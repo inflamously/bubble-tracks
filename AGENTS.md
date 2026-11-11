@@ -19,6 +19,7 @@ bubble-tracks section the installer writes into *users'* AGENTS.md.)
 | `install.js` | `node install.js …` entry, loads `skill-install/` | — | yes |
 | `build.mjs` | every build: `npm run build`, `site`, `check`; the tests import it | — | yes |
 | `test/` | `node --test` suites | — | yes |
+| `.bubble-tracks-benchmark/` | the eval that scores how an agent walks a track: rules, scenarios, `score.mjs` + `scoring/` (see its own `AGENTS.md`; tests in `test/benchmark/`) | — | yes |
 
 ## Rules
 
