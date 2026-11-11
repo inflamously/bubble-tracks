@@ -55,4 +55,4 @@ option, `delete`). That is the CLI's behaviour, not the agent's, and `test/e2e.t
   baseline run will show whether they are fair.
 - **`research-needed` keeps its sources in the repo** (`notes/`), so a run doesn't depend on the web. An
   agent may read all three notes at once instead of trying them in turn; then P12 to P14 have nothing to
-  count.
+  count. Its fallback reply is "yes, go", which also lets any research through the script's P10 check.

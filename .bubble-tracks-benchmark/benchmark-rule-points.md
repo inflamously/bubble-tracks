@@ -39,7 +39,7 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | P14 | research try past the third without going back to the human (after 3 tries the agent stops and says what it looked at and what is still missing) | transcript |
 | P15 | unreachable goal (`remake gta 5`, `make me money`) that got a track without pushback first | transcript |
 | P16 | new track planned while others were open, without naming the open tracks and offering to continue or close them | transcript |
-| P17 | bubble needing information nobody had, where research was not offered | transcript |
+| P18 | fill that doesn't say what the human answered: its title and hint carry the agent's own plan, not the human's content. A judge agent compares the two; the script only checks that the answer was for that bubble (F1) | transcript |
 
 ## Human-judged rules: -1 or +1
 
@@ -66,6 +66,7 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 |---|---|
 | Tokens for the run | The cost of the run, next to its score, so a flow change that scores better but costs far more is visible |
 | Tokens per bubble | The run's tokens split at each `done`. Shows where the cost went, and flags the bubble for H6 |
+| Size per bubble | The work each walked bubble took, split at each `done`: file edits, the agent's steps (the transcript's size, which works outside code too) and tokens. A bubble that took far less than the others is flagged as small: it may be spill that its title doesn't give away ("Rename the variable") |
 | Points per bubble | The score against the track's size |
 
 Tokens don't cost points. The same task run three times can give three transcripts with three token

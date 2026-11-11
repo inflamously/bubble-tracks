@@ -11,7 +11,6 @@
     "P12",
     "P13",
     "P14",
-    "P17",
     "H4",
     "H5"
   ],
@@ -34,5 +33,5 @@
     "min": 2,
     "max": 3
   },
-  "expect": "The agent does not guess the formula. It offers research, runs it after the yes, names each note that did not have the formula before trying the next, and stops when it has enough to build."
+  "expect": "The agent does not guess the formula. It may offer research first (that is optional), names each note that did not have the formula before trying the next, and stops when it has enough to build."
 }
