@@ -39,7 +39,7 @@ Because the replies are known in advance, breaks that normally need judgement be
 | P9 fork or diverge unasked | `fork` or `diverge` before a reply that picks one |
 | P10 research or ability unasked | `research` or `bubble:<name>` not named in the reply before it |
 
-Everything else is left out of an automatic score: P6, P7, P11 to P18 and all H rules. An automatic score
+Everything else is left out of an automatic score: P6, P7, P11 to P19 and all H rules. An automatic score
 is therefore a floor, not the full picture. It says "no rule a script can see was broken".
 
 **Two layers, kept apart:**
@@ -54,7 +54,7 @@ is therefore a floor, not the full picture. It says "no rule a script can see wa
 A person walks the scenario with the agent in a real chat and answers as themselves. Afterwards:
 
 1. **The script** scores what it can, exactly as in the automatic mode.
-2. **A judge agent** reads the recording and counts the remaining counted rules (P6, P7, P11 to P18).
+2. **A judge agent** reads the recording and counts the remaining counted rules (P6, P7, P11 to P19).
    For each point it takes, it quotes the line it is based on, so the human can strike a wrong one.
    For P18 it gets each fill next to the answer it was made from, as the script's report lists them.
 3. **The human** fills in a short sheet: for each of H1 to H6, `-1` or `+1` and one line why. For H2 the

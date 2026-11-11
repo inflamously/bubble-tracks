@@ -24,7 +24,7 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | Id | -1 for each… | Evidence |
 |---|---|---|
 | P1 | title over 20 characters, or not 2 to 4 words | track |
-| P2 | fog without a `why`, or a `why` that says what the bubble is | track |
+| P2 | fog without a `why` | track |
 | P3 | planned bubble whose hint has no `Boundary:` | track |
 | P4 | spill bubble: named after a file, a line or a single edit ("zoom 500% while 200% is fine"). Read the **title**: a hint may name files | track |
 | P5 | bubble outside the scenario's allowed bubble count range | track |
@@ -40,6 +40,7 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | P15 | unreachable goal (`remake gta 5`, `make me money`) that got a track without pushback first | transcript |
 | P16 | new track planned while others were open, without naming the open tracks and offering to continue or close them | transcript |
 | P18 | fill that doesn't say what the human answered: its title and hint carry the agent's own plan, not the human's content. A judge agent compares the two; the script only checks that the answer was for that bubble (F1) | transcript |
+| P19 | fog whose `why` says what the bubble is, not why it is unclear ("Store the notes in a file" instead of "where and in which format to store is undecided"): the plan hidden in the why. A judge agent reads each why | track |
 
 ## Human-judged rules: -1 or +1
 
