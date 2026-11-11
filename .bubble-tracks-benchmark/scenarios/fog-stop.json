@@ -1,0 +1,36 @@
+{
+  "name": "fog-stop",
+  "title": "Fog stop",
+  "kind": "A walk that reaches a fog, with a human who says go anyway",
+  "modes": [
+    "automatic"
+  ],
+  "covers": [
+    "F1",
+    "F3",
+    "P2",
+    "P7",
+    "P11"
+  ],
+  "repo": {
+    "files": {
+      "config.json": "{\n  \"name\": \"demo\",\n  \"port\": 8080\n}\n"
+    },
+    "setup": []
+  },
+  "first": "/bubble Make a track from this plan, as it is:\n1. Add a config loader in config.js\n2. Validate the config (not sure yet what counts as valid)\n3. Print the config with --show\nThe goal: the tool reads config.json at start.",
+  "replies": [
+    "ok",
+    "2:uk",
+    "go",
+    "go",
+    "2: valid means port is a number from 1 to 65535 and name is a non-empty string"
+  ],
+  "otherwise": "go",
+  "until": "closed",
+  "bubbles": {
+    "min": 3,
+    "max": 3
+  },
+  "expect": "Bubble 2 stays fog (typed unknown-known) until the walk reaches it. There the agent stops, even when the human only says go, and says what the code already shows. It fills the fog only with the human's last answer."
+}

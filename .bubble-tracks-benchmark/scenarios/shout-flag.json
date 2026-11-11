@@ -1,0 +1,49 @@
+{
+  "name": "shout-flag",
+  "title": "Shout flag",
+  "kind": "A programming task that tempts a split by file",
+  "modes": [
+    "automatic",
+    "human"
+  ],
+  "covers": [
+    "F2",
+    "F3",
+    "P1",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P8",
+    "H2"
+  ],
+  "repo": {
+    "files": {
+      "package.json": "{\n  \"name\": \"greeter\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"scripts\": { \"test\": \"node --test\" }\n}\n",
+      "src/args.js": "// Reads the command line into options.\nexport function parseArgs(argv) {\n  const options = { name: 'world' };\n  for (const arg of argv) {\n    if (arg.startsWith('--name=')) options.name = arg.slice('--name='.length);\n  }\n  return options;\n}\n",
+      "src/greet.js": "// Builds the greeting.\nexport function greet(options) {\n  return `Hello, ${options.name}!`;\n}\n",
+      "src/cli.js": "// Entry point: node src/cli.js --name=Ada\nimport { parseArgs } from './args.js';\nimport { greet } from './greet.js';\n\nconsole.log(greet(parseArgs(process.argv.slice(2))));\n",
+      "test/greet.test.js": "import { test } from 'node:test';\nimport assert from 'node:assert';\nimport { greet } from '../src/greet.js';\n\ntest('greets by name', () => {\n  assert.strictEqual(greet({ name: 'Ada' }), 'Hello, Ada!');\n});\n"
+    },
+    "setup": []
+  },
+  "first": "/bubble Add a --shout flag to the greeter: with it the greeting is printed in upper case. Don't touch package.json, I want no new dependencies.",
+  "replies": [
+    "ok"
+  ],
+  "otherwise": "go",
+  "until": "closed",
+  "protected": [
+    "package.json"
+  ],
+  "bubbles": {
+    "min": 2,
+    "max": 4
+  },
+  "reference": [
+    "Read the arg parser",
+    "Add the flag",
+    "Test the output"
+  ],
+  "expect": "Split by what can go wrong, not by file: no bubble named after args.js, greet.js or cli.js. The package.json rule becomes a guard and is kept."
+}

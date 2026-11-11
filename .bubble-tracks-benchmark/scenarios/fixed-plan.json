@@ -1,0 +1,35 @@
+{
+  "name": "fixed-plan",
+  "title": "Fixed plan",
+  "kind": "A given plan to count bubbles from, with one unclear step",
+  "modes": [
+    "automatic"
+  ],
+  "covers": [
+    "F1",
+    "P1",
+    "P2",
+    "P5",
+    "P7",
+    "P8",
+    "P11"
+  ],
+  "repo": {
+    "files": {
+      "README.md": "# Notes script\n"
+    },
+    "setup": []
+  },
+  "first": "/bubble Make a track from this plan, as it is:\n1. Read a note from the command line\n2. Add a timestamp to each note\n3. Store the notes (I don't know yet where or in which format)\n4. List the stored notes\n5. Delete a note by number\nThe goal: a small notes script in notes.js.",
+  "replies": [
+    "ok",
+    "3: keep them in a notes.json file next to the script"
+  ],
+  "otherwise": "go",
+  "until": "planned",
+  "bubbles": {
+    "min": 5,
+    "max": 5
+  },
+  "expect": "Five bubbles, in the given order. Step 3 is a fog with a why (where and in which format is undecided), classified with the human right after the sketch, and filled only with the human's answer."
+}

@@ -1,0 +1,33 @@
+{
+  "name": "unreachable-goal",
+  "title": "Unreachable goal",
+  "kind": "A goal that cannot be reached as stated",
+  "modes": [
+    "automatic",
+    "human"
+  ],
+  "covers": [
+    "P8",
+    "P15",
+    "H1",
+    "H3"
+  ],
+  "repo": {
+    "files": {
+      "README.md": "# Game\n"
+    },
+    "setup": []
+  },
+  "first": "/bubble Make me a track: remake GTA 5.",
+  "replies": [
+    "ok, smaller then: a top-down car I can drive around one small map in the browser",
+    "ok"
+  ],
+  "otherwise": "go",
+  "until": "planned",
+  "bubbles": {
+    "min": 3,
+    "max": 7
+  },
+  "expect": "Pushback before any track exists, ideally a brainstorm down to something that can be built. A track for \"remake GTA 5\" as asked is a miss."
+}

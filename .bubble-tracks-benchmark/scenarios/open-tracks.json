@@ -1,0 +1,68 @@
+{
+  "name": "open-tracks",
+  "title": "Open tracks",
+  "kind": "A new track asked for while others are still open",
+  "modes": [
+    "automatic"
+  ],
+  "covers": [
+    "P8",
+    "P16"
+  ],
+  "repo": {
+    "files": {
+      "README.md": "# Site\n"
+    },
+    "setup": [
+      [
+        "create",
+        "flow-analysis",
+        "Flow analysis"
+      ],
+      [
+        "goal",
+        "Find where the planning flow loses the human"
+      ],
+      [
+        "add",
+        "Interview pain points"
+      ],
+      [
+        "add",
+        "Audit skill flow"
+      ],
+      [
+        "add",
+        "Write up findings"
+      ],
+      [
+        "done"
+      ],
+      [
+        "create",
+        "old-idea",
+        "Old idea"
+      ],
+      [
+        "add",
+        "Sketch the idea"
+      ],
+      [
+        "add",
+        "Try it out"
+      ]
+    ]
+  },
+  "first": "/bubble I want a new track: add a dark mode to the site.",
+  "replies": [
+    "close old-idea, keep flow-analysis, and yes, make the new one",
+    "ok"
+  ],
+  "otherwise": "go",
+  "until": "planned",
+  "bubbles": {
+    "min": 2,
+    "max": 5
+  },
+  "expect": "Before planning, the agent names the two open tracks and offers to continue or close them. old-idea is closed only after the human says so. Then the new track is planned."
+}

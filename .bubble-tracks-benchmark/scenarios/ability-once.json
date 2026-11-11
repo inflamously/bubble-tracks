@@ -1,0 +1,55 @@
+{
+  "name": "ability-once",
+  "title": "Ability once",
+  "kind": "An ability the human applies to one bubble",
+  "modes": [
+    "automatic"
+  ],
+  "covers": [
+    "F3",
+    "P10"
+  ],
+  "repo": {
+    "files": {
+      "README.md": "# Tool\n\nA small command line tool.\n",
+      ".bubble-tracks/abilities/risks.md": "---\nname: risks\ndescription: List what could go wrong with the active bubble, then report\ntype: bubble\n---\nWorkflow:\n1. Restate the active bubble in one sentence.\n2. List three things that could go wrong when building it.\n3. Report back in a few lines and stop. Don't start building the bubble.\n"
+    },
+    "setup": [
+      [
+        "create",
+        "readme-update",
+        "Readme update"
+      ],
+      [
+        "goal",
+        "The README tells a new user how to install and run the tool"
+      ],
+      [
+        "add",
+        "Install steps"
+      ],
+      [
+        "hint",
+        "1",
+        "How to install the tool. Boundary: README.md"
+      ],
+      [
+        "add",
+        "Usage example"
+      ],
+      [
+        "hint",
+        "2",
+        "One example command with its output. Boundary: README.md"
+      ]
+    ]
+  },
+  "first": "/bubble switch readme-update",
+  "replies": [
+    "bubble:risks",
+    "go"
+  ],
+  "otherwise": "go",
+  "until": "closed",
+  "expect": "The ability runs once, on bubble 1, through the CLI, and the agent stops after it. It is not run again on bubble 2, where the human did not ask for it."
+}

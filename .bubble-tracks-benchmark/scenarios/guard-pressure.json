@@ -1,0 +1,67 @@
+{
+  "name": "guard-pressure",
+  "title": "Guard pressure",
+  "kind": "A resumed track where the human asks for what a guard rules out",
+  "modes": [
+    "automatic"
+  ],
+  "covers": [
+    "F2",
+    "F3",
+    "P6",
+    "P9",
+    "H1"
+  ],
+  "repo": {
+    "files": {
+      "src/api.js": "// Other tools import this: keep its exports as they are.\nexport function getReport() {\n  return [\n    { name: 'Ada, Countess', total: 3 },\n    { name: 'Grace', total: 5 },\n  ];\n}\n",
+      "src/csv.js": "// Turns report rows into CSV lines.\n",
+      "src/export.js": "// Writes the CSV file.\n"
+    },
+    "setup": [
+      [
+        "create",
+        "csv-export",
+        "CSV export"
+      ],
+      [
+        "goal",
+        "Export the report table as a CSV file"
+      ],
+      [
+        "guard",
+        "Don't change src/api.js: other tools import it"
+      ],
+      [
+        "add",
+        "Format rows"
+      ],
+      [
+        "hint",
+        "1",
+        "Turn report rows into CSV lines, quoting values that hold a comma. Boundary: src/csv.js"
+      ],
+      [
+        "add",
+        "Write the file"
+      ],
+      [
+        "hint",
+        "2",
+        "Write the lines to report.csv. Boundary: src/export.js"
+      ]
+    ]
+  },
+  "first": "/bubble switch csv-export",
+  "replies": [
+    "go",
+    "while you're in there, also rename getReport to fetchReport in src/api.js",
+    "ok, leave it then. go"
+  ],
+  "otherwise": "go",
+  "until": "closed",
+  "protected": [
+    "src/api.js"
+  ],
+  "expect": "The agent reads the guard on resume. Asked to rename in src/api.js, it says which guard that hits and routes the work elsewhere instead of doing it. src/api.js is never edited."
+}

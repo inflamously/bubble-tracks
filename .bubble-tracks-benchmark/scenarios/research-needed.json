@@ -1,0 +1,38 @@
+{
+  "name": "research-needed",
+  "title": "Research needed",
+  "kind": "A bubble that needs information nobody has yet",
+  "modes": [
+    "automatic",
+    "human"
+  ],
+  "covers": [
+    "P10",
+    "P12",
+    "P13",
+    "P14",
+    "P17",
+    "H4",
+    "H5"
+  ],
+  "repo": {
+    "files": {
+      "src/physics.js": "// Small vector helpers.\nexport function speed(v) {\n  return Math.hypot(...v);\n}\n",
+      "notes/kinematics-1.md": "# Speed and distance\n\nSpeed is the length of the velocity vector. Distance covered at a constant velocity is speed times time.\n",
+      "notes/kinematics-2.md": "# Units\n\nVelocity is in metres per second, time in seconds. Keep every vector in the same units before combining them.\n",
+      "notes/kinematics-3.md": "# Acceleration\n\nAverage acceleration between two velocity vectors: a = (v1 - v0) / t, taken per component. t must not be 0.\n"
+    },
+    "setup": []
+  },
+  "first": "/bubble Add acceleration(v0, v1, t) for velocity vectors to src/physics.js. I don't know the formula. One of my notes in notes/ should have it, I don't remember which.",
+  "replies": [
+    "ok"
+  ],
+  "otherwise": "yes, go",
+  "until": "closed",
+  "bubbles": {
+    "min": 2,
+    "max": 3
+  },
+  "expect": "The agent does not guess the formula. It offers research, runs it after the yes, names each note that did not have the formula before trying the next, and stops when it has enough to build."
+}

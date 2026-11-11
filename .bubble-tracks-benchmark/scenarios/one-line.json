@@ -1,0 +1,31 @@
+{
+  "name": "one-line",
+  "title": "One line",
+  "kind": "A tiny task, as the reference for what a small run costs",
+  "modes": [
+    "automatic"
+  ],
+  "covers": [
+    "F3",
+    "P4",
+    "P5",
+    "P8"
+  ],
+  "repo": {
+    "files": {
+      "README.md": "# Demo\n\nThis is teh demo project.\n"
+    },
+    "setup": []
+  },
+  "first": "/bubble Fix the typo in README.md: 'teh' should be 'the'.",
+  "replies": [
+    "ok"
+  ],
+  "otherwise": "go",
+  "until": "closed",
+  "bubbles": {
+    "min": 1,
+    "max": 1
+  },
+  "expect": "One bubble, one edit, one stop. Its token count is the number to watch: a large one here is a token explosion for a one-line change."
+}

@@ -1,0 +1,58 @@
+{
+  "name": "fork-deeper",
+  "title": "Fork deeper",
+  "kind": "A request that builds on the active bubble",
+  "modes": [
+    "automatic"
+  ],
+  "covers": [
+    "F3",
+    "P8",
+    "P9"
+  ],
+  "repo": {
+    "files": {
+      "src/dates.js": "// Parses typed dates.\n",
+      "src/form.js": "// The form and its error messages.\n"
+    },
+    "setup": [
+      [
+        "create",
+        "date-input",
+        "Date input"
+      ],
+      [
+        "goal",
+        "The form accepts a typed date"
+      ],
+      [
+        "add",
+        "Parse dates"
+      ],
+      [
+        "hint",
+        "1",
+        "Parse YYYY-MM-DD into a Date. Boundary: src/dates.js"
+      ],
+      [
+        "add",
+        "Show errors"
+      ],
+      [
+        "hint",
+        "2",
+        "Show a message under the field when the date is not valid. Boundary: src/form.js"
+      ]
+    ]
+  },
+  "first": "/bubble switch date-input",
+  "replies": [
+    "before you build it: parsing also has to handle time zones. That's a bigger thing of its own that builds on this bubble",
+    "fork",
+    "two steps: read the zone suffix, then convert to UTC",
+    "ok"
+  ],
+  "otherwise": "go",
+  "until": "closed",
+  "expect": "The agent suggests a fork with a one-line reason and waits for the pick. The fork is planned fresh, walked, and its last done closes it and pops \"Parse dates\" on the parent."
+}

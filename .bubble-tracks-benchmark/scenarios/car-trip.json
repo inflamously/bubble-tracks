@@ -1,0 +1,39 @@
+{
+  "name": "car-trip",
+  "title": "Car trip",
+  "kind": "An everyday task where the right split is easy to judge",
+  "modes": [
+    "automatic",
+    "human"
+  ],
+  "covers": [
+    "P1",
+    "P3",
+    "P4",
+    "P5",
+    "P8",
+    "H2"
+  ],
+  "repo": {
+    "files": {
+      "README.md": "# Garage notes\n"
+    },
+    "setup": []
+  },
+  "first": "/bubble I want to get my car started. I haven't driven it in months and I'm not sure where the key is.",
+  "replies": [
+    "ok"
+  ],
+  "otherwise": "go",
+  "until": "planned",
+  "bubbles": {
+    "min": 3,
+    "max": 5
+  },
+  "reference": [
+    "Find the key",
+    "Unlock the car",
+    "Start the engine"
+  ],
+  "expect": "One bubble per action that can go wrong. Not one bubble for the whole trip, and no bubble per hand movement (turn the key, press the clutch)."
+}
