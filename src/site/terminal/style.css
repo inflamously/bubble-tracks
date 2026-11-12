@@ -1,6 +1,6 @@
 /* Mint paper, generous rounding, sky blue for the track and the agent, red for fog and the human's turn.
    Depth comes from borders and background steps, not shadows; spacing sits on a 0.25rem scale.
-   Layout: a sticky top bar (scenes + controls), then one column: the tabs, the view that is on, and the
+   Layout: a sticky top bar (scenes + controls), then one column: the tabs (with the narrator's notice beside them), the view that is on, and the
    tracks as a status bar under it. Chat comes first; Terminal and Files are the deeper views. The stage fills
    the window below the bar (--topbar-h, measured by the header); the footer is a scroll away. */
 :root {
@@ -176,7 +176,36 @@ body::before {
   min-height: 30rem;
   padding-block: 1rem 1.25rem;
 }
-.tabs { display: flex; gap: 0.25rem; }
+/* The tabs, and beside them the narrator's notice: room for two lines, so it comes and goes without moving the views */
+.stage-head { display: flex; align-items: center; gap: 0.5rem 1rem; min-height: 2.75rem; }
+.notice {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.3;
+  animation: notice 0.3s ease-out;
+}
+.notice[hidden] { display: none; }
+.notice::before {
+  content: "i";
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 700 0.74rem/1 var(--font-display);
+}
+@keyframes notice { from { opacity: 0; transform: translateY(-0.25rem); } }
+.tabs { flex: none; display: flex; gap: 0.25rem; }
 .tabs button {
   padding: 0.5rem 1rem;
   border: 1px solid transparent;
@@ -261,20 +290,6 @@ body::before {
   background: var(--accent);
   color: var(--accent-ink);
   font: 700 0.78rem/1 var(--font-display);
-}
-/* The narrator speaks to the visitor, not to the agent: an info mark sets it apart from the messages. */
-.chat-note { display: flex; gap: 0.5rem; padding: 0.5rem 1rem 0.5rem 0.75rem; border-radius: var(--r-md); background: var(--sunk); color: var(--muted); font-size: 0.88rem; }
-.chat-note::before {
-  content: "i";
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 1.2rem;
-  height: 1.2rem;
-  margin-top: 0.08rem;
-  border-radius: 50%;
-  border: 1.5px solid currentColor;
-  font: 700 0.74rem/1 var(--font-display);
 }
 .msg {
   padding: 0.5rem 1rem 0.75rem;
@@ -466,6 +481,8 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
   .scene-track { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; }
 }
 @media (max-width: 40rem) {
+  .stage-head { flex-wrap: wrap; }
+  .notice { flex-basis: 100%; justify-content: flex-start; }
   :root { --r-lg: 1.15rem; }
   .controls button { padding: 0.5rem 0.75rem; }
   .controls button.primary { min-width: 0; }
@@ -474,6 +491,6 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
   .screen { font-size: 0.78rem; padding: 0.75rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .files button.flash { animation: none; }
+  .files button.flash, .notice { animation: none; }
   .scene-track button::before, .controls button { transition: none; }
 }

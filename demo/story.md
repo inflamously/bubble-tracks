@@ -5,72 +5,81 @@ types to their agent, or what the agent says. They are not model output. Every `
 real CLI call, and its output is shown as the CLI prints it. The demo page plays these scenes in
 order, and `test/web.test.js` replays them on the real CLI.
 
-## 1. Plan what you can see
+## 1. A first plan
 
-> human: plan a todo CLI: add items, list them, keep them between runs
+> human: Let's make a todo app.
+
+> agent: A first plan, before I write anything down: set up the project, then build what the app does.
+
+> human: Also include a list for the items.
+
+> agent: Added to the plan: an item list. Say when to start.
+
+## 2. The track, with a goal
+
+> human: Let's start.
 
 ```
-bubble switch todo "Todo app"
-bubble add "Add command"
-bubble add ? "Where the items live between runs is undecided"
-bubble add "List command"
+bubble create todo "Todo app"
+bubble goal "A todo app that keeps a list of items"
+bubble add "Project setup"
+bubble add "Item list"
 ```
 
-The unclear step is not guessed. It goes on the track as fog, with the reason it is unclear.
+> agent: The track is up, and every bubble on it serves that goal. Is there anything I should stay away from?
 
-## 2. The agent walks
+## 3. Guards and fog
 
-> agent: implements "Add command"
+> human: I just want a minimalistic MVP: a basic design, nothing fancy.
+
+```
+bubble guard "No fancy design: a basic, minimal look"
+bubble guard "MVP only: nothing the goal does not need"
+bubble insert at 2 ? "Nobody has said which functions the app has"
+bubble add ? "What counts as finished for the MVP is unsaid"
+```
+
+> agent: Two guards, so I keep it small. And two things I cannot see yet. I don't guess them: they are fog.
+
+## 4. The agent walks into fog
+
+> human: Go.
+
+> agent: Starting the first bubble: Project setup.
+
+```
+bubble done
+```
+
+> agent: Project setup is done, and I stop here. The next bubble is fog: nobody has said which functions the app has, and only you plan fog. What should it do?
+
+## 5. The human plans the fog
+
+> human: Add items, delete them, and show the list.
+
+```
+bubble fill 2 "Add items"
+bubble insert at 3 "Delete items"
+```
+
+> agent: The fog is gone. Adding and deleting are bubbles now, and showing the list was already planned.
+
+## 6. The human steers
+
+> human: Go.
+
+> agent: Starting the next bubble: Add items.
 
 ```
 bubble done
 ```
 
-> agent: ⏸ stop, waiting for the human
+> agent: Add items is done. I stop after every bubble, so you can change the plan before the next one.
 
-## 3. Fog stops the agent
-
-> human: go
+> human: Show the list before deleting.
 
 ```
-bubble show
+bubble move 4 to 3
 ```
 
-> agent: bubble 2 is fog, so I stop. What is it? `2: <what it is>`
-
-## 4. The human plans it
-
-> human: 2: persist to JSON
-
-```
-bubble fill 2 "Persist to JSON"
-```
-
-> agent: implements "Persist to JSON"
-
-```
-bubble done
-```
-
-## 5. A side idea gets its own track
-
-> human: what about a web UI someday?
-
-```
-bubble diverge web-ui "Web UI"
-bubble add ? "Nobody has said what the page shows"
-bubble switch todo
-```
-
-The todo track stays about the todo CLI. The idea waits on its own track, as fog.
-
-## 6. Finish
-
-> agent: implements "List command"
-
-```
-bubble done
-bubble tracks
-```
-
-The last `done` closes `todo`. `web-ui` is still open, for another day.
+> agent: Moved. Item list is next, and the last bubble is still fog. Say go.

@@ -28,10 +28,13 @@
 </header>
 
 <main class="stage wrap">
+  <div class="stage-head">
   <div class="tabs" id="tabs" role="tablist" aria-label="Views">
     <button type="button" role="tab" id="tab-chat" aria-controls="panel-chat" aria-selected="true">Chat</button>
     <button type="button" role="tab" id="tab-terminal" aria-controls="panel-terminal" aria-selected="false" tabindex="-1">Terminal</button>
     <button type="button" role="tab" id="tab-files" aria-controls="panel-files" aria-selected="false" tabindex="-1">Files</button>
+  </div>
+  <p class="notice" id="notice" role="status" hidden></p>
   </div>
 
   <section class="panel view" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat">

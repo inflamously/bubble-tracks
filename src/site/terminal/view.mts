@@ -1,5 +1,5 @@
-// The human's view: the tracks as the CLI prints them, and the conversation between the human and
-// the agent. The tracks are asked from the CLI after each command; the player fills the conversation
+// The human's view: the tracks as the CLI prints them, the conversation between the human and the
+// agent, and the narrator's notice. The tracks are asked from the CLI after each command; the player fills the conversation
 // from the story.
 import { ansi } from './ansi.mjs';
 import type { Machine } from '../bubble-web/index.mjs';
@@ -31,6 +31,7 @@ function fogNote(json: string): HTMLElement | null {
 export class View {
   private readonly tracks = $('tracks');
   private readonly chat = $('chat');
+  private readonly notice = $('notice');
   private readonly dir: string;
   private readonly machine: () => Machine;
 
@@ -42,6 +43,7 @@ export class View {
   /** A fresh disk: no tracks, no conversation. */
   reset(): void {
     this.chat.textContent = '';
+    this.note(null);
     this.refresh();
   }
 
@@ -89,20 +91,26 @@ export class View {
   }
 
   say(who: string, text: string): void {
+    this.note(null);
     this.add(el('div', `msg ${who}`, el('span', 'who', WHO[who] ?? who), el('p', '', text)));
   }
 
   /** A command the agent ran. Commands in a row share one block; the terminal shows what they print. */
   ran(line: string): void {
+    this.note(null);
     let block = this.chat.lastElementChild;
     if (!block?.classList.contains('ran')) block = this.add(el('div', 'msg agent ran', el('span', 'who', 'Agent runs')));
     block.append(el('code', '', line));
     this.scrollDown();
   }
 
-  /** The narrator, between the messages. */
-  note(text: string): void {
-    this.add(el('p', 'chat-note', text));
+  /**
+   * The narrator speaks to the visitor, not in the conversation: a notice beside the tabs, which stays
+   * until the conversation moves on. `null` takes it away.
+   */
+  note(text: string | null): void {
+    this.notice.textContent = text ?? '';
+    this.notice.hidden = text === null;
   }
 
   private add<T extends HTMLElement>(node: T): T {

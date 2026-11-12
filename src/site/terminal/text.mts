@@ -18,7 +18,7 @@ clear              clear the screen
 reset              start over on an empty disk
 replay             play the story again`;
 
-export const YOUR_TURN_VIEW = 'Your turn. Open the Terminal tab: it is the real CLI, and every command you type redraws the track here.';
+export const YOUR_TURN_VIEW = 'Your turn. Open the Terminal tab: it is the real CLI, and every command you type redraws the tracks below.';
 export const YOUR_TURN = '\nYour turn. This is the real CLI on a disk in this tab. Try: bubble tracks · bubble switch todo · bubble done · help';
 export const FRESH_DISK = 'A fresh disk. Start with: bubble switch my-plan "My plan"';
 export const countdown = (seconds: number) => `The demo starts in ${seconds}…  Press any key or Play to start now.`;
