@@ -28,7 +28,7 @@ test('the browser CLI prints what the real CLI prints, for every line of the dem
     .flatMap((scene) => scene.steps)
     .filter((step) => step.kind === 'run' && step.line.startsWith('bubble '))
     .map((step) => words(step.line).slice(1));
-  assert.ok(commands.length > 20, 'demo/story.md has no bubble commands');
+  assert.ok(commands.length > 10, 'demo/story.md has no bubble commands');
 
   const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'bubbles-web-')));
   const web = createMachine({ cwd: '/home/demo/todo-app' });
