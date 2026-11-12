@@ -1,41 +1,48 @@
-/* Warm cream surfaces, generous rounding, indigo for the track and the agent, a clay orange for fog and
-   the human's turn.
+/* Mint paper, generous rounding, sky blue for the track and the agent, red for fog and the human's turn.
+   Depth comes from borders and background steps, not shadows; spacing sits on a 0.25rem scale.
    Layout: a sticky top bar (scenes + controls), then one column: the tabs, the view that is on, and the
    tracks as a status bar under it. Chat comes first; Terminal and Files are the deeper views. The stage fills
    the window below the bar (--topbar-h, measured by the header); the footer is a scroll away. */
 :root {
-  --paper: #fbf7f2;
-  --panel: #ffffff;
-  --sunk: #f4eee6;
-  --ink: #23201c;
-  --muted: #6b6259;
-  --line: #e7ded3;
-  --line-strong: #d6cabc;
-  --accent: #4f46e5;
-  --accent-ink: #ffffff;
-  --accent-soft: #eef0fe;
-  --accent-edge: #d9dcfb;
-  --fog: #b83a0a;
-  --fog-ink: #ffffff;
-  --fog-soft: #fff1e8;
-  --fog-edge: #f6d3bd;
-  --shadow: 0 1px 2px rgb(60 40 20 / 0.06), 0 10px 30px -18px rgb(60 40 20 / 0.28);
+  /* The palette (colorpalettes.net/color-palette-4657), five colours, each with one job: */
+  --red: #ac3539; /* fog, and the human's turn */
+  --pink: #e8a5ad; /* the edge of fog surfaces; fog itself on dark */
+  --mint: #e5f7eb; /* the page: sunk surfaces, and tinted lighter for the paper */
+  --ice: #d0ecf7; /* the agent's surfaces */
+  --sky: #71c1d6; /* the track and the agent: fills and edges; darkened where it carries text */
 
-  /* The terminal is dark in both themes: it is a terminal. */
-  --term-bg: #1c1a24;
-  --term-bar: #26232f;
-  --term-fg: #e6e1ec;
-  --term-dim: #9d96ab;
-  --ansi-green: #8ee0a8;
-  --ansi-blue: #a3b4ff;
-  --ansi-yellow: #f6cf72;
-  --ansi-red: #ff9d92;
-  --who-human: #ffb489;
-  --who-agent: #8fdcea;
+  /* Everything below is one of the five, or a tint or shade of one (same hue, other lightness). */
+  --paper: #f4fbf6; /* mint, lighter */
+  --panel: #ffffff;
+  --sunk: var(--mint);
+  --ink: #16262c; /* sky, near black */
+  --muted: #51646b;
+  --line: #d3e6df;
+  --line-strong: #b5d0cb;
+  --accent: #1b6e84; /* sky, dark enough for text and buttons (5.8:1 on white) */
+  --accent-ink: #ffffff;
+  --accent-soft: var(--ice);
+  --accent-edge: var(--sky);
+  --fog: var(--red);
+  --fog-ink: #ffffff;
+  --fog-soft: #fbecee; /* pink, lighter */
+  --fog-edge: var(--pink);
+
+  /* The terminal and the status bar are dark in both themes: they are a terminal. */
+  --term-bg: #12222a; /* sky, near black */
+  --term-bar: #1a2f38;
+  --term-fg: #dcebee;
+  --term-dim: #8fa6ad;
+  --ansi-green: #a6e3b8; /* mint, saturated */
+  --ansi-blue: var(--sky);
+  --ansi-yellow: #f0cf7a; /* the one colour from outside the palette: the CLI prints warnings in yellow */
+  --ansi-red: #f2959b; /* red, light enough for the dark screen */
+  --who-human: var(--pink);
+  --who-agent: var(--ice);
 
   --r-lg: 1.5rem;
   --r-md: 1rem;
-  --r-sm: 0.7rem;
+  --r-sm: 0.75rem;
 
   --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
@@ -44,46 +51,44 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #17151a;
-    --panel: #211e25;
-    --sunk: #1b191f;
-    --ink: #f3ede6;
-    --muted: #b3a99e;
-    --line: #35303b;
-    --line-strong: #48414f;
-    --accent: #a9acff;
-    --accent-ink: #17151a;
-    --accent-soft: #2a2940;
-    --accent-edge: #3d3b62;
-    --fog: #ffa36b;
-    --fog-ink: #1f140c;
-    --fog-soft: #33231a;
-    --fog-edge: #5a3a26;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 30px -18px rgb(0 0 0 / 0.7);
-    --term-bg: #121016;
-    --term-bar: #1c1a22;
+    --paper: #0f1a1e;
+    --panel: #16252b;
+    --sunk: #1c2f36;
+    --ink: #e6f2f1;
+    --muted: #9fb4b8;
+    --line: #27404a;
+    --line-strong: #3a5a66;
+    --accent: #71c1d6;
+    --accent-ink: #0f1a1e;
+    --accent-soft: #1c3640;
+    --accent-edge: #2c5361;
+    --fog: #e8a5ad;
+    --fog-ink: #3a0f12;
+    --fog-soft: #3a1c20;
+    --fog-edge: #6b2f35;
+    --term-bg: #0a1317;
+    --term-bar: #132127;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #17151a;
-  --panel: #211e25;
-  --sunk: #1b191f;
-  --ink: #f3ede6;
-  --muted: #b3a99e;
-  --line: #35303b;
-  --line-strong: #48414f;
-  --accent: #a9acff;
-  --accent-ink: #17151a;
-  --accent-soft: #2a2940;
-  --accent-edge: #3d3b62;
-  --fog: #ffa36b;
-  --fog-ink: #1f140c;
-  --fog-soft: #33231a;
-  --fog-edge: #5a3a26;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 30px -18px rgb(0 0 0 / 0.7);
-  --term-bg: #121016;
-  --term-bar: #1c1a22;
+  --paper: #0f1a1e;
+  --panel: #16252b;
+  --sunk: #1c2f36;
+  --ink: #e6f2f1;
+  --muted: #9fb4b8;
+  --line: #27404a;
+  --line-strong: #3a5a66;
+  --accent: #71c1d6;
+  --accent-ink: #0f1a1e;
+  --accent-soft: #1c3640;
+  --accent-edge: #2c5361;
+  --fog: #e8a5ad;
+  --fog-ink: #3a0f12;
+  --fog-soft: #3a1c20;
+  --fog-edge: #6b2f35;
+  --term-bg: #0a1317;
+  --term-bar: #132127;
   color-scheme: dark;
 }
 
@@ -122,13 +127,12 @@ body::before {
   z-index: 5;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
-  box-shadow: 0 6px 20px -16px rgb(60 40 20 / 0.35);
 }
 .topbar-in {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 0.6rem 1.5rem;
+  gap: 0.5rem 1.5rem;
   padding-block: 0.75rem;
 }
 .brand { min-width: 0; }
@@ -136,7 +140,7 @@ body::before {
   margin: 0;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   font: 700 1.15rem/1.2 var(--font-display);
   letter-spacing: -0.01em;
   color: var(--accent);
@@ -149,9 +153,9 @@ body::before {
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0.45rem 0 0 -0.1rem var(--fog);
-  margin-right: 0.35rem;
+  margin-right: 0.25rem;
 }
-.scene-now { margin: 0.2rem 0 0; display: flex; align-items: baseline; gap: 0.55rem; min-width: 0; }
+.scene-now { margin: 0.25rem 0 0; display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; }
 .scene-num {
   flex: none;
   padding: 0.1rem 0.5rem;
@@ -172,7 +176,7 @@ body::before {
   min-height: 30rem;
   padding-block: 1rem 1.25rem;
 }
-.tabs { display: flex; gap: 0.35rem; }
+.tabs { display: flex; gap: 0.25rem; }
 .tabs button {
   padding: 0.5rem 1rem;
   border: 1px solid transparent;
@@ -182,17 +186,17 @@ body::before {
   cursor: pointer;
 }
 .tabs button:hover { color: var(--ink); background: var(--sunk); }
-.tabs button[aria-selected="true"] { background: var(--panel); border-color: var(--line); color: var(--ink); font-weight: 600; box-shadow: var(--shadow); }
+.tabs button[aria-selected="true"] { background: var(--panel); border-color: var(--line); color: var(--ink); font-weight: 600; }
 .panel { min-width: 0; min-height: 0; border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
 .panel[hidden] { display: none; }
 
 /* Chat: the conversation */
-.view { display: grid; grid-template-rows: minmax(0, 1fr); background: var(--panel); box-shadow: var(--shadow); }
+.view { display: grid; grid-template-rows: minmax(0, 1fr); background: var(--panel); }
 
 /* The status bar: the tracks as the CLI prints them, dark like the terminal they come from */
 .status {
   min-width: 0;
-  padding: 0.6rem 1rem 0.75rem;
+  padding: 0.5rem 1rem 0.75rem;
   border-radius: var(--r-md);
   background: var(--term-bg);
   color: var(--term-fg);
@@ -204,28 +208,28 @@ body::before {
 .board { overflow-x: auto; }
 .board > div { white-space: pre; min-height: 1.7em; }
 .board .empty { color: var(--term-dim); }
-.needs-you { margin: 0.3rem 0 0; padding-left: 0.75rem; border-left: 3px solid var(--who-human); font: 400 0.84rem/1.5 var(--font-body); }
+.needs-you { margin: 0.25rem 0 0; padding-left: 0.75rem; border-left: 3px solid var(--who-human); font: 400 0.84rem/1.5 var(--font-body); }
 .needs-you strong { color: var(--who-human); font-weight: 600; }
 
 /* The conversation */
 .chat {
   min-height: 0;
   overflow-y: auto;
-  padding: 1.1rem 1.25rem 1.4rem;
+  padding: 1rem 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.65rem;
+  gap: 0.75rem;
   background: var(--panel);
 }
 .chat > * { flex: none; max-width: min(100%, 34rem); margin: 0; }
 .pitch {
-  padding: 1.1rem 1.25rem;
+  padding: 1rem 1.25rem;
   border-radius: var(--r-lg);
   background: var(--accent-soft);
   border: 1px solid var(--accent-edge);
 }
-.pitch-lead { margin: 0 0 0.4rem; font: 700 1.6rem/1.15 var(--font-display); letter-spacing: -0.02em; }
+.pitch-lead { margin: 0 0 0.5rem; font: 700 1.6rem/1.15 var(--font-display); letter-spacing: -0.02em; }
 .pitch p:last-child { margin: 0; color: var(--muted); }
 .countdown {
   padding: 0.25rem 0.75rem;
@@ -240,8 +244,8 @@ body::before {
   max-width: none !important;
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  margin-top: 0.8rem;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
   font: 500 0.95rem/1.3 var(--font-display);
   color: var(--ink);
 }
@@ -259,7 +263,7 @@ body::before {
   font: 700 0.78rem/1 var(--font-display);
 }
 /* The narrator speaks to the visitor, not to the agent: an info mark sets it apart from the messages. */
-.chat-note { display: flex; gap: 0.6rem; padding: 0.55rem 0.9rem 0.55rem 0.7rem; border-radius: var(--r-md); background: var(--sunk); color: var(--muted); font-size: 0.88rem; }
+.chat-note { display: flex; gap: 0.5rem; padding: 0.5rem 1rem 0.5rem 0.75rem; border-radius: var(--r-md); background: var(--sunk); color: var(--muted); font-size: 0.88rem; }
 .chat-note::before {
   content: "i";
   flex: none;
@@ -273,7 +277,7 @@ body::before {
   font: 700 0.74rem/1 var(--font-display);
 }
 .msg {
-  padding: 0.6rem 1rem 0.7rem;
+  padding: 0.5rem 1rem 0.75rem;
   border: 1px solid var(--accent-edge);
   border-radius: 0.4rem 1.25rem 1.25rem 1.25rem;
   background: var(--accent-soft);
@@ -293,7 +297,6 @@ body::before {
   border-radius: 1.25rem 0.4rem 1.25rem 1.25rem;
   background: var(--fog);
   color: var(--fog-ink);
-  box-shadow: 0 8px 20px -14px var(--fog);
 }
 .msg.human .who { color: inherit; }
 .msg.ran {
@@ -328,10 +331,10 @@ body::before {
   box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
-.controls { display: flex; gap: 0.4rem; justify-content: flex-end; }
+.controls { display: flex; gap: 0.5rem; justify-content: flex-end; }
 button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
 .controls button {
-  padding: 0.55rem 0.9rem;
+  padding: 0.5rem 1rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--sunk);
@@ -350,26 +353,25 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
   color: var(--term-fg);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 22px 44px -26px rgb(20 10 40 / 0.6);
 }
 .term[hidden] { display: none; }
 .term-bar {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.65rem 1rem;
+  padding: 0.75rem 1rem;
   background: var(--term-bar);
   color: var(--term-dim);
   font: 400 0.78rem var(--font-mono);
 }
-.dots { display: flex; gap: 0.4rem; }
+.dots { display: flex; gap: 0.5rem; }
 .dots i { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--term-dim); opacity: 0.4; }
 .dots i:first-child { background: var(--who-human); opacity: 0.85; }
 .screen {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 1rem 1.1rem 1.25rem;
+  padding: 1rem 1rem 1.25rem;
   font: 400 0.86rem/1.5 var(--font-mono);
   font-variant-ligatures: none;
   cursor: text;
@@ -397,7 +399,7 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
 .err { color: var(--ansi-red); }
 /* The banner is 79 columns: on a narrow screen it shrinks to fit (a monospace column is about 0.6em) instead of wrapping. */
 .banner { color: var(--ansi-green); font-weight: 600; font-size: min(1em, 2cqw); white-space: pre !important; overflow-wrap: normal !important; }
-.scene-head { color: var(--ansi-yellow); margin-top: 0.6rem; }
+.scene-head { color: var(--ansi-yellow); margin-top: 0.5rem; }
 .hint { color: var(--term-dim); }
 .a-b { font-weight: 600; }
 .a-d { opacity: 0.7; }
@@ -412,17 +414,17 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
 .dir { color: var(--ansi-blue); font-weight: 600; }
 
 /* Files: what is on disk */
-.disk { display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 0.75rem; padding: 1rem 1.25rem 1.25rem; background: var(--panel); box-shadow: var(--shadow); }
+.disk { display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 0.75rem; padding: 1rem 1.25rem 1.25rem; background: var(--panel); }
 .disk[hidden] { display: none; }
 .disk-head { margin: 0; color: var(--muted); font-size: 0.88rem; }
-.disk-head span { margin-right: 0.4rem; font: 600 0.9rem var(--font-mono); color: var(--ink); }
-.files { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.disk-head span { margin-right: 0.5rem; font: 600 0.9rem var(--font-mono); color: var(--ink); }
+.files { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .files .empty { color: var(--muted); font-size: 0.88rem; }
 .files button {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.4rem 0.75rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--sunk);
@@ -432,7 +434,7 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
 .files button:hover { border-color: var(--accent); }
 .files button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
 .files .tag {
-  padding: 0.05rem 0.4rem;
+  padding: 0.05rem 0.5rem;
   border-radius: 999px;
   background: var(--accent);
   color: var(--accent-ink);
@@ -445,7 +447,7 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
   margin: 0;
   min-height: 0;
   overflow: auto;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: var(--r-md);
   background: var(--term-bg);
   color: var(--term-fg);
@@ -465,10 +467,10 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
 }
 @media (max-width: 40rem) {
   :root { --r-lg: 1.15rem; }
-  .controls button { padding: 0.45rem 0.7rem; }
+  .controls button { padding: 0.5rem 0.75rem; }
   .controls button.primary { min-width: 0; }
-  .status { padding: 0.5rem 0.75rem 0.6rem; font-size: 0.76rem; }
-  .chat { padding: 1rem 0.85rem 1.25rem; }
+  .status { padding: 0.5rem 0.75rem 0.5rem; font-size: 0.76rem; }
+  .chat { padding: 1rem 0.75rem 1.25rem; }
   .screen { font-size: 0.78rem; padding: 0.75rem; }
 }
 @media (prefers-reduced-motion: reduce) {
