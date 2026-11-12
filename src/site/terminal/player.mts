@@ -1,11 +1,11 @@
-import { el } from './dom.mjs';
 import type { Header, PlayerState } from './header.mjs';
 import type { Shell } from './shell.mjs';
 import type { Scene, Step } from './story.mjs';
 import type { Terminal } from './terminal.mjs';
-import { banner, countdown, INTRO, YOUR_TURN } from './text.mjs';
+import { banner, countdown, PITCH, TERMINAL_INTRO, YOUR_TURN, YOUR_TURN_VIEW } from './text.mjs';
+import type { View } from './view.mjs';
 
-/** Milliseconds at 1× speed. */
+/** Milliseconds. */
 const PACE = {
   key: 48,
   space: 90,
@@ -19,21 +19,20 @@ const PACE = {
 };
 const COUNTDOWN_SECONDS = 5;
 
-/** The story as one list: each scene's heading, then its captions and commands. */
-type Beat = { kind: 'scene'; si: number } | (Step & { si: number });
+/** The story as one list: each scene's heading, its captions and commands, then its notes. */
+type Beat = { kind: 'scene'; si: number } | { kind: 'note'; si: number; text: string } | (Step & { si: number });
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Plays the story into the terminal. Every pause or jump starts a new run; a beat that was being
- * played as part of an older run stops where it is, and plays again from the start on resume.
- * Step, back, skip and jump show beats at once, without the typing and the pauses.
+ * Plays the story: captions into the human's view, commands into the terminal. Every pause or jump starts a new run; a command that was
+ * being typed out starts again on resume; a beat that is already on screen is not shown twice.
+ * Step and jump show beats at once, without the typing and the pauses.
  */
 export class Player {
   playing = false;
   inIntro = false;
-  speed = 1;
   private pos = 0; // the next beat
   private run = 0;
   private readonly beats: Beat[];
@@ -41,13 +40,19 @@ export class Player {
   private readonly term: Terminal;
   private readonly shell: Shell;
   private readonly header: Header;
+  private readonly view: View;
 
-  constructor(story: Scene[], parts: { term: Terminal; shell: Shell; header: Header }) {
+  constructor(story: Scene[], parts: { term: Terminal; shell: Shell; header: Header; view: View }) {
     this.story = story;
-    this.beats = story.flatMap((scene, si): Beat[] => [{ kind: 'scene', si }, ...scene.steps.map((s) => ({ ...s, si }))]);
+    this.beats = story.flatMap((scene, si): Beat[] => [
+      { kind: 'scene', si },
+      ...scene.steps.map((s) => ({ ...s, si })),
+      ...scene.notes.map((text): Beat => ({ kind: 'note', si, text })),
+    ]);
     this.term = parts.term;
     this.shell = parts.shell;
     this.header = parts.header;
+    this.view = parts.view;
   }
 
   get atEnd(): boolean {
@@ -55,7 +60,7 @@ export class Player {
   }
 
   get state(): PlayerState {
-    return { playing: this.playing, started: this.pos > 0, atEnd: this.atEnd, speed: this.speed };
+    return { playing: this.playing, started: this.pos > 0, atEnd: this.atEnd };
   }
 
   /** The banner, the pitch and a countdown; then the story starts. Any key or Play starts it sooner. */
@@ -66,10 +71,10 @@ export class Player {
     this.header.update(this.state);
     for (const l of banner()) this.term.line(l, 'banner');
     this.term.line('');
-    for (const l of INTRO) this.term.line(l);
-    const count = this.term.line('', 'countdown');
+    this.term.print(TERMINAL_INTRO, 'hint');
+    this.view.intro(PITCH.lead, PITCH.body);
     for (let t = COUNTDOWN_SECONDS; t > 0 && run === this.run; t--) {
-      count.textContent = countdown(t);
+      this.view.countdown(countdown(t));
       await delay(1000);
     }
     if (run === this.run) this.play();
@@ -84,7 +89,6 @@ export class Player {
     this.header.update(this.state);
     while (!this.atEnd) {
       if (!(await this.perform(this.beats[this.pos], run))) return;
-      this.pos++;
     }
     this.finish();
   }
@@ -102,11 +106,6 @@ export class Player {
     else this.play();
   }
 
-  toggleSpeed(): void {
-    this.speed = this.speed === 1 ? 2 : 1;
-    this.header.update(this.state);
-  }
-
   /** The next caption or command; a scene heading comes along, since alone it shows nothing new. */
   step(): void {
     this.pause();
@@ -115,24 +114,6 @@ export class Player {
     while (!this.atEnd && this.beats[this.pos - 1].kind === 'scene');
     if (this.atEnd) this.finish();
     else this.header.update(this.state);
-  }
-
-  /** Undo the last step: start over on a fresh disk and show every beat before it at once. */
-  back(): void {
-    this.pause();
-    let target = Math.max(0, this.pos - 1);
-    while (target > 0 && this.beats[target - 1].kind === 'scene') target--;
-    this.shell.boot();
-    this.pos = 0;
-    while (this.pos < target) this.show(this.beats[this.pos++]);
-    this.header.show(target > 0 ? this.beats[target - 1].si : -1);
-    this.header.update(this.state);
-  }
-
-  skip(): void {
-    this.pause();
-    while (!this.atEnd) this.show(this.beats[this.pos++]);
-    this.finish();
   }
 
   /** Start over on a fresh disk and play from scene `si`; the scenes before it run at once. */
@@ -155,13 +136,14 @@ export class Player {
   private finish(): void {
     this.end();
     this.term.print(YOUR_TURN, 'hint');
+    this.view.note(YOUR_TURN_VIEW);
     this.term.scrollDown();
   }
 
   private endIntro(): void {
     if (!this.inIntro) return;
     this.inIntro = false;
-    this.term.out.querySelector('.countdown')?.remove();
+    this.view.countdown(null);
   }
 
   /** Put a beat on screen, at once. */
@@ -170,10 +152,13 @@ export class Player {
       const scene = this.story[beat.si];
       this.header.show(beat.si);
       this.term.line(`── ${beat.si + 1} · ${scene.title} ${'─'.repeat(Math.max(3, 44 - scene.title.length))}`, 'scene-head');
-      for (const note of scene.notes) this.term.line(`# ${note}`, 'note');
+      this.view.scene(beat.si + 1, scene.title);
+    } else if (beat.kind === 'note') {
+      this.view.note(beat.text);
     } else if (beat.kind === 'say') {
-      this.term.line(el('span', '', el('span', `who ${beat.who}`, beat.who), ` › ${beat.text}`), `say ${beat.who}`);
+      this.view.say(beat.who, beat.text);
     } else {
+      this.view.ran(beat.line);
       this.term.typed.textContent = '';
       this.shell.exec(beat.line);
     }
@@ -186,7 +171,7 @@ export class Player {
    */
   private async perform(beat: Beat, run: number): Promise<boolean> {
     const wait = async (ms: number) => {
-      await delay(ms / this.speed);
+      await delay(ms);
       return run === this.run;
     };
     if (beat.kind === 'run' && !reduceMotion) {
@@ -198,14 +183,16 @@ export class Player {
       if (!(await wait(PACE.beforeRun))) return false;
     }
     if (run !== this.run) return false;
+    // Shown is done: a pause during the reading time must not show the beat again on resume.
     this.show(beat);
-    return wait(pauseAfter(beat));
+    this.pos++;
+    return this.atEnd || wait(pauseAfter(beat));
   }
 }
 
 /** How long the reader gets after a beat. */
 function pauseAfter(beat: Beat): number {
   if (beat.kind === 'scene') return PACE.scene;
-  if (beat.kind === 'say') return Math.min(PACE.sayMax, PACE.sayBase + beat.text.length * PACE.sayPerChar);
+  if (beat.kind === 'say' || beat.kind === 'note') return Math.min(PACE.sayMax, PACE.sayBase + beat.text.length * PACE.sayPerChar);
   return /^(bubble done|cat)\b/.test(beat.line) ? PACE.afterLongRun : PACE.afterRun;
 }

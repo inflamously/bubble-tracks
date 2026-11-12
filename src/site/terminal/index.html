@@ -15,57 +15,55 @@
 <header class="topbar" id="topbar">
   <div class="topbar-in wrap">
     <div class="brand">
-      <p class="eyebrow">bubble-tracks</p>
+      <p class="eyebrow" id="brand-name">bubble-tracks</p>
       <p class="scene-now"><span class="scene-num" id="scene-num">Intro</span> <span class="scene-title" id="scene-title">Welcome</span></p>
     </div>
-    <div class="scene-track" aria-label="Scenes">
-      <span class="end">S</span><ol id="scenes"></ol><span class="end">F</span>
-    </div>
+    <ol class="scene-track" id="scenes" aria-label="Scenes"></ol>
     <div class="controls">
       <button type="button" id="play" class="primary">Play</button>
-      <button type="button" id="back">Back</button>
       <button type="button" id="step">Step</button>
-      <button type="button" id="skip">Skip to end</button>
       <button type="button" id="restart">Restart</button>
-      <button type="button" id="speed" aria-label="Playback speed">1×</button>
     </div>
   </div>
 </header>
 
 <main class="stage wrap">
-  <section class="console" aria-label="Demo terminal">
-    <div class="term">
-      <div class="term-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span id="term-title">demo@bubble: ~/todo-app</span></div>
-      <div class="screen" id="screen">
-        <div id="out" role="log" aria-live="polite"></div>
-        <label class="promptline" for="cmd">
-          <span class="ps1" id="ps1">~/todo-app $</span>
-          <span class="typed" id="typed"></span>
-          <input id="cmd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Command">
-        </label>
-      </div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-chat" aria-controls="panel-chat" aria-selected="true">Chat</button>
+    <button type="button" role="tab" id="tab-terminal" aria-controls="panel-terminal" aria-selected="false" tabindex="-1">Terminal</button>
+    <button type="button" role="tab" id="tab-files" aria-controls="panel-files" aria-selected="false" tabindex="-1">Files</button>
+  </div>
+
+  <section class="panel view" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat">
+    <div class="chat" id="chat" role="log" aria-label="Conversation" tabindex="0"></div>
+  </section>
+
+  <section class="panel term" id="panel-terminal" role="tabpanel" aria-labelledby="tab-terminal" hidden>
+    <div class="term-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span id="term-title">demo@bubble: ~/todo-app</span></div>
+    <div class="screen" id="screen">
+      <div id="out"></div>
+      <label class="promptline" for="cmd">
+        <span class="ps1" id="ps1">~/todo-app $</span>
+        <span class="typed" id="typed"></span>
+        <input id="cmd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Command">
+      </label>
     </div>
   </section>
 
-  <aside class="disk" aria-labelledby="disk-title">
-    <div class="disk-head">
-      <h2 id="disk-title">.bubble-tracks/</h2>
-      <p>Every command writes plain JSON. The last file that changed opens here.</p>
-    </div>
-    <ul class="files" id="files"></ul>
+  <section class="panel disk" id="panel-files" role="tabpanel" aria-labelledby="tab-files" hidden>
+    <p class="disk-head"><span id="disk-title">.bubble-tracks/</span> Every command writes plain JSON. The last file that changed opens here.</p>
+    <ul class="files" id="files" aria-labelledby="disk-title"></ul>
     <pre class="file-view" id="file-view" tabindex="0"></pre>
-  </aside>
+  </section>
+
+  <section class="status" aria-labelledby="status-title">
+    <p class="status-head"><span id="status-title">Tracks</span><span class="legend">● done · ◐ active · ○ todo · ❓ fog: unplanned, the human plans it</span></p>
+    <div id="tracks"></div>
+  </section>
 </main>
 
 <footer class="colophon wrap">
-  <div>
-    <h2>How this works</h2>
-    <p>The page runs the CLI's own code, bundled for the browser. Only what Node would provide is swapped: the filesystem lives in memory and the output goes to this terminal. A test replays every scene against the real CLI and fails if one byte differs.</p>
-  </div>
-  <div>
-    <h2>Try it in your agent</h2>
-    <p>Claude Code, Codex CLI and Gemini CLI are supported. Install and usage are in the <a href="https://github.com/inflamously/bubble-coding">repository README</a>.</p>
-  </div>
+  <p>This page runs the CLI's own code on a disk that lives in this tab. Install and usage are in the <a href="https://github.com/inflamously/bubble-coding">repository README</a>.</p>
 </footer>
 
 <script type="module" src="main.js"></script>

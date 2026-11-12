@@ -1,15 +1,18 @@
 // The demo page. It wires the parts together around the CLI (bundled in, see build.mjs):
-//   terminal – the screen shell  – runs a command line (bubble-web underneath)
-//   disk     – the .bubble-tracks/ panel  player – plays demo/story.md after an intro
-//   header   – scene track and controls
+//   view     – what the human sees: the tracks and the conversation
+//   terminal – the screen  shell  – runs a command line (bubble-web underneath)
+//   disk     – the .bubble-tracks/ files  player – plays demo/story.md after an intro
+//   header   – scenes and controls  tabs – Chat first; Terminal and Files are the deeper views
 import { Disk } from './disk.mjs';
 import { $ } from './dom.mjs';
 import { Header } from './header.mjs';
 import { Player } from './player.mjs';
 import { PROJECT, Shell } from './shell.mjs';
+import { Tabs } from './tabs.mjs';
 import type { Scene } from './story.mjs';
 import { Terminal } from './terminal.mjs';
 import { FRESH_DISK } from './text.mjs';
+import { View } from './view.mjs';
 
 /** demo/story.md as scenes, inlined by build.mjs (esbuild `define`). */
 declare const STORY: Scene[];
@@ -17,8 +20,14 @@ const story = STORY;
 
 const term = new Terminal();
 const shell = new Shell(term, {
-  booted: () => disk.reset(),
-  ran: () => disk.refresh(),
+  booted: () => {
+    disk.reset();
+    view.reset();
+  },
+  ran: () => {
+    disk.refresh();
+    view.refresh();
+  },
   reset: () => {
     player.end();
     shell.boot();
@@ -27,20 +36,27 @@ const shell = new Shell(term, {
   replay: () => player.jump(0),
 });
 const disk = new Disk(() => shell.machine, PROJECT);
+const view = new View(() => shell.machine, PROJECT);
 const header = new Header(story, {
   toggle: () => player.toggle(),
   step: () => player.step(),
-  back: () => player.back(),
-  skip: () => player.skip(),
   restart: () => player.jump(0),
-  toggleSpeed: () => player.toggleSpeed(),
   jump: (si) => player.jump(si),
 });
-const player = new Player(story, { term, shell, header });
-
-// ── keyboard ──
+const player = new Player(story, { term, shell, header, view });
 
 const cmd = $<HTMLInputElement>('cmd');
+
+// A hidden view can't scroll: catch up when it comes on screen.
+new Tabs((name) => {
+  if (name === 'chat') view.scrollDown();
+  if (name === 'terminal') {
+    term.scrollDown();
+    cmd.focus({ preventScroll: true });
+  }
+});
+
+// ── keyboard ──
 
 /** The prompt: Enter runs, ↑/↓ walk the history, Ctrl+L clears, Ctrl+C drops the line. */
 cmd.addEventListener('keydown', (e) => {

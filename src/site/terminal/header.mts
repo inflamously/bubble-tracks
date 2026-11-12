@@ -6,21 +6,17 @@ export interface PlayerState {
   playing: boolean;
   started: boolean;
   atEnd: boolean;
-  speed: number;
 }
 
 /** What the header's controls ask for. */
 export interface HeaderActions {
   toggle(): void;
   step(): void;
-  back(): void;
-  skip(): void;
   restart(): void;
-  toggleSpeed(): void;
   jump(scene: number): void;
 }
 
-/** The top bar: which scene is on, the scenes as a bubble track, and the controls. */
+/** The top bar: which scene is on, the scenes, and the controls. */
 export class Header {
   private readonly story: Scene[];
   private readonly track = $('scenes');
@@ -33,15 +29,29 @@ export class Header {
       b.setAttribute('aria-label', `Play from scene ${si + 1}: ${scene.title}`);
       this.track.append(el('li', '', b));
     });
+    // The name runs from full size down to three quarters, letter by letter.
+    const name = $('brand-name');
+    const letters = [...(name.textContent ?? '')];
+    name.setAttribute('role', 'img');
+    name.setAttribute('aria-label', letters.join(''));
+    name.textContent = '';
+    name.append(
+      el(
+        'span',
+        'word',
+        ...letters.map((ch, i) => {
+          const letter = el('span', '', ch);
+          letter.style.fontSize = `${1 - (0.25 * i) / Math.max(1, letters.length - 1)}em`;
+          return letter;
+        }),
+      ),
+    );
     // The stage fills the window below the bar, whose height changes as its contents wrap.
     const bar = $('topbar');
     new ResizeObserver(() => document.documentElement.style.setProperty('--topbar-h', `${bar.offsetHeight}px`)).observe(bar);
     $('play').addEventListener('click', () => actions.toggle());
-    $('back').addEventListener('click', () => actions.back());
     $('step').addEventListener('click', () => actions.step());
-    $('skip').addEventListener('click', () => actions.skip());
     $('restart').addEventListener('click', () => actions.restart());
-    $('speed').addEventListener('click', () => actions.toggleSpeed());
   }
 
   /** Scene `si` is on: -1 is the intro, story.length is the end. */
@@ -58,9 +68,6 @@ export class Header {
 
   update(state: PlayerState): void {
     $('play').textContent = state.playing ? 'Pause' : state.atEnd ? 'Replay' : state.started ? 'Resume' : 'Play';
-    $('speed').textContent = `${state.speed}×`;
-    $<HTMLButtonElement>('back').disabled = !state.started;
     $<HTMLButtonElement>('step').disabled = state.atEnd;
-    $<HTMLButtonElement>('skip').disabled = state.atEnd;
   }
 }
