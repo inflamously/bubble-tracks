@@ -21,7 +21,7 @@ const edit = (file) => ({ who: 'agent', edit: file });
 
 describe('a whole run', () => {
   const scenario = { name: 'demo', protected: ['package.json'], bubbles: { min: 2, max: 3 } };
-  const track = { bubbles: [good('Read the parser'), good('Add the flag')] };
+  const track = { goal: 'A --shout flag', guards: ['Keep package.json as it is'], bubbles: [good('Read the parser'), good('Add the flag')] };
 
   it('adds the script, the judge and the human up, and a fail fails it', () => {
     const recording = { events: [human('add a flag'), human('ok'), bubble('create', 'shout'), human('go'), edit('package.json'), bubble('done')] };
@@ -54,7 +54,8 @@ describe('the report', () => {
 });
 
 describe('the saved baseline tracks', () => {
-  const baseline = { 'flow-analysis.json': [-14, { P1: 1, P2: 1, P3: 12 }], 'goal-guard-test.json': [0, {}], 'src-tour.json': [-8, { P3: 8 }] };
+  // flow-analysis and src-tour were planned without a goal or guards: they fail on F5
+  const baseline = { 'flow-analysis.json': [-5, { F5: 1, P20: 1, P1: 1, P2: 1, P3: 2 }], 'goal-guard-test.json': [0, {}], 'src-tour.json': [-3, { F5: 1, P20: 1, P3: 2 }] };
   for (const [file, [points, counts]] of Object.entries(baseline)) {
     it(`${file} scores ${points}`, () => {
       const score = scoreRun({ track: JSON.parse(fs.readFileSync(path.join(BENCH, file), 'utf8')) });
@@ -71,7 +72,7 @@ describe('the command line', () => {
     const run = (...args) => spawnSync('node', [SCORE, ...args], { encoding: 'utf8' });
     const text = run('--track', path.join(BENCH, 'src-tour.json'));
     assert.strictEqual(text.status, 0);
-    assert.match(text.stdout, /^-8 points \(8 bubbles, -1 per bubble\)\n {4}-1 {2}P3 {3}bubble 1 "Big picture map" names no boundary/);
+    assert.match(text.stdout, /^FAILED, -3 points \(8 bubbles, -0\.37 per bubble\)\n {2}fail {2}F5 {3}the track has no goal\n {4}-1 {2}P20 {2}the track has no guards\n {4}-1 {2}P3 {3}8 of 8 planned bubbles name no boundary/);
     assert.match(text.stdout, /\nnot checked: F1 F2 F3 F4 P6 /);
     const asJson = run('--track', path.join(BENCH, 'goal-guard-test.json'), '--json');
     assert.strictEqual(JSON.parse(asJson.stdout).points, 0);

@@ -8,14 +8,29 @@ A run starts at 0. Its score is the total of its points, and higher is better: a
 at -20. That one number is what two runs, or the flow before and after a change, are compared on.
 
 - **Counted rules** (found by the script or the agent, from the track file or the transcript) each cost
-  exactly **1 point**. No rule is worth more than another.
+  exactly **1 point**. No rule is worth more than another. P3 is counted by share, so it costs 1 or 2.
 - **Human-judged rules**: the human gives **-1** or **+1**, with a short line saying why. -1 when that
   part was bad, +1 to boost a part that was genuinely good, and nothing else. For example
   `-1 H3: two questions needed a rephrase`, or `+1 H2: the risky step got its own bubble`.
 
-For now the eval **only counts**. No number of points fails a run, and nothing is weighed against the
-track's size yet. A run also reports its points per bubble, so that can be judged later (see
-`benchmark-feedback.md`).
+The eval **only counts**. No number of points fails a run: only the fail rules do. A run also reports
+its points per bubble, so runs of different sizes can be compared.
+
+## A valid track, and the two ways in
+
+A track holds at minimum a **goal** and the bubbles that are the path to it. Without a goal the run fails
+(F5). **Guards** keep the path inside a domain or a set of rules; a track may go without, at a point
+(P20). Fog is optional.
+
+The plan comes before the bubbles: the bubbles are what the agent predicts from it. There are two ways in,
+and a scenario says which one it is (`start`):
+
+- **The human starts with a plan** (`start: plan`). The agent enhances it and makes the bubbles. No
+  approval is owed first.
+- **The human starts with a goal** (`start: goal`, the default). The agent plans until the human
+  approves, and only then makes the bubbles. A track before that is P8.
+
+An "ok" after the track is shown means carry on: the agent may start the first bubble on it.
 
 ## Counted rules: -1 each
 
@@ -25,12 +40,12 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 |---|---|---|
 | P1 | title over 20 characters, or not 2 to 4 words | track |
 | P2 | fog without a `why` | track |
-| P3 | planned bubble whose hint has no `Boundary:` | track |
+| P3 | By share, not per bubble: 1 point when any planned bubble's hint has no `Boundary:`, a second point when more than half of them have none. A small track and a big one lose the same | track |
 | P4 | spill bubble: named after a file, a line or a single edit ("zoom 500% while 200% is fine"). Read the **title**: a hint may name files | track |
 | P5 | bubble outside the scenario's allowed bubble count range | track |
 | P6 | piece of work past a bubble's boundary without stopping to propose an `insert` | transcript |
 | P7 | sketch after which fog was not classified with the human | transcript |
-| P8 | track created before the human approved the plan | transcript |
+| P8 | track created before the human approved the agent's plan. Only when the human started with a goal: when they brought the plan themselves, the agent may make the track from it at once | transcript |
 | P9 | `fork` or `diverge` without asking first | transcript |
 | P10 | research or ability run without the human starting it | transcript |
 | P11 | time the human's words on a fog were dropped or reworded | transcript |
@@ -41,6 +56,7 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | P16 | new track planned while others were open, without naming the open tracks and offering to continue or close them | transcript |
 | P18 | fill that doesn't say what the human answered: its title and hint carry the agent's own plan, not the human's content. A judge agent compares the two; the script only checks that the answer was for that bubble (F1) | transcript |
 | P19 | fog whose `why` says what the bubble is, not why it is unclear ("Store the notes in a file" instead of "where and in which format to store is undecided"): the plan hidden in the why. A judge agent reads each why | track |
+| P20 | track without any guard: allowed, but risky | track |
 
 ## Human-judged rules: -1 or +1
 

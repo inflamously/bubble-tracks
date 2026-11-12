@@ -41,6 +41,7 @@ function startWalk(scenario) {
     marks: [],
     guardedFiles: new Set((scenario.protected || []).map(normalizePath)),
     knownTracks: tracksFromSetup(scenario),
+    planGiven: scenario.start === 'plan', // the human brought the plan: the agent may make the track from it at once
     humanMessages: 0,
     lastHumanMessage: '',
     answeredFogs: new Set(), // fog numbers the human gave content for, not filled yet
@@ -92,14 +93,14 @@ function onDone(walk) {
   walk.waitingForHuman = true;
 }
 
-/** P8: create, init, or a switch to a name that doesn't exist yet. */
+/** P8: create, init, or a switch to a name that doesn't exist yet, before the human approved the agent's plan. */
 function onOpenTrack(walk, command, args) {
   const words = args.filter((word) => !word.startsWith('--'));
   const name = command === 'init' ? 'track' : (words[0] || '').toLowerCase();
   const isResume = !name || walk.knownTracks.has(name);
   if (isResume) return;
   walk.knownTracks.add(name);
-  if (walk.humanMessages < MESSAGES_BEFORE_APPROVAL) {
+  if (!walk.planGiven && walk.humanMessages < MESSAGES_BEFORE_APPROVAL) {
     walk.marks.push(lostPoint('P8', `${command} ${name} before the human approved the plan`));
   }
 }

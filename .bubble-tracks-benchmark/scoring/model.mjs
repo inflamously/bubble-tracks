@@ -2,7 +2,7 @@
 
 /**
  * @typedef {{ title: string, state: string, hint?: string, why?: string }} Bubble
- * @typedef {{ title?: string, bubbles: Bubble[] }} Track
+ * @typedef {{ title?: string, goal?: string, guards?: string[], bubbles: Bubble[] }} Track
  *
  * One step of a recording, in order:
  *   { who: 'human', text }              a message from the human
@@ -17,7 +17,7 @@
  * @typedef {{ id: string, points: number, what: string, by: 'script' | 'judge' | 'human' }} Mark
  *
  * The parts of a scenario file the scoring reads (the runner reads the rest).
- * @typedef {{ name?: string, protected?: string[], bubbles?: { min: number, max: number },
+ * @typedef {{ name?: string, start?: 'plan' | 'goal', protected?: string[], bubbles?: { min: number, max: number },
  *             repo?: { setup?: string[][] } }} Scenario
  */
 

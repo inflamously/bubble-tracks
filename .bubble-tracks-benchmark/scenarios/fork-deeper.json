@@ -26,6 +26,10 @@
         "The form accepts a typed date"
       ],
       [
+        "guard",
+        "Keep to src/dates.js and src/form.js"
+      ],
+      [
         "add",
         "Parse dates"
       ],

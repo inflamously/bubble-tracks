@@ -19,6 +19,7 @@
     },
     "setup": []
   },
+  "start": "plan",
   "first": "/bubble Make a track from this plan, as it is:\n1. Add a config loader in config.js\n2. Validate the config (not sure yet what counts as valid)\n3. Print the config with --show\nThe goal: the tool reads config.json at start.",
   "replies": [
     "ok",

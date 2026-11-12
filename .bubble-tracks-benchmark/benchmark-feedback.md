@@ -14,13 +14,9 @@ Decided to leave out for now, to bring back once runs give something to go on:
 
 - **Moving a points rule to the fail tier** (or a fail down to points). Open question from the start: is
   any 1-point rule really bad enough to fail a run? Watch for runs where a single P rule ruined it.
-- **Failing a run on points for its size.** -20 on a 3-bubble track can be too much, while -20 on 10
-  bubbles is fine, so a fail line would have to scale with the track. For now nothing fails on points:
-  count first. Also open: whether "size" is just the bubble count.
-- **A token limit.** Asking three times with the same prompt to change one line can give three
-  transcripts with three token counts, so there is no fair line yet. Idea to come back to: each
-  scenario's baseline run as the reference, a later run reported as a multiple of it, and a point lost
-  only far over it. Needs repeated runs first, to see how much the same task varies.
+- **A token point.** Decided on 2026-11-12: a run loses 1 point when it uses far more tokens than its
+  scenario's baseline run. Not built yet, because "far more" needs a number: one scenario has to be run
+  several times first, to see how much the same task varies. Until then tokens are only reported.
 
 - **Spill by size.** P4 only sees a spill bubble by its title (a file or a line). A bubble cut too fine
   with an ordinary title is measured instead: edits, steps and tokens per bubble, with the ones far
@@ -45,4 +41,23 @@ Decided to leave out for now, to bring back once runs give something to go on:
 
 ## Hints from runs
 
-None yet.
+None open. The hints from the baseline run are settled below.
+
+## Decided
+
+From the interview after the baseline run (2026-11-12, Sonnet, see `README.md`):
+
+| What the run showed | Decided | Where it is now |
+|---|---|---|
+| `planned` scenarios derailed: the agent asked for its fog to be classified, the script only said "ok" and "go" (`car-trip`, `open-tracks`, `unreachable-goal`) | The flow is plan, then the track exists, then bubble by bubble. Each scenario says how far its run goes | To build: scenario format and runner |
+| "go" against a real question: the agent rightly refused to guess, and the run derailed | The scenario plays along. Two kinds of automatic run: answers written into the scenario (the same every time), and a human-faking agent that answers the walking agent (more variety) | To build: scenario format and runner |
+| P8 in `fixed-plan`: the human gave the plan, the agent made the track at once and lost a point | Two ways in. The human starts with a plan: the agent enhances it and makes bubbles. The human starts with a goal: the agent plans until approved, then makes bubbles. P8 only counts on the second | Done: `start: plan` in the scenario |
+| What a track must hold | A goal, or the run fails: the goal is the purpose and the bubbles are the path. Guards may be missing, but that is risky | Done: F5, and P20 (1 point) |
+| P3 in `fixed-plan`: one omission cost 5 points | By share: 1 point for any bubble without a boundary, 2 when more than half have none | Done |
+| "ok" read as "go" after the track was shown | Fine: ok means carry on | Done: said in `benchmark-rule-points.md`, no rule |
+| `research-needed` tested a lookup in a file the human could name | That is a search. Research is for a real unknown: the agent highlights it, explains it, and the human goes on with what they learned. The check: the agent explained and stopped before it built | To build: a new scenario and its check |
+| Failing a run on points for its size | No. Points never fail a run. The loop is run, feedback, better rules that lose fewer points; on some tracks losing points is hard to avoid | Done: said in both rule files |
+| A token limit | A point far over the scenario's baseline | Parked above until "far over" has a number |
+
+`ability-once` and `fork-deeper` start on a track their setup makes. Those tracks had no guard, which P20
+would have charged to the agent, so each setup now sets one.

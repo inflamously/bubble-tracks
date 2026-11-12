@@ -52,6 +52,8 @@ describe('recording rules', () => {
   it('P8: a new track before the first reply; a resume is not a new track', () => {
     assert.deepStrictEqual(ids(scoreRecording([human('add dark mode'), bubble('create', 'dark-mode', 'Dark mode')])), ['P8']);
     assert.deepStrictEqual(ids(scoreRecording([human('add dark mode'), bubble('switch', 'dark-mode')])), ['P8']);
+    // the human brought the plan: the agent makes the track from it without waiting
+    assert.deepStrictEqual(scoreRecording([human('make a track from this plan: 1… 2…'), bubble('create', 'notes', 'Notes')], { start: 'plan' }), []);
     assert.deepStrictEqual(scoreRecording([human('add dark mode'), human('ok'), bubble('create', 'dark-mode')]), []);
     const scenario = { repo: { setup: [['create', 'csv-export', 'CSV export']] } };
     assert.deepStrictEqual(scoreRecording([human('/bubble switch csv-export'), bubble('tracks'), bubble('switch', 'CSV-Export')], scenario), []);

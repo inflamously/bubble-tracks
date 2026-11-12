@@ -30,12 +30,12 @@ Because the replies are known in advance, breaks that normally need judgement be
 
 | Rule | The check |
 |---|---|
-| P1 to P5 | read from the track file: titles, `why`, `Boundary:`, spill titles, bubble count against the scenario's range |
+| F5, P1 to P5, P20 | read from the track file: the goal, titles, `why`, `Boundary:`, spill titles, bubble count against the scenario's range, guards |
 | F1 fills a fog itself | a `fill N` with no reply that gave content for bubble N (`N: …`). Whether the fill says what the reply said is the judge's count (P18) |
 | F2 crosses a guard | the scenario sets a guard on named files; an edit to one of them |
 | F3 no stop after `done` | another bubble command or file edit after `done`, before the next reply |
 | F4 hand-edits the JSON | a file edit under `.bubble-tracks/` that isn't a CLI call |
-| P8 track before approval | `create` or `init` before the reply that approves the plan |
+| P8 track before approval | `create` or `init` before the reply that approves the plan, in a scenario where the human starts with a goal |
 | P9 fork or diverge unasked | `fork` or `diverge` before a reply that picks one |
 | P10 research or ability unasked | `research` or `bubble:<name>` not named in the reply before it |
 

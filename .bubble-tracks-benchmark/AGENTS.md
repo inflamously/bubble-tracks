@@ -28,7 +28,7 @@ recordings from outside, and nothing a user runs depends on it.
 |---|---|---|
 | `scoring/model.mjs` | the shapes passed around (track, event, mark, scenario) and the few helpers every module shares | nothing |
 | `scoring/rules.mjs` | the table of rule ids and who checks each | nothing |
-| `scoring/track.mjs` | the rules read from the track file: P1 to P5 | `model` |
+| `scoring/track.mjs` | the rules read from the track file: F5, P1 to P5, P20 | `model` |
 | `scoring/fills.mjs` | fog answers and fills: what the human answered, what got filled | nothing |
 | `scoring/recording.mjs` | the rules read from the recording: F1 to F4, P8 to P10 | `model`, `fills` |
 | `scoring/sizes.mjs` | tokens and work per bubble, and the two flags. Reported, never scored | `model` |

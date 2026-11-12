@@ -36,6 +36,7 @@ option, `delete`). That is the CLI's behaviour, not the agent's, and `test/e2e.t
 | `covers` | The rule ids this scenario is there to exercise |
 | `repo.files` | The starting repo: path to content |
 | `repo.setup` | `bubble` commands run in order to build the tracks that already exist. Never hand-written JSON |
+| `start` | `plan` when the human's first message already holds the plan: the agent may make the track at once (no P8). Left out when they start with a goal |
 | `first` | The human's first message |
 | `replies` | The human's scripted replies, one per stop, in order |
 | `otherwise` | The reply once `replies` has run out |

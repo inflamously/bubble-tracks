@@ -21,6 +21,7 @@
     },
     "setup": []
   },
+  "start": "plan",
   "first": "/bubble Make a track from this plan, as it is:\n1. Read a note from the command line\n2. Add a timestamp to each note\n3. Store the notes (I don't know yet where or in which format)\n4. List the stored notes\n5. Delete a note by number\nThe goal: a small notes script in notes.js.",
   "replies": [
     "ok",

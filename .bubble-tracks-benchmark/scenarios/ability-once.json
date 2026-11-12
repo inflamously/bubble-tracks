@@ -25,6 +25,10 @@
         "The README tells a new user how to install and run the tool"
       ],
       [
+        "guard",
+        "Only the README changes: no code"
+      ],
+      [
         "add",
         "Install steps"
       ],
