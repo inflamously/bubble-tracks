@@ -43,15 +43,18 @@ describe('the scenarios', () => {
 });
 
 describe('the code structure', () => {
-  const modules = fs.readdirSync(path.join(BENCH, 'scoring')).filter((f) => f.endsWith('.mjs'));
+  const modulesIn = (folder) => fs.readdirSync(path.join(BENCH, folder)).filter((f) => f.endsWith('.mjs'));
+  const modules = modulesIn('scoring');
+  const runnerModules = modulesIn('runner');
 
-  it('every scoring module is listed in AGENTS.md, and the other way round', () => {
-    const listed = new Set(read('AGENTS.md').match(/^\| `scoring\/[\w-]+\.mjs` /gm).map((row) => row.slice(11, -2)));
-    assert.deepStrictEqual([...listed].sort(), modules.sort());
+  it('every scoring and runner module is listed in AGENTS.md, and the other way round', () => {
+    const listed = [...read('AGENTS.md').matchAll(/^\| `((?:scoring|runner)\/[\w-]+\.mjs)` /gm)].map((row) => row[1]);
+    const onDisk = [...modules.map((m) => `scoring/${m}`), ...runnerModules.map((m) => `runner/${m}`)];
+    assert.deepStrictEqual(listed.sort(), onDisk.sort());
   });
 
   it(`no module is over ${MODULE_MAX_LINES} lines: past that it is doing two jobs`, () => {
-    for (const file of [...modules.map((m) => path.join('scoring', m)), 'score.mjs']) {
+    for (const file of [...modules.map((m) => path.join('scoring', m)), ...runnerModules.map((m) => path.join('runner', m)), 'score.mjs', 'run.mjs']) {
       const lines = read(file).split('\n').length;
       assert.ok(lines <= MODULE_MAX_LINES, `${file} is ${lines} lines`);
     }

@@ -18,6 +18,8 @@ recordings from outside, and nothing a user runs depends on it.
 | `README.md` | the baseline results (empty until the baseline run) |
 | `score.mjs` | the command line: reads files, parses options, prints. No scoring |
 | `scoring/` | the scoring, one module per job (below) |
+| `run.mjs` | the command line that makes a run: an agent walks one scenario. Started by hand |
+| `runner/` | making a run, one module per job (below) |
 | `../test/benchmark/` | one test file per module, plus `docs.test.js` |
 
 ## The scoring modules
@@ -36,6 +38,22 @@ recordings from outside, and nothing a user runs depends on it.
 
 Every check returns **marks** (`{ id, points, what, by }`). A module never prints and never reads a file:
 `score.mjs` does both.
+
+## The runner modules
+
+| Module | Its one job | May import |
+|---|---|---|
+| `runner/repo.mjs` | the throwaway repo: builds it from the scenario (files, then `repo.setup` through the CLI) and reads back the track the run is on | nothing |
+| `runner/agent.mjs` | one turn of the agent without a person: sends a message to Claude Code, returns what its session log gained | nothing |
+| `runner/recording.mjs` | the session log as the recording the scoring reads: messages, bubble commands, edits, tokens per step | nothing |
+| `runner/until.mjs` | when a run is over: `planned` or `closed`, checked against the track | nothing |
+
+`run.mjs` pulls them together: build the repo, send the first message, then one scripted reply per stop
+until `until` holds. It keeps the run (`repo/`, `track.json`, `recording.json`) in a temp folder and
+prints the `score.mjs` line for it. The agent needs the bubble-tracks plugin installed, and
+runs under the machine's own permission settings. Only edits made with the edit tools show up in the
+session log, so the agent is told to use them; a file that changed without a recorded edit is listed as
+`unrecorded` in the recording and printed, and that run's recording rules are not to be trusted.
 
 ## Rules
 
@@ -69,6 +87,7 @@ Every check returns **marks** (`{ id, points, what, by }`). A module never print
 
 ```
 node .bubble-tracks-benchmark/score.mjs --track <file> [--scenario <file>] [--recording <file>] [--judgements <file>] [--json]
+node .bubble-tracks-benchmark/run.mjs --scenario <file> [--model <name>]   # a live agent: costs tokens
 node --test "test/benchmark/*.test.js"   # the benchmark's tests only
 npm test                                # everything
 ```

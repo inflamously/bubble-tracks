@@ -38,6 +38,10 @@ Decided to leave out for now, to bring back once runs give something to go on:
 - **Idea: a research flag on a bubble.** If a bubble could be marked as "this one is research", the eval
   could tell asked-for research from unasked without guessing from the chat. That is a change to the
   flow and the CLI, so it belongs on its own track, not this one.
+- **The runner's own numbers.** Three choices made before any run: a run counts as derailed after 3
+  `otherwise` replies past the scripted ones, one agent turn may take 10 minutes, and a step's tokens
+  are its output tokens only (what the agent wrote and thought, not the history it re-read, which grows
+  with every turn). The baseline run will show whether they fit.
 
 ## Hints from runs
 
