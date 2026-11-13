@@ -237,6 +237,13 @@ body::before {
 .board { overflow-x: auto; }
 .board > div { white-space: pre; min-height: 1.7em; }
 .board .empty { color: var(--term-dim); }
+/* The current track's guards: sentences, so they wrap instead of scrolling sideways */
+.guards { margin-top: 0.25rem; }
+.guards > div { white-space: pre-wrap; overflow-wrap: anywhere; }
+/* A track the last command added or changed: a sky tint that fades. Nothing moves: a shifted line
+   would overflow the board and flash its scrollbar. */
+.board > .changed { border-radius: 0.25rem; animation: changed 0.9s ease-out; }
+@keyframes changed { from { background: color-mix(in srgb, var(--ansi-blue) 28%, transparent); opacity: 0.55; } }
 .needs-you { margin: 0.25rem 0 0; padding-left: 0.75rem; border-left: 3px solid var(--who-human); font: 400 0.84rem/1.5 var(--font-body); }
 .needs-you strong { color: var(--who-human); font-weight: 600; }
 
@@ -274,7 +281,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 0.75rem;
+  margin-top: 1.75rem; /* with the chat's gap: 2.5rem before a scene, 0.75rem after */
   font: 500 0.95rem/1.3 var(--font-display);
   color: var(--ink);
 }
@@ -292,7 +299,7 @@ body::before {
   font: 700 0.78rem/1 var(--font-display);
 }
 .msg {
-  padding: 0.5rem 1rem 0.75rem;
+  padding: 0.75rem 1.25rem;
   border: 1px solid var(--accent-edge);
   border-radius: 0.4rem 1.25rem 1.25rem 1.25rem;
   background: var(--accent-soft);
@@ -301,19 +308,16 @@ body::before {
 .msg p { margin: 0; }
 .msg .who {
   display: block;
-  margin-bottom: 0.1rem;
-  font: 600 0.72rem/1.5 var(--font-body);
-  letter-spacing: 0.02em;
+  font: 600 1rem/1.55 var(--font-body); /* the role reads at the size of what it says */
   color: var(--accent);
 }
 .msg.human {
   align-self: flex-end;
-  border-color: var(--fog);
+  border-color: var(--fog-edge);
   border-radius: 1.25rem 0.4rem 1.25rem 1.25rem;
-  background: var(--fog);
-  color: var(--fog-ink);
+  background: var(--fog-soft);
 }
-.msg.human .who { color: inherit; }
+.msg.human .who { color: var(--fog); }
 .msg.ran {
   background: transparent;
   border: 1px dashed var(--line-strong);
@@ -322,6 +326,13 @@ body::before {
 .msg.ran .who { color: var(--muted); }
 .msg.ran code { display: block; font: 400 0.8rem/1.6 var(--font-mono); overflow-wrap: anywhere; color: var(--ink); }
 .msg.ran code::before { content: "$ "; color: var(--muted); }
+/* Someone is about to speak: three dots in a bubble on their side */
+.msg.typing { display: flex; align-items: center; gap: 0.25rem; padding: 1rem 1.25rem; }
+.msg.typing i { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--accent); opacity: 0.35; animation: typing 1.2s ease-in-out infinite; }
+.msg.typing i:nth-child(2) { animation-delay: 0.15s; }
+.msg.typing i:nth-child(3) { animation-delay: 0.3s; }
+.msg.human.typing i { background: var(--fog); }
+@keyframes typing { 30% { opacity: 1; transform: translateY(-0.2rem); } 60% { opacity: 0.35; transform: none; } }
 
 /* The scenes: one bubble each, filled up to the one that is on */
 .scene-track { list-style: none; margin: 0; padding: 0.15rem 0; display: flex; align-items: center; gap: 0.15rem; overflow-x: auto; justify-content: safe center; }
@@ -492,5 +503,7 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
 }
 @media (prefers-reduced-motion: reduce) {
   .files button.flash, .notice { animation: none; }
+  .msg.typing i { animation: none; opacity: 0.6; }
+  .board > .changed { animation: none; }
   .scene-track button::before, .controls button { transition: none; }
 }
