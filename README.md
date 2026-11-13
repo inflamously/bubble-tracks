@@ -1,4 +1,9 @@
-# bubble-tracks
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img src="assets/logo.svg" alt="bubble-tracks" height="56">
+  </picture>
+</h1>
 
 **Gamified planning for coding agents, with fog of war.**
 
