@@ -244,8 +244,6 @@ body::before {
    would overflow the board and flash its scrollbar. */
 .board > .changed { border-radius: 0.25rem; animation: changed 0.9s ease-out; }
 @keyframes changed { from { background: color-mix(in srgb, var(--ansi-blue) 28%, transparent); opacity: 0.55; } }
-.needs-you { margin: 0.25rem 0 0; padding-left: 0.75rem; border-left: 3px solid var(--who-human); font: 400 0.84rem/1.5 var(--font-body); }
-.needs-you strong { color: var(--who-human); font-weight: 600; }
 
 /* The conversation */
 .chat {

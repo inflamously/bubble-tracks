@@ -7,8 +7,6 @@ import {$, el} from './dom.mjs';
 
 /** What the view reads from a track file (the CLI's `Track`, src/lib/model.ts). */
 interface TrackFile {
-    bubbles?: { state: string; why?: string }[];
-    closed?: unknown;
     guards?: unknown[];
 }
 
@@ -21,14 +19,6 @@ function parseTrack(json: string): TrackFile {
     } catch {
         return {};
     }
-}
-
-/** The sentence under the tracks when the current track's active bubble is fog; null when it isn't. */
-function fogNote(track: TrackFile): HTMLElement | null {
-    const active = track.closed ? undefined : (track.bubbles ?? []).find((b) => b.state !== 'done');
-    if (active?.state !== 'fog') return null;
-    const why = active.why ? ` Unclear: ${active.why.replace(/[.!?]+$/, '')}.` : '';
-    return el('p', 'needs-you', el('strong', '', 'Fog. The agent stops here.'), `${why} Only the human plans it.`);
 }
 
 /** The tracks and the conversation. */
@@ -82,8 +72,6 @@ export class View {
             this.tracks.append(el('div', 'board guards', ...guards.map(row)));
             this.lines = [...this.lines, ...guards];
         }
-        const note = fogNote(track);
-        if (note) this.tracks.append(note);
     }
 
     // ── the conversation ──
