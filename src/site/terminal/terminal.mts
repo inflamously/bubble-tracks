@@ -1,7 +1,7 @@
 import { ansi } from './ansi.mjs';
 import { $, el } from './dom.mjs';
 
-/** The screen: lines of output, and the half-typed command the player shows at the prompt. */
+/** The screen: lines of output, what was said to the agent, and the half-typed command the player shows at the prompt. */
 export class Terminal {
   readonly out = $('out');
   readonly screen = $('screen');
@@ -17,6 +17,11 @@ export class Terminal {
   /** Program output; a trailing newline doesn't add an empty line. */
   print(text: string, className = ''): void {
     for (const l of text.replace(/\n$/, '').split('\n')) this.line(l, className);
+  }
+
+  /** A message in the session, as the agent receives it: who spoke, then their words. */
+  say(who: string, text: string): HTMLDivElement {
+    return this.line(el('span', '', el('span', 'who', `${who} ❯ `), text), `said ${who}`);
   }
 
   clear(): void {

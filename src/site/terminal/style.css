@@ -440,11 +440,17 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
 .typed:not(:empty) + #cmd { min-width: 1ch; }
 .screen:focus-within { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ansi-blue) 45%, transparent); }
 
-.echo .cmdtext { color: var(--term-fg); }
+/* Three voices, three palette colours: the human in pink, the agent's commands in sky (ice is too close to the plain foreground), the scene bar dim; CLI output keeps the plain foreground */
+.echo { margin-top: 0.5rem; }
+.echo .cmdtext, .typed { color: var(--sky); font-weight: 600; }
 .err { color: var(--ansi-red); }
 /* The banner is 79 columns: on a narrow screen it shrinks to fit (a monospace column is about 0.6em) instead of wrapping. */
 .banner { color: var(--ansi-green); font-weight: 600; font-size: min(1em, 2cqw); white-space: pre !important; overflow-wrap: normal !important; }
-.scene-head { color: var(--ansi-yellow); margin-top: 0.5rem; }
+.scene-head { color: var(--term-dim); margin-top: 1rem; }
+/* What was said to the agent: a tinted block in the speaker's colour, set off from the commands around it */
+.said { margin-block: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 0.5rem; }
+.said .who { font-weight: 600; }
+.said.human { color: var(--who-human); background: color-mix(in srgb, var(--who-human) 14%, transparent); }
 .hint { color: var(--term-dim); }
 .a-b { font-weight: 600; }
 .a-d { opacity: 0.7; }
