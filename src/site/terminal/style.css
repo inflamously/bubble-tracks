@@ -442,7 +442,7 @@ button { font: 500 0.88rem/1 var(--font-body); color: var(--ink); }
 
 /* Three voices, three palette colours: the human in pink, the agent's commands in sky (ice is too close to the plain foreground), the scene bar dim; CLI output keeps the plain foreground */
 .echo { margin-top: 0.5rem; }
-.echo .cmdtext, .typed { color: var(--sky); font-weight: 600; }
+.echo .cmdtext, .typed { color: var(--mint); font-weight: 600; }
 .err { color: var(--ansi-red); }
 /* The banner is 79 columns: on a narrow screen it shrinks to fit (a monospace column is about 0.6em) instead of wrapping. */
 .banner { color: var(--ansi-green); font-weight: 600; font-size: min(1em, 2cqw); white-space: pre !important; overflow-wrap: normal !important; }
