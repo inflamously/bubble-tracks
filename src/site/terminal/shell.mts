@@ -21,8 +21,6 @@ type Command = (args: string[]) => void;
 /** A small shell around the browser CLI: `bubble …`, plus enough of ls, cat and cd to look around. */
 export class Shell {
   machine!: Machine;
-  readonly history: string[] = [];
-  historyAt = 0;
   private readonly term: Terminal;
   private readonly hooks: ShellHooks;
   private readonly commands: Record<string, Command>;
@@ -57,9 +55,14 @@ export class Shell {
     return `${cwd === HOME || cwd.startsWith(`${HOME}/`) ? `~${cwd.slice(HOME.length)}` : cwd} $`;
   }
 
+  /** A command line as it stood at the prompt. */
+  echo(text: string): void {
+    this.term.line(el('span', '', el('span', 'ps1', `${this.prompt()} `), el('span', 'cmdtext', text)), 'echo');
+  }
+
   /** Run one command line, echoed after the prompt like a terminal would. */
   exec(text: string): void {
-    this.term.line(el('span', '', el('span', 'ps1', `${this.prompt()} `), el('span', 'cmdtext', text)), 'echo');
+    this.echo(text);
     try {
       const [name, ...args] = words(text);
       if (name === undefined) return;

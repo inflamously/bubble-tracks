@@ -1,12 +1,13 @@
 // The demo page. It wires the parts together around the CLI (bundled in, see build.mjs):
 //   view     – what the human sees: the tracks and the conversation
 //   terminal – the screen  shell  – runs a command line (bubble-web underneath)
+//   prompt   – the line the reader types at
 //   disk     – the .bubble-tracks/ files  player – plays demo/story.md after an intro
 //   header   – scenes and controls  tabs – Chat first; Terminal and Files are the deeper views
 import { Disk } from './disk.mjs';
-import { $ } from './dom.mjs';
 import { Header } from './header.mjs';
 import { Player } from './player.mjs';
+import { Prompt } from './prompt.mjs';
 import { PROJECT, Shell } from './shell.mjs';
 import { Tabs } from './tabs.mjs';
 import type { Scene } from './story.mjs';
@@ -16,8 +17,9 @@ import { View } from './view.mjs';
 
 /** demo/story.md as scenes, inlined by build.mjs (esbuild `define`). */
 declare const STORY: Scene[];
-const story = STORY;
 
+// The parts need each other in a circle (the shell resets the player, the player runs the shell), so
+// the callbacks name parts built further down. They only run after everything below exists.
 const term = new Terminal();
 const shell = new Shell(term, {
   booted: () => {
@@ -37,64 +39,39 @@ const shell = new Shell(term, {
 });
 const disk = new Disk(() => shell.machine, PROJECT);
 const view = new View(() => shell.machine, PROJECT);
-const header = new Header(story, {
+const header = new Header(STORY, {
   toggle: () => player.toggle(),
   step: () => player.step(),
   restart: () => player.jump(0),
   jump: (si) => player.jump(si),
 });
-const player = new Player(story, { term, shell, header, view });
-
-const cmd = $<HTMLInputElement>('cmd');
-
-// A hidden view can't scroll: catch up when it comes on screen.
-new Tabs((name) => {
-  if (name === 'chat') view.scrollDown();
-  if (name === 'terminal') {
-    term.scrollDown();
-    cmd.focus({ preventScroll: true });
-  }
+const player = new Player(STORY, { term, shell, header, view });
+// Typing at the prompt takes over from the story.
+const prompt = new Prompt(term, shell, () => {
+  if (player.playing) player.pause();
 });
 
-// ── keyboard ──
+/** Start the page: hook up the tabs and the keys, then boot the shell and show the intro. */
+function main(): void {
+  // A hidden view can't scroll: catch up when it comes on screen.
+  new Tabs((name) => {
+    if (name === 'chat') view.scrollDown();
+    if (name === 'terminal') {
+      term.scrollDown();
+      prompt.focus();
+    }
+  });
 
-/** The prompt: Enter runs, ↑/↓ walk the history, Ctrl+L clears, Ctrl+C drops the line. */
-cmd.addEventListener('keydown', (e) => {
-  const typing = e.key.length === 1 && !e.metaKey && !e.ctrlKey;
-  if (player.playing && (typing || e.key === 'Enter')) player.pause();
+  // During the intro, any key starts the story.
+  addEventListener('keydown', (e) => {
+    if (player.inIntro && !e.metaKey && !e.ctrlKey && !e.altKey && e.key !== 'Tab') {
+      e.preventDefault();
+      player.play();
+    }
+  });
 
-  if (e.key === 'Enter') {
-    const text = cmd.value;
-    cmd.value = '';
-    if (text.trim()) shell.history.push(text);
-    shell.historyAt = shell.history.length;
-    shell.exec(text);
-    return;
-  }
-  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-    const at = shell.historyAt + (e.key === 'ArrowUp' ? -1 : 1);
-    shell.historyAt = Math.max(0, Math.min(shell.history.length, at));
-    cmd.value = shell.history[shell.historyAt] ?? '';
-  } else if (e.ctrlKey && e.key === 'l') {
-    term.clear();
-  } else if (e.ctrlKey && e.key === 'c' && cmd.selectionStart === cmd.selectionEnd) {
-    term.line(`${shell.prompt()} ${cmd.value}^C`);
-    cmd.value = '';
-  } else return;
-  e.preventDefault();
-});
+  shell.boot();
+  player.intro();
+}
 
-/** During the intro, any key starts the story. */
-addEventListener('keydown', (e) => {
-  if (player.inIntro && !e.metaKey && !e.ctrlKey && !e.altKey && e.key !== 'Tab') {
-    e.preventDefault();
-    player.play();
-  }
-});
-
-term.screen.addEventListener('click', () => {
-  if (!getSelection()?.toString()) cmd.focus({ preventScroll: true });
-});
-
-shell.boot();
-player.intro();
+main();

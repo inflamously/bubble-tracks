@@ -7,7 +7,7 @@ tsc only type-checks them; `build.mjs` bundles them with esbuild.
 | Folder | What it is | May use |
 |---|---|---|
 | `bubble-web/` | The CLI (`src/lib/cli/main.ts`, bundled in) on an in-memory machine: fake `node:fs`, POSIX `node:path`, per-run `process` and `console` (`host.mts`) | the language only (no DOM, no Node) |
-| `terminal/` | The page: `index.html`, `style.css` and the modules behind them (the tabs, the human's view, terminal, shell, disk files, player, header) | the DOM; imports `bubble-web/` |
+| `terminal/` | The page: `index.html`, `style.css` and the modules behind them (the tabs, the human's view, terminal, shell, prompt, disk files, player, header) | the DOM; imports `bubble-web/` |
 | `build/` | Node code `build.mjs` runs at build time: parses the story | Node |
 
 ```
