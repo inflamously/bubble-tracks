@@ -23,10 +23,15 @@ export class Header {
 
   constructor(story: Scene[], actions: HeaderActions) {
     this.story = story;
+    // One bubble per scene: a jump to it. Its small count is shifted one bubble left: it is the
+    // commands the agent runs in the scene after it, and shows once this scene is played.
+    const runs = story.map((scene) => scene.steps.filter((s) => s.kind === 'run').length);
     story.forEach((scene, si) => {
+      const commands = runs[si] ? ` (${runs[si]} ${runs[si] === 1 ? 'command' : 'commands'})` : '';
       const b = button('', () => actions.jump(si));
-      b.title = `${si + 1}. ${scene.title}`;
-      b.setAttribute('aria-label', `Play from scene ${si + 1}: ${scene.title}`);
+      b.title = `${si + 1}. ${scene.title}${commands}`;
+      b.setAttribute('aria-label', `Play from scene ${si + 1}: ${scene.title}${commands}`);
+      if (runs[si + 1]) b.append(el('span', 'count', String(runs[si + 1])));
       this.track.append(el('li', '', b));
     });
     // The name runs from full size down to three quarters, letter by letter.
