@@ -29,7 +29,15 @@ jobs:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm test
+      # The Impressum is a feature toggle: the repository variable IMPRESSUM_ENABLED=1 switches the page on.
+      # Its details are repository secrets, so they are on the page but not in the repo; with the toggle on,
+      # the build fails here if one is missing.
       - run: npm run site
+        env:
+          IMPRESSUM_ENABLED: ${{ vars.IMPRESSUM_ENABLED }}
+          IMPRESSUM_NAME: ${{ secrets.IMPRESSUM_NAME }}
+          IMPRESSUM_ADDRESS: ${{ secrets.IMPRESSUM_ADDRESS }}
+          IMPRESSUM_EMAIL: ${{ secrets.IMPRESSUM_EMAIL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

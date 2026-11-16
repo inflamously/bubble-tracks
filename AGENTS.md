@@ -44,6 +44,9 @@ bubble-tracks section the installer writes into *users'* AGENTS.md.)
 - **No runtime dependencies.** Users run the committed JS with plain Node; `typescript`,
   `@types/node` and `esbuild` are dev-only. So is `@pkgjs/parseargs`, but esbuild bundles it into the demo,
   so the site ships its licence notices (`THIRD-PARTY-NOTICES.txt`, written by `build.mjs`).
+- **No personal details in the repo.** The Impressum's name, address and email are passed into the site build
+  (repository secrets in CI, a git-ignored `.impressum.json` locally; see `src/site/README.md`). The committed page
+  keeps placeholders; never write real details into a file, a test or a track.
 - **LF line endings** (`.gitattributes`), so built output matches on every OS.
 - **Planning lives in `.bubble-tracks/`** (committed; only `current` is git-ignored). Change it only through the CLI:
   `node skills/bubble/scripts/cli/bubble.js <command>`, never by editing the JSON.

@@ -22,6 +22,20 @@ and publishes `dist/pages/`. One-time setup: Settings → Pages → Source: GitH
 `test/web.test.js` type-checks all three, bundles bubble-web the way the page does, and replays every
 `bubble …` line of the story on both bubble-web and the real CLI; the output and the files on disk must match.
 
+## Impressum
+
+**Off by default.** The page is only built with `IMPRESSUM_ENABLED=1`: for the deploy that is a repository
+variable (`gh variable set IMPRESSUM_ENABLED --body 1`; delete it to switch the page off again), locally the
+environment variable.
+
+`terminal/impressum.html` is committed with placeholders (`[YOUR NAME]`, `[YOUR STREET ADDRESS]`, `[YOUR EMAIL]`).
+The owner's details are passed into the build, so they are on the live page but never in the repo:
+
+- **Deploy:** the repository secrets `IMPRESSUM_NAME`, `IMPRESSUM_ADDRESS` (one line per address line) and
+  `IMPRESSUM_EMAIL`, e.g. `gh secret set IMPRESSUM_NAME`. In CI the build fails if one is missing while the page is on.
+- **Local preview:** the same environment variables, or a git-ignored `.impressum.json`
+  (`{ "name": "…", "address": "…\n…", "email": "…" }`). Without them the placeholders stay.
+
 ## Palette
 
 Five colours, from [colorpalettes.net/color-palette-4657](https://colorpalettes.net/color-palette-4657/).
