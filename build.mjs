@@ -27,6 +27,12 @@ export const SITE_CONFIGS = ['src/site/bubble-web', 'src/site/terminal', 'src/si
 
 const BUBBLE_WEB = path.join(ROOT, 'src', 'site', 'bubble-web');
 
+/** The licence notices the demo ships with, next to the bundle. The page's footer links to it. */
+export const NOTICES_FILE = 'THIRD-PARTY-NOTICES.txt';
+
+/** Third-party packages whose code ends up in the demo's bundle; each one's licence terms ask for its notice in copies. */
+const BUNDLED_PACKAGES = ['@pkgjs/parseargs'];
+
 /** Bundles bubble-web's CLI from src/lib/cli/main.ts with node:fs and node:path swapped for the machine's (see host.mts),
  *  and node:util for @pkgjs/parseargs. */
 const machine = {
@@ -85,9 +91,40 @@ export async function importTs(entry, options = { bundle: true, format: 'esm', p
   return import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].contents).toString('base64')}`);
 }
 
+/** The comment a file opens with, without its markers: where a copied file states its own licence. */
+function leadingComment(file) {
+  const match = /^\s*\/\*([\s\S]*?)\*\//.exec(fs.readFileSync(file, 'utf8'));
+  return match ? match[1].trim() : '';
+}
+
+/**
+ * The text of NOTICES_FILE: for each of BUNDLED_PACKAGES its LICENSE file, plus the licence header of any of
+ * its source files that carries one. Read from node_modules, so it follows the installed version.
+ */
+export function thirdPartyNotices() {
+  const rule = '-'.repeat(78);
+  const parts = ['The bubble-tracks demo page bundles code from the packages below. Their licence notices follow.'];
+  for (const name of BUNDLED_PACKAGES) {
+    const dir = path.dirname(require.resolve(`${name}/package.json`));
+    const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+    const license = path.join(dir, 'LICENSE');
+    if (!fs.existsSync(license)) throw new Error(`${name}: no LICENSE file to ship with the demo; update build.mjs`);
+    parts.push(`${rule}\n${name} ${pkg.version} (${pkg.license})\n${pkg.homepage ?? ''}\n${rule}`, fs.readFileSync(license, 'utf8').trim());
+    const sources = fs.readdirSync(dir, { recursive: true, encoding: 'utf8' })
+      .filter((f) => f.endsWith('.js') && !f.split(path.sep).includes('node_modules'))
+      .sort();
+    for (const source of sources) {
+      const header = leadingComment(path.join(dir, source));
+      if (!/copyright/i.test(header)) continue;
+      parts.push(`${rule}\n${name}: ${source.split(path.sep).join('/')}\n${rule}`, header);
+    }
+  }
+  return `${parts.join('\n\n')}\n`;
+}
+
 /**
  * dist/pages/: index.html, main-<hash>.js (the page, bubble-web, the CLI and the story in one bundle),
- * style-<hash>.css. The hashed names keep a browser from mixing a new page with stale cached files.
+ * style-<hash>.css, and NOTICES_FILE for the third-party code in the bundle. The hashed names keep a browser from mixing a new page with stale cached files.
  */
 export async function buildSite(out = path.join(ROOT, 'dist', 'pages')) {
   const { parseStory } = await importTs('src/site/build/story.mts');
@@ -101,6 +138,7 @@ export async function buildSite(out = path.join(ROOT, 'dist', 'pages')) {
     outdir: out,
     platform: 'browser',
     define: { ...browserOptions.define, STORY: JSON.stringify(story) },
+    banner: { js: `/*! Bundles ${BUNDLED_PACKAGES.join(', ')}; licence notices in ${NOTICES_FILE} */` },
     metafile: true,
   });
 
@@ -113,7 +151,9 @@ export async function buildSite(out = path.join(ROOT, 'dist', 'pages')) {
     if (!s.includes(from)) throw new Error(`src/site/terminal/index.html: ${from} moved; update build.mjs`);
     return s.replace(from, to);
   }, page);
+  if (!html.includes(`href="${NOTICES_FILE}"`)) throw new Error(`src/site/terminal/index.html: the link to ${NOTICES_FILE} is gone; update build.mjs`);
   fs.writeFileSync(path.join(out, 'index.html'), html);
+  fs.writeFileSync(path.join(out, NOTICES_FILE), thirdPartyNotices());
   fs.writeFileSync(path.join(out, '.nojekyll'), '');
 }
 

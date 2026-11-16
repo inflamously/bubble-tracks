@@ -258,3 +258,5 @@ Edit `src/`, never the generated JavaScript, and commit both together. [`docs/`]
 ## License
 
 MIT, see [LICENSE](LICENSE).
+
+The logo's wordmark is set in [Bricolage Grotesque](https://github.com/ateliertriay/bricolage) Bold, © 2022 The Bricolage Grotesque Project Authors, used under the [SIL Open Font License 1.1](https://openfontlicense.org).

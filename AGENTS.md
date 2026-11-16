@@ -42,7 +42,8 @@ bubble-tracks section the installer writes into *users'* AGENTS.md.)
 - **A CLI change extends `test/e2e.test.js`.** Every command, and every new output a human sees, gets a
   step in its story, so the e2e transcript (`BUBBLES_TRANSCRIPT=<file>`) covers the whole bubble language.
 - **No runtime dependencies.** Users run the committed JS with plain Node; `typescript`,
-  `@types/node` and `esbuild` are dev-only.
+  `@types/node` and `esbuild` are dev-only. So is `@pkgjs/parseargs`, but esbuild bundles it into the demo,
+  so the site ships its licence notices (`THIRD-PARTY-NOTICES.txt`, written by `build.mjs`).
 - **LF line endings** (`.gitattributes`), so built output matches on every OS.
 - **Planning lives in `.bubble-tracks/`** (committed; only `current` is git-ignored). Change it only through the CLI:
   `node skills/bubble/scripts/cli/bubble.js <command>`, never by editing the JSON.

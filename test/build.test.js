@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { ROOT, CLI_BUILDS, buildCli } from '../build.mjs';
+import { ROOT, CLI_BUILDS, NOTICES_FILE, buildCli, buildSite } from '../build.mjs';
 
 /** Every file under `dir`, as sorted forward-slash relative paths. */
 const filesIn = (dir) =>
@@ -30,3 +30,19 @@ for (const build of CLI_BUILDS) {
     }
   });
 }
+
+test('the demo ships the licence notices of the third-party code in its bundle, and links them', async () => {
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'bubbles-site-'));
+  try {
+    await buildSite(out);
+    const notices = fs.readFileSync(path.join(out, NOTICES_FILE), 'utf8');
+    assert.match(notices, /@pkgjs\/parseargs \d/, 'the bundled package is named with its version');
+    assert.match(notices, /Apache License/, "the package's LICENSE file is included");
+    assert.match(notices, /Copyright Node\.js contributors/, 'the header of the file copied from Node is included');
+    assert.ok(fs.readFileSync(path.join(out, 'index.html'), 'utf8').includes(`href="${NOTICES_FILE}"`), 'the page links the notices');
+    const bundle = filesIn(out).find((f) => /^main-.*\.js$/.test(f));
+    assert.ok(fs.readFileSync(path.join(out, bundle), 'utf8').includes(NOTICES_FILE), 'the bundle points at the notices');
+  } finally {
+    fs.rmSync(out, { recursive: true, force: true });
+  }
+});
