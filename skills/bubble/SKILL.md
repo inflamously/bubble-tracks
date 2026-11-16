@@ -122,12 +122,22 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
 
 ## Fork or diverge: keep each track to one domain
 
-A track stays clean when every bubble on it serves one goal. If the human asks for something that doesn't belong to the active bubble, such as a new feature, another domain or a side idea, don't `add` it to this track, because that poisons its workflow. Split it off:
+A track stays clean when every bubble on it serves one goal. If the human asks for something that doesn't serve the active bubble, such as a new feature, another domain, a side idea or a cleanup somewhere else, it's a **side task**. Don't just do it, and don't `add` it to this track on your own, because that poisons its workflow. **Always ask where it goes.** The human picks one of four:
 
 - **`fork`**: the request **builds on** the active bubble (it goes deeper into the same idea). The bubble waits until its fork is finished.
 - **`diverge`**: the request goes **a different direction**. The side track remembers where it came from, but nothing waits for it.
+- **keep here**: it becomes a bubble on this track (`add` or `insert`).
+- **now**: do it right away, with no bubble and no new track. This is for a task too small to be worth a track.
 
-**Ask before splitting.** Suggest the one you think fits, with a one-line reason, and let the human pick: `fork`, `diverge`, or keep it on this track. For example: *"This goes a different direction from 'Login'. Diverge into `auth-sso`? (fork / diverge / keep here)"*. Run the command only after they answer. Then the new track is current and starts **fresh**: ask the human what to do around the new goal, plan it (step 1: goal, guards, use cases; the track already exists), and classify all fog. Small, related follow-ups (a missing step of the same goal) still go on the current track with `insert`.
+**Ask, never decide.** Name the request as a side task, suggest the answer you think fits with a one-line reason, and let the human pick. For example: *"That's a side task: it goes a different direction from 'Login'. Diverge into `auth-sso`? (fork / diverge / keep here / now)"*. Act only after they answer. A reply that doesn't pick, like "do it", is not `now`: ask once more.
+
+**A `now` task stays off the track, but the rules still hold:**
+
+- The guards and the fog gate apply to it like to any other work, and it never fills fog.
+- Keep it out of the bubble's commit: it gets its own.
+- If it changes something a later bubble relies on, leave a `hint` on that bubble, so a fresh chat knows.
+
+After `fork` or `diverge`, the new track is current and starts **fresh**: ask the human what to do around the new goal, plan it (step 1: goal, guards, use cases; the track already exists), and classify all fog. Small, related follow-ups (a missing step of the same goal) still go on the current track with `insert`.
 
 Work that belongs to a track that **already exists** doesn't need a split: record it there with `add <title> --to <track>` (plus `hint N <text> --to <track>`) and keep walking. To regroup bubbles that ended up on the wrong track, `move N:M --to <track>`.
 
