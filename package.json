@@ -4,10 +4,10 @@
   "private": true,
   "description": "Gamified fog-of-war planning for agents (Claude Code, Codex CLI, Gemini CLI, AGENTS.md).",
   "license": "MIT",
-  "homepage": "https://github.com/inflamously/bubble-coding",
+  "homepage": "https://github.com/inflamously/bubble-tracks",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inflamously/bubble-coding.git"
+    "url": "git+https://github.com/inflamously/bubble-tracks.git"
   },
   "engines": {
     "node": ">=18"

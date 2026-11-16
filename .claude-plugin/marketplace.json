@@ -12,8 +12,8 @@
       "source": "./",
       "description": "Gamified fog-of-war planning on a track of task bubbles.",
       "author": { "name": "nflamously" },
-      "homepage": "https://github.com/inflamously/bubble-coding",
-      "repository": "https://github.com/inflamously/bubble-coding",
+      "homepage": "https://github.com/inflamously/bubble-tracks",
+      "repository": "https://github.com/inflamously/bubble-tracks",
       "license": "MIT",
       "keywords": ["planning", "statusline", "hooks", "skills"],
       "category": "productivity"
