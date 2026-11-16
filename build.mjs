@@ -35,6 +35,15 @@ export const NOTICES_FILE = 'THIRD-PARTY-NOTICES.txt';
 /** Third-party packages whose code ends up in the demo's bundle; each one's licence terms ask for its notice in copies. */
 const BUNDLED_PACKAGES = ['@pkgjs/parseargs'];
 
+/** The data policy page, built next to the demo. It says only what the site really does. */
+export const DATA_POLICY_PAGE = 'data-policy.html';
+
+/** Where DATA_POLICY_PAGE points to the Impressum, when that page is built. */
+const IMPRESSUM_LINK_SLOT = '<!-- impressum-link -->';
+
+/** Where a footer (index.html, DATA_POLICY_PAGE) links the Impressum, when that page is built. */
+const IMPRESSUM_FOOTER_SLOT = '<!-- impressum-footer-link -->';
+
 /** The Impressum page, built next to the demo. */
 export const IMPRESSUM_PAGE = 'impressum.html';
 
@@ -183,7 +192,7 @@ export function fillImpressum(page, details) {
 }
 
 /**
- * dist/pages/: index.html, IMPRESSUM_PAGE (filled from `impressum`; left out when that is null, the toggle being off), main-<hash>.js (the page, bubble-web, the CLI and the story in one bundle),
+ * dist/pages/: index.html, DATA_POLICY_PAGE, IMPRESSUM_PAGE (filled from `impressum`; left out when that is null, the toggle being off), main-<hash>.js (the page, bubble-web, the CLI and the story in one bundle),
  * style-<hash>.css, and NOTICES_FILE for the third-party code in the bundle. The hashed names keep a browser from mixing a new page with stale cached files.
  */
 export async function buildSite(out = path.join(ROOT, 'dist', 'pages'), impressum = impressumEnabled() ? impressumDetails() : null) {
@@ -209,9 +218,14 @@ export async function buildSite(out = path.join(ROOT, 'dist', 'pages'), impressu
     return s.replace(from, to);
   }, source(name));
   const style = ['href="style.css"', `href="${built('src/site/terminal/style.css')}"`];
-  const html = link('index.html', [style, ['src="main.js"', `src="${built('src/site/terminal/main.mts')}"`]]);
-  if (!html.includes(`href="${NOTICES_FILE}"`)) throw new Error(`src/site/terminal/index.html: the link to ${NOTICES_FILE} is gone; update build.mjs`);
+  const footerLink = [IMPRESSUM_FOOTER_SLOT, impressum ? ` · <a href="${IMPRESSUM_PAGE}">Legal notice (Impressum)</a>` : ''];
+  const html = link('index.html', [style, ['src="main.js"', `src="${built('src/site/terminal/main.mts')}"`], footerLink]);
+  for (const file of [NOTICES_FILE, DATA_POLICY_PAGE]) {
+    if (!html.includes(`href="${file}"`)) throw new Error(`src/site/terminal/index.html: the link to ${file} is gone; update build.mjs`);
+  }
   fs.writeFileSync(path.join(out, 'index.html'), html);
+  const impressumLink = impressum ? ` Their name and address are in the <a href="${IMPRESSUM_PAGE}">legal notice</a>.` : '';
+  fs.writeFileSync(path.join(out, DATA_POLICY_PAGE), link(DATA_POLICY_PAGE, [style, [IMPRESSUM_LINK_SLOT, impressumLink], footerLink]));
   if (impressum) fs.writeFileSync(path.join(out, IMPRESSUM_PAGE), fillImpressum(link(IMPRESSUM_PAGE, [style]), impressum));
   fs.writeFileSync(path.join(out, NOTICES_FILE), thirdPartyNotices());
   fs.writeFileSync(path.join(out, '.nojekyll'), '');

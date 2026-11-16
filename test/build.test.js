@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { ROOT, CLI_BUILDS, NOTICES_FILE, IMPRESSUM, IMPRESSUM_PAGE, buildCli, buildSite, impressumDetails, impressumEnabled } from '../build.mjs';
+import { ROOT, CLI_BUILDS, NOTICES_FILE, IMPRESSUM, IMPRESSUM_PAGE, DATA_POLICY_PAGE, buildCli, buildSite, impressumDetails, impressumEnabled } from '../build.mjs';
 
 /** Every file under `dir`, as sorted forward-slash relative paths. */
 const filesIn = (dir) =>
@@ -65,6 +65,35 @@ test('the Impressum is filled from what the build is given, and keeps its placeh
     assert.ok(page().includes('Test &#60;Person&#62;'), 'details are escaped');
     assert.match(page(), /Test Street 1<br>\s*00000 Testtown/, 'an address keeps its lines');
     assert.ok(page().includes('href="mailto:test@example.invalid"'), 'the email is a link');
+  } finally {
+    fs.rmSync(out, { recursive: true, force: true });
+  }
+});
+
+test('the data policy ships with the demo, and what it says about the page holds', async () => {
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'bubbles-site-'));
+  try {
+    const policy = () => fs.readFileSync(path.join(out, DATA_POLICY_PAGE), 'utf8');
+    await buildSite(out, null);
+    assert.match(policy(), /href="style-[^"]+\.css"/, 'the page uses the built stylesheet');
+    assert.ok(!policy().includes(IMPRESSUM_PAGE), 'no link to an Impressum that is not built');
+    const demo = () => fs.readFileSync(path.join(out, 'index.html'), 'utf8');
+    assert.ok(demo().includes(`href="${DATA_POLICY_PAGE}"`), "the demo's footer links the policy");
+    assert.ok(!demo().includes(IMPRESSUM_PAGE), "the demo's footer does not link an Impressum that is not built");
+    assert.ok(policy().includes('href="./"'), 'the policy links back to the demo');
+
+    // The policy says: no cookies, nothing stored in the browser, nothing loaded or sent elsewhere.
+    for (const f of filesIn(out).filter((name) => /\.(js|css|html)$/.test(name))) {
+      const text = fs.readFileSync(path.join(out, f), 'utf8');
+      assert.doesNotMatch(text, /localStorage|sessionStorage|indexedDB|document\.cookie|sendBeacon|XMLHttpRequest|WebSocket|\bfetch\(/, `${f} stores or sends nothing`);
+      assert.doesNotMatch(text, /(src|href)="https?:\/\/(?!github\.com\/|docs\.github\.com\/)|@import|url\(\s*["']?https?:/, `${f} loads nothing from another server`);
+    }
+
+    await buildSite(out, {});
+    assert.ok(policy().includes(`href="${IMPRESSUM_PAGE}"`), 'with the Impressum built, the policy points to it');
+    assert.ok(demo().includes(`href="${IMPRESSUM_PAGE}"`), "and the demo's footer links it");
+    const impressum = fs.readFileSync(path.join(out, IMPRESSUM_PAGE), 'utf8');
+    assert.ok(impressum.includes('href="./"') && impressum.includes(`href="${DATA_POLICY_PAGE}"`), 'the Impressum links back to the demo and to the policy');
   } finally {
     fs.rmSync(out, { recursive: true, force: true });
   }

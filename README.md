@@ -17,7 +17,7 @@ Fix generation   S ●──●──❓──○ F   Read logs ‹ ❓ needs yo
 
 `●` done · `◐` active · `○` todo · `❓` fog · `prev ‹ active › next` shows where you are
 
-**[Live demo](https://inflamously.github.io/bubble-tracks/)**: the real CLI playing a full session in your browser.
+**[Live demo](https://inflamously.github.io/bubble-tracks/)**: the real CLI playing a full session in your browser ([data policy](https://inflamously.github.io/bubble-tracks/data-policy.html)).
 
 ## Overview
 

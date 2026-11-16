@@ -22,6 +22,13 @@ and publishes `dist/pages/`. One-time setup: Settings → Pages → Source: GitH
 `test/web.test.js` type-checks all three, bundles bubble-web the way the page does, and replays every
 `bubble …` line of the story on both bubble-web and the real CLI; the output and the files on disk must match.
 
+## Data policy
+
+`terminal/data-policy.html` is always built. It describes only what the site really does (GitHub Pages logging
+visitor IPs, nothing else), and `test/build.test.js` fails if the built site starts to store anything in the
+browser or to load or send anything elsewhere: change the page and the policy together. With the Impressum on,
+the policy links to it for the name and address.
+
 ## Impressum
 
 **Off by default.** The page is only built with `IMPRESSUM_ENABLED=1`: for the deploy that is a repository
