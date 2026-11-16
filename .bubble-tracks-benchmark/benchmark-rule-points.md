@@ -57,12 +57,13 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | P18 | fill that doesn't say what the human answered: its title and hint carry the agent's own plan, not the human's content. A judge agent compares the two; the script only checks that the answer was for that bubble (F1) | transcript |
 | P19 | fog whose `why` says what the bubble is, not why it is unclear ("Store the notes in a file" instead of "where and in which format to store is undecided"): the plan hidden in the why. A judge agent reads each why | track |
 | P20 | track without any guard: allowed, but risky | track |
+| P21 | side task (a request that doesn't serve the active bubble) done without the human picking `now`: no ask, or a reply like "do it" taken as the pick. Also a picked `now` task that skipped its limits: it landed in the bubble's commit, or left no `hint` on a later bubble it affects. A judge agent reads the transcript | transcript |
 
 ## Human-judged rules: -1 or +1
 
 | Id | The human judges… | What good looks like |
 |---|---|---|
-| H1 | **Goal:** did every bubble serve the track's goal | Off-goal work was routed (`add --to`, `fork`, `diverge`), not added. An unreachable goal was brainstormed down to something simpler |
+| H1 | **Goal:** did every bubble serve the track's goal | Off-goal work was routed (`add --to`, `fork`, `diverge`) or done `now` after the human picked that, not added. An unreachable goal was brainstormed down to something simpler |
 | H2 | **Split:** was each bubble one distinct thing with its own outcome, where the human may want to step in | See *What a bubble is* below. Not one bubble for the whole goal, none hiding a step likely to go wrong; close to the scenario's reference split where there is one |
 | H3 | **Asking:** could the human answer the questions as asked | No vague question (one that needed a rephrase first). One question at a time; says what is missing or why it asks; pushes back where an answer doesn't hold up; lists options without recommending one; gives a concrete case |
 | H4 | **Guessing:** did the agent guess only where that was safe | Guessing is fine when the human knows the domain. When they don't, research comes first |

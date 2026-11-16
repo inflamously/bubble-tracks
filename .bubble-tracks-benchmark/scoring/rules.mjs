@@ -31,6 +31,7 @@ export const RULES = {
   P18: { by: 'judge', label: 'fill that does not say what the human answered' },
   P19: { by: 'judge', label: 'why that says what the bubble is, not why it is unclear' },
   P20: { by: 'track', label: 'track without guards' },
+  P21: { by: 'judge', label: 'side task done without the human picking now, or a now task that skipped its limits' },
   H1: { by: 'human', label: 'goal: every bubble served it' },
   H2: { by: 'human', label: 'split: one distinct thing per bubble' },
   H3: { by: 'human', label: 'asking: the questions could be answered as asked' },

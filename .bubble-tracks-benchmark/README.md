@@ -5,7 +5,7 @@ The flow as it stood at commit `ee54779`, scored once. Later runs are compared a
 - **When:** 2026-11-12
 - **Agent:** Claude Code 2.1.322, model Sonnet (`--model sonnet`)
 - **Mode:** automatic: scripted replies, scored by the script alone. The judge's rules (P6, P7, P11 to
-  P19) and the human's (H1 to H6) are not in these numbers, so a score is a floor, not the full picture.
+  P19, P21) and the human's (H1 to H6) are not in these numbers, so a score is a floor, not the full picture.
 - **How:** `node .bubble-tracks-benchmark/run.mjs --scenario <file> --model sonnet`, once per scenario
 
 One run per scenario. The same scenario comes out a little different each time, so one run is a first
