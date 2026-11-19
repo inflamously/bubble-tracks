@@ -100,7 +100,11 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
    - **Guards:** numbered, one rule each.
    - **Bubbles:** numbered in track order, each with a short title and one line on what it does; fog with its reason.
 
-   If an existing track already covers it, propose that instead: "this fits track X, add it there?". When the human says ok (or edits it), create it in one burst: `create <name> <title>`, `goal`, one `guard` per rule, the `add`s and their `hint`s. Then classify the fog (step 2).
+   If an existing track already covers it, propose that instead: "this fits track X, add it there?".
+
+   **Refine until go.** The proposal is a draft until the human approves it. If they change something (add a guard, move a bubble, reword the goal) or ask a question, that is not approval: apply the change or answer, show the whole revised proposal again, and wait. Repeat this as often as they want. Create the track only when they say go to the proposal as it stands ("ok", "go", "create it"). If one reply approves and changes it ("ok, but add a guard …"), apply the change, create the track and say what you changed.
+
+   Then create it in one burst: `create <name> <title>`, `goal`, one `guard` per rule, the `add`s and their `hint`s. Then classify the fog (step 2).
 
    **Seams: one bubble per use case**, not one per file and not one bubble for the whole goal. Its hint names its boundary (`Boundary: …`, the files or domain it may touch), so the work stays scoped and easy to review. If a bubble needs work past its boundary, stop and propose an `insert` instead of doing it.
 2. **Sketch.** For later passes on an existing track (or after `init`), make one rough pass from the active bubble to F. Steps that are clear become todo bubbles with short titles; add a `hint` when a step needs more words. Anything unclear becomes `add ? <why>`: fog, plus one line on **why** it's unclear (what's missing or undecided), never what it is. Keep it short and don't over-plan.
