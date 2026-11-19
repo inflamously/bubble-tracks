@@ -106,6 +106,8 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
      3. ❓ why: undecided who signs the mail
      ```
 
+   **A diagram, only when it helps.** Add one when the plan has a flow, an order or a structure that sentences make harder to follow: three or more steps or parts that depend on each other, a branch, or a before and after. Use at most one per plan, right after the TL;DR. A plain list of independent bubbles gets none, because the track line already shows it. Draw it in ASCII when the human reads the plan in a terminal, and in Mermaid when the plan is a markdown file they can open. In ASCII, put every step in a box of its own and join the boxes with arrows, even though that takes more lines: it is easier to read.
+
    If an existing track already covers it, propose that instead: "this fits track X, add it there?".
 
    **Refine until go.** The proposal is a draft until the human approves it. If they change something (add a guard, move a bubble, reword the goal) or ask a question, that is not approval: apply the change or answer, show the whole revised proposal again, and wait. Repeat this as often as they want. Create the track only when they say go to the proposal as it stands ("ok", "go", "create it"). If one reply approves and changes it ("ok, but add a guard …"), apply the change, create the track and say what you changed.
