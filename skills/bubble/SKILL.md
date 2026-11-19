@@ -86,7 +86,21 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
 
    Ask for the goal. The human often answers only that, so don't ask again for the rest: draft the guards and use cases yourself from the goal and the codebase, and they confirm or edit them in the proposal. Use whatever they did give as they gave it.
 
-   Then make one compact proposal: track name and title, goal, guards, and the bubbles (fog with its reason), or "this fits track X, add it there?" if an existing track already covers it. When the human says ok (or edits it), create it in one burst: `create <name> <title>`, `goal`, one `guard` per rule, the `add`s and their `hint`s. Then classify the fog (step 2).
+   **Write the plan in plain sentences**, so the human can check it in one read. This covers the proposal and everything in it (goal, guards, hints, fog reasons):
+   - One sentence says one thing: one instruction or one fact, in about 20 words at most.
+   - Use the active voice and name who acts: "the reviewer signs the draft", not "the draft gets signed".
+   - One word for one thing. If you call it a "track" once, don't call it a "list" later.
+   - Use the simple word, and the exact name of a thing (the file, command, section or person) instead of a description of it.
+   - Plain is not shallow. If a part is complex, keep the complexity and explain it in more short sentences. Never leave something out to make the plan look simple.
+
+   Then make one compact proposal, always in this order, so the human finds each part in the same place every time:
+   - **TL;DR:** one or two sentences that say what changes and what the human has at the end. It comes first, so they can stop reading there if the direction is wrong.
+   - **Track:** its name and title.
+   - **Goal:** one sentence.
+   - **Guards:** numbered, one rule each.
+   - **Bubbles:** numbered in track order, each with a short title and one line on what it does; fog with its reason.
+
+   If an existing track already covers it, propose that instead: "this fits track X, add it there?". When the human says ok (or edits it), create it in one burst: `create <name> <title>`, `goal`, one `guard` per rule, the `add`s and their `hint`s. Then classify the fog (step 2).
 
    **Seams: one bubble per use case**, not one per file and not one bubble for the whole goal. Its hint names its boundary (`Boundary: …`, the files or domain it may touch), so the work stays scoped and easy to review. If a bubble needs work past its boundary, stop and propose an `insert` instead of doing it.
 2. **Sketch.** For later passes on an existing track (or after `init`), make one rough pass from the active bubble to F. Steps that are clear become todo bubbles with short titles; add a `hint` when a step needs more words. Anything unclear becomes `add ? <why>`: fog, plus one line on **why** it's unclear (what's missing or undecided), never what it is. Keep it short and don't over-plan.
