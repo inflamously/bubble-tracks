@@ -98,7 +98,13 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
    - **Track:** its name and title.
    - **Goal:** one sentence.
    - **Guards:** numbered, one rule each.
-   - **Bubbles:** numbered in track order, each with a short title and one line on what it does; fog with its reason.
+   - **Bubbles:** numbered in track order, each with a short title, one line on what it does, and its boundary in square brackets on a line of its own; fog with its reason.
+
+     ```
+     2. Welcome mail: rewrite the text new members get.
+        [Boundary: the welcome mail template]
+     3. ❓ why: undecided who signs the mail
+     ```
 
    If an existing track already covers it, propose that instead: "this fits track X, add it there?".
 
@@ -106,7 +112,7 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
 
    Then create it in one burst: `create <name> <title>`, `goal`, one `guard` per rule, the `add`s and their `hint`s. Then classify the fog (step 2).
 
-   **Seams: one bubble per use case**, not one per file and not one bubble for the whole goal. Its hint names its boundary (`Boundary: …`, the files or domain it may touch), so the work stays scoped and easy to review. If a bubble needs work past its boundary, stop and propose an `insert` instead of doing it.
+   **Seams: one bubble per use case**, not one per file and not one bubble for the whole goal. Its boundary names the places it may touch, so the work stays scoped and easy to review. A place is whatever the work is made of: files, a domain, a section of a document, a system, a step in a process. Always write it in square brackets, `[Boundary: …]`, with the places separated by commas, so it stands out from the sentences around it. In the proposal it stands on its own line under the bubble, so the human can check all boundaries at a glance. On the track it is the end of the bubble's hint. If a bubble needs work past its boundary, stop and propose an `insert` instead of doing it.
 2. **Sketch.** For later passes on an existing track (or after `init`), make one rough pass from the active bubble to F. Steps that are clear become todo bubbles with short titles; add a `hint` when a step needs more words. Anything unclear becomes `add ? <why>`: fog, plus one line on **why** it's unclear (what's missing or undecided), never what it is. Keep it short and don't over-plan.
    - **Then always classify every fog bubble in one go.** Do this after every sketch, without skipping it. List every fog bubble by number and ask the human to answer each line with either:
      - `N: <what they think it is>`: their content. Run `fill N` with a short title, and put the detail in a `hint`.
@@ -115,7 +121,7 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
      - `N:?`: they don't know enough to say yet. Run `research N` on it (see **Research**), show the findings, then ask them to classify or fill it again. It stays fog until they do.
 
      For example: `1:uk  2: tighten the fog gate  3:?`. The levels shape everything after this, because they decide how you work each bubble in step 4.
-3. **Walk.** Run `show`. If the active bubble is known, implement it, then run `done`. Read the bubble's `↳` hint first: it's the human's steer for that bubble, and its `Boundary:` is how far the bubble reaches.
+3. **Walk.** Run `show`. If the active bubble is known, implement it, then run `done`. Read the bubble's `↳` hint first: it's the human's steer for that bubble, and its `[Boundary: …]` is how far the bubble reaches.
    - **Guards come before acting**, not as a check at `done`. Before you implement a bubble or take any other action, read them (`guard show`, or the list `switch` printed) and keep to them.
    - **A guard stands even against a direct ask from the human.** If they ask for something a guard rules out, don't do it on this track: say which guard it hits and route the work where it belongs (`add <title> --to <track>`, or offer `fork` / `diverge`).
 4. **Hit fog → STOP.** When the active bubble is fog (`show` exits 3, or an edit is blocked):
