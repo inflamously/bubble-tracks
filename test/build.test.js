@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { ROOT, CLI_BUILDS, NOTICES_FILE, IMPRESSUM, IMPRESSUM_PAGE, DATA_POLICY_PAGE, buildCli, buildSite, impressumDetails, impressumEnabled } from '../build.mjs';
+import { ROOT, CLI_BUILDS, NOTICES_FILE, IMPRESSUM, IMPRESSUM_PAGE, IMPRESSUM_PAGE_DE, DATA_POLICY_PAGE, DATA_POLICY_PAGE_DE, buildCli, buildSite, impressumDetails, impressumEnabled } from '../build.mjs';
 
 /** Every file under `dir`, as sorted forward-slash relative paths. */
 const filesIn = (dir) =>
@@ -65,6 +65,11 @@ test('the Impressum is filled from what the build is given, and keeps its placeh
     assert.ok(page().includes('Test &#60;Person&#62;'), 'details are escaped');
     assert.match(page(), /Test Street 1<br>\s*00000 Testtown/, 'an address keeps its lines');
     assert.ok(page().includes('href="mailto:test@example.invalid"'), 'the email is a link');
+
+    const german = fs.readFileSync(path.join(out, IMPRESSUM_PAGE_DE), 'utf8');
+    assert.match(german, /<html lang="de">/, 'the German Impressum is built with it');
+    for (const { placeholder } of Object.values(IMPRESSUM)) assert.ok(!german.includes(placeholder), `${placeholder} is filled in German too`);
+    assert.ok(german.includes('Test &#60;Person&#62;') && german.includes('href="mailto:test@example.invalid"'), 'with the same details');
   } finally {
     fs.rmSync(out, { recursive: true, force: true });
   }
@@ -82,6 +87,14 @@ test('the data policy ships with the demo, and what it says about the page holds
     assert.ok(!demo().includes(IMPRESSUM_PAGE), "the demo's footer does not link an Impressum that is not built");
     assert.ok(policy().includes('href="./"'), 'the policy links back to the demo');
 
+    const german = () => fs.readFileSync(path.join(out, DATA_POLICY_PAGE_DE), 'utf8');
+    assert.match(german(), /<html lang="de">/, 'the policy ships in German too');
+    assert.match(german(), /href="style-[^"]+\.css"/, 'the German policy uses the built stylesheet');
+    assert.ok(policy().includes(`href="${DATA_POLICY_PAGE_DE}"`) && german().includes(`href="${DATA_POLICY_PAGE}"`), 'each language links the other');
+    assert.ok(german().includes('href="./"'), 'the German policy links back to the demo');
+    assert.ok(!german().includes(IMPRESSUM_PAGE_DE), 'no link to a German Impressum that is not built');
+    assert.equal((german().match(/<h2>/g) ?? []).length, (policy().match(/<h2>/g) ?? []).length, 'both languages have the same sections');
+
     // The policy says: no cookies, nothing stored in the browser, nothing loaded or sent elsewhere.
     for (const f of filesIn(out).filter((name) => /\.(js|css|html)$/.test(name))) {
       const text = fs.readFileSync(path.join(out, f), 'utf8');
@@ -94,6 +107,10 @@ test('the data policy ships with the demo, and what it says about the page holds
     assert.ok(demo().includes(`href="${IMPRESSUM_PAGE}"`), "and the demo's footer links it");
     const impressum = fs.readFileSync(path.join(out, IMPRESSUM_PAGE), 'utf8');
     assert.ok(impressum.includes('href="./"') && impressum.includes(`href="${DATA_POLICY_PAGE}"`), 'the Impressum links back to the demo and to the policy');
+    assert.ok(german().includes(`href="${IMPRESSUM_PAGE_DE}"`), 'the German policy points to the German Impressum');
+    const germanImpressum = fs.readFileSync(path.join(out, IMPRESSUM_PAGE_DE), 'utf8');
+    assert.ok(germanImpressum.includes('href="./"') && germanImpressum.includes(`href="${DATA_POLICY_PAGE_DE}"`), 'the German Impressum links back to the demo and to the German policy');
+    assert.ok(impressum.includes(`href="${IMPRESSUM_PAGE_DE}"`) && germanImpressum.includes(`href="${IMPRESSUM_PAGE}"`), 'each Impressum links the other language');
   } finally {
     fs.rmSync(out, { recursive: true, force: true });
   }

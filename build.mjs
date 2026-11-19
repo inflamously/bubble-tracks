@@ -38,14 +38,20 @@ const BUNDLED_PACKAGES = ['@pkgjs/parseargs'];
 /** The data policy page, built next to the demo. It says only what the site really does. */
 export const DATA_POLICY_PAGE = 'data-policy.html';
 
-/** Where DATA_POLICY_PAGE points to the Impressum, when that page is built. */
+/** Its German version. Each links the other. */
+export const DATA_POLICY_PAGE_DE = 'data-policy.de.html';
+
+/** Where a data policy page points to its Impressum, when that page is built. */
 const IMPRESSUM_LINK_SLOT = '<!-- impressum-link -->';
 
-/** Where a footer (index.html, DATA_POLICY_PAGE) links the Impressum, when that page is built. */
+/** Where a footer (index.html, a data policy page) links the Impressum, when that page is built. */
 const IMPRESSUM_FOOTER_SLOT = '<!-- impressum-footer-link -->';
 
 /** The Impressum page, built next to the demo. */
 export const IMPRESSUM_PAGE = 'impressum.html';
+
+/** Its German version, built with it. Each links the other. */
+export const IMPRESSUM_PAGE_DE = 'impressum.de.html';
 
 /** The feature toggle: the Impressum page is only built when this environment variable is 1 (or true, on, yes). Off by default. */
 export const IMPRESSUM_TOGGLE = 'IMPRESSUM_ENABLED';
@@ -62,6 +68,25 @@ export const IMPRESSUM = {
   address: { placeholder: '[YOUR STREET ADDRESS]', env: 'IMPRESSUM_ADDRESS' },
   email: { placeholder: '[YOUR EMAIL]', env: 'IMPRESSUM_EMAIL' },
 };
+
+/**
+ * The legal pages, one entry per language: the data policy, its Impressum, and the words the build puts into the
+ * policy's two slots when the Impressum is built. The demo itself is English and links the first entry.
+ */
+const LEGAL_PAGES = [
+  {
+    policy: DATA_POLICY_PAGE,
+    impressum: IMPRESSUM_PAGE,
+    pointer: (href) => ` Their name and address are in the <a href="${href}">legal notice</a>.`,
+    footer: 'Legal notice (Impressum)',
+  },
+  {
+    policy: DATA_POLICY_PAGE_DE,
+    impressum: IMPRESSUM_PAGE_DE,
+    pointer: (href) => ` Name und Anschrift stehen im <a href="${href}">Impressum</a>.`,
+    footer: 'Impressum',
+  },
+];
 
 /** Bundles bubble-web's CLI from src/lib/cli/main.ts with node:fs and node:path swapped for the machine's (see host.mts),
  *  and node:util for @pkgjs/parseargs. */
@@ -180,10 +205,10 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
-/** `page` (impressum.html) with each placeholder replaced by its detail; one that is missing stays, visibly. An address may span lines. */
-export function fillImpressum(page, details) {
+/** `page` (the Impressum page `name`) with each placeholder replaced by its detail; one that is missing stays, visibly. An address may span lines. */
+export function fillImpressum(page, details, name = IMPRESSUM_PAGE) {
   for (const [key, { placeholder }] of Object.entries(IMPRESSUM)) {
-    if (!page.includes(placeholder)) throw new Error(`src/site/terminal/${IMPRESSUM_PAGE}: ${placeholder} moved; update build.mjs`);
+    if (!page.includes(placeholder)) throw new Error(`src/site/terminal/${name}: ${placeholder} moved; update build.mjs`);
     if (!details[key]) continue;
     const lines = details[key].split(/\r?\n/).map((line) => escapeHtml(line.trim())).filter(Boolean);
     page = page.replaceAll(placeholder, lines.join('<br>\n    '));
@@ -192,7 +217,7 @@ export function fillImpressum(page, details) {
 }
 
 /**
- * dist/pages/: index.html, DATA_POLICY_PAGE, IMPRESSUM_PAGE (filled from `impressum`; left out when that is null, the toggle being off), main-<hash>.js (the page, bubble-web, the CLI and the story in one bundle),
+ * dist/pages/: index.html, the LEGAL_PAGES in each language (a data policy, and its Impressum filled from `impressum`; that one is left out when `impressum` is null, the toggle being off), main-<hash>.js (the page, bubble-web, the CLI and the story in one bundle),
  * style-<hash>.css, and NOTICES_FILE for the third-party code in the bundle. The hashed names keep a browser from mixing a new page with stale cached files.
  */
 export async function buildSite(out = path.join(ROOT, 'dist', 'pages'), impressum = impressumEnabled() ? impressumDetails() : null) {
@@ -218,15 +243,17 @@ export async function buildSite(out = path.join(ROOT, 'dist', 'pages'), impressu
     return s.replace(from, to);
   }, source(name));
   const style = ['href="style.css"', `href="${built('src/site/terminal/style.css')}"`];
-  const footerLink = [IMPRESSUM_FOOTER_SLOT, impressum ? ` · <a href="${IMPRESSUM_PAGE}">Legal notice (Impressum)</a>` : ''];
-  const html = link('index.html', [style, ['src="main.js"', `src="${built('src/site/terminal/main.mts')}"`], footerLink]);
+  const footerLink = (legal) => [IMPRESSUM_FOOTER_SLOT, impressum ? ` · <a href="${legal.impressum}">${legal.footer}</a>` : ''];
+  const html = link('index.html', [style, ['src="main.js"', `src="${built('src/site/terminal/main.mts')}"`], footerLink(LEGAL_PAGES[0])]);
   for (const file of [NOTICES_FILE, DATA_POLICY_PAGE]) {
     if (!html.includes(`href="${file}"`)) throw new Error(`src/site/terminal/index.html: the link to ${file} is gone; update build.mjs`);
   }
   fs.writeFileSync(path.join(out, 'index.html'), html);
-  const impressumLink = impressum ? ` Their name and address are in the <a href="${IMPRESSUM_PAGE}">legal notice</a>.` : '';
-  fs.writeFileSync(path.join(out, DATA_POLICY_PAGE), link(DATA_POLICY_PAGE, [style, [IMPRESSUM_LINK_SLOT, impressumLink], footerLink]));
-  if (impressum) fs.writeFileSync(path.join(out, IMPRESSUM_PAGE), fillImpressum(link(IMPRESSUM_PAGE, [style]), impressum));
+  for (const legal of LEGAL_PAGES) {
+    const pointer = [IMPRESSUM_LINK_SLOT, impressum ? legal.pointer(legal.impressum) : ''];
+    fs.writeFileSync(path.join(out, legal.policy), link(legal.policy, [style, pointer, footerLink(legal)]));
+    if (impressum) fs.writeFileSync(path.join(out, legal.impressum), fillImpressum(link(legal.impressum, [style]), impressum, legal.impressum));
+  }
   fs.writeFileSync(path.join(out, NOTICES_FILE), thirdPartyNotices());
   fs.writeFileSync(path.join(out, '.nojekyll'), '');
 }

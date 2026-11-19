@@ -29,6 +29,10 @@ visitor IPs, nothing else), and `test/build.test.js` fails if the built site sta
 browser or to load or send anything elsewhere: change the page and the policy together. With the Impressum on,
 the policy links to it for the name and address.
 
+`terminal/data-policy.de.html` is its German version, and `terminal/impressum.de.html` the Impressum's (built and
+filled with it, from the same details). Each page links its other language in the footer; the demo itself is English
+and links the English pages. The two languages say the same: change them together.
+
 ## Impressum
 
 **Off by default.** The page is only built with `IMPRESSUM_ENABLED=1`: for the deploy that is a repository
