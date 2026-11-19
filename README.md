@@ -105,7 +105,7 @@ Start or resume a track in chat:
 /bubble switch fix-generation
 ```
 
-**A new track** starts with a short plan in chat. The agent asks for the goal, drafts the guards and the bubbles, and proposes them in one list. When you say ok, it creates the track and asks you about each fog bubble. Then it walks the track one bubble at a time.
+**A new track** starts with a short plan in chat. The agent asks for the goal, drafts the guards and the bubbles, and proposes them in one fixed shape: a TL;DR first, then the track, goal, guards and bubbles, each bubble with its `[Boundary: …]` (what it may touch), and a diagram when a flow needs one. Change anything and it shows the revised plan again. Only when you say go does it create the track and asks you about each fog bubble. Then it walks the track one bubble at a time.
 
 **An existing track** is picked up where it stopped. Hints on the bubbles and a handoff note carry the context between chats, so a fresh chat needs nothing else.
 
