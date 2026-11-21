@@ -25,7 +25,8 @@
   "first": "/bubble I want to plan our chess club's open day in June. If it rains we move from the yard into the hall, and that changes the setup.",
   "replies": [
     "add a guard: we spend no more than 200 euros",
-    "ok"
+    "ok",
+    "all fog: ku"
   ],
   "approval": 2,
   "otherwise": "go",

@@ -41,7 +41,13 @@ Decided to leave out for now, to bring back once runs give something to go on:
 
 ## Hints from runs
 
-None open. The hints from the baseline run are settled below.
+The hints from the baseline run are settled below.
+
+- **`plan-shape` derailed on unclassified fog (2026-11-21).** The agent proposed two fogs, the script
+  said "ok" and then "go" three times, and the agent rightly refused to plan the fog. The proposal
+  itself was right (no P8, P22 or P23). Each `planned` scenario that ended on "ok" now adds the reply
+  `all fog: ku`, an answer written into the scenario that fits whatever number the fog has. It is only
+  sent when fog is left. Open: P5 cost 2 points for 8 bubbles where the scenario allows 3 to 6.
 
 ## Decided
 

@@ -22,7 +22,8 @@
   },
   "first": "/bubble I want to get my car started. I haven't driven it in months and I'm not sure where the key is.",
   "replies": [
-    "ok"
+    "ok",
+    "all fog: ku"
   ],
   "otherwise": "go",
   "until": "planned",
