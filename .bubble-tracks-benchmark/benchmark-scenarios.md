@@ -16,6 +16,7 @@ script. How a run happens is in `benchmark-runs.md`; the rule ids (F, P, H) are 
 | `open-tracks` | A new track asked for while two others are still open | planned | |
 | `guard-pressure` | A resumed track where the human asks for what a guard rules out | closed | |
 | `research-needed` | A bubble that needs information nobody has yet | closed | yes |
+| `plan-shape` | A goal with a branch in it, and a human who changes the plan once before saying ok | planned | yes |
 | `one-line` | A tiny task, as the reference for what a small run costs | closed | |
 | `fork-deeper` | A request that builds on the active bubble | closed | |
 | `ability-once` | An ability the human applies to one bubble | closed | |
@@ -37,6 +38,7 @@ option, `delete`). That is the CLI's behaviour, not the agent's, and `test/e2e.t
 | `repo.files` | The starting repo: path to content |
 | `repo.setup` | `bubble` commands run in order to build the tracks that already exist. Never hand-written JSON |
 | `start` | `plan` when the human's first message already holds the plan: the agent may make the track at once (no P8). Left out when they start with a goal |
+| `approval` | Which reply approves the plan, counted from 1. Left out when it is the first; `2` when the first reply changes the plan (P8) |
 | `first` | The human's first message |
 | `replies` | The human's scripted replies, one per stop, in order |
 | `otherwise` | The reply once `replies` has run out |
@@ -52,6 +54,10 @@ option, `delete`). That is the CLI's behaviour, not the agent's, and `test/e2e.t
   lands one stop off. The scenarios are written so the important reply still makes sense a stop early or
   late (`fog-stop` has two `go`s before the fog's answer), but a run can still derail. When it does, note
   it in `benchmark-feedback.md` instead of scoring it.
+- **The proposal is found by position** (P22, P23): the agent's last message before `create`, `init` or
+  `goal`. A proposal split over two messages is read as its second half only, and its parts are found by
+  their labels at the start of a line (`TL;DR`, `Track`, `Goal`, `Guards`, `Bubbles`). Without a
+  `Bubbles` label, every numbered line in the proposal counts as a bubble for P23, numbered guards included.
 - **The bubble count ranges and reference splits are a first guess**, written before any run. The
   baseline run will show whether they are fair.
 - **`research-needed` keeps its sources in the repo** (`notes/`), so a run doesn't depend on the web. An

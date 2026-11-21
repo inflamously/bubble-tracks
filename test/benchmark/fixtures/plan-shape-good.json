@@ -1,0 +1,82 @@
+{
+  "events": [
+    {
+      "who": "human",
+      "text": "/bubble I want to plan our chess club's open day in June. If it rains we move from the yard into the hall, and that changes the setup."
+    },
+    {
+      "who": "agent",
+      "text": "**TL;DR:** We plan the open day once for the yard and once for the hall. On the day, the weather decides which setup the club builds.\n\n```\n┌────────────────────┐\n│ check the forecast │\n└─────────┬──────────┘\n     ┌────┴─────┐\n    dry        rain\n     ▼          ▼\n┌─────────┐ ┌─────────┐\n│ yard    │ │ hall    │\n│ setup   │ │ setup   │\n└─────────┘ └─────────┘\n```\n\n**Track:** `open-day` \"Open day\"\n\n**Goal:** The chess club holds its open day in June, in the yard or in the hall.\n\n**Guards:**\n1. The club's weekly training stays as it is.\n\n**Bubbles:**\n1. Pick the date: the board chooses one Saturday in June.\n   [Boundary: the club calendar]\n2. Yard setup: list the tables, boards and signs the yard needs.\n   [Boundary: the yard plan]\n3. Hall setup: list what changes when the day moves indoors.\n   [Boundary: the hall plan]\n4. ❓ why: undecided who invites the visitors, and how\n"
+    },
+    {
+      "who": "human",
+      "text": "add a guard: we spend no more than 200 euros"
+    },
+    {
+      "who": "agent",
+      "text": "**TL;DR:** We plan the open day once for the yard and once for the hall. On the day, the weather decides which setup the club builds.\n\n```\n┌────────────────────┐\n│ check the forecast │\n└─────────┬──────────┘\n     ┌────┴─────┐\n    dry        rain\n     ▼          ▼\n┌─────────┐ ┌─────────┐\n│ yard    │ │ hall    │\n│ setup   │ │ setup   │\n└─────────┘ └─────────┘\n```\n\n**Track:** `open-day` \"Open day\"\n\n**Goal:** The chess club holds its open day in June, in the yard or in the hall.\n\n**Guards:**\n1. The club's weekly training stays as it is.\n2. We spend no more than 200 euros.\n\n**Bubbles:**\n1. Pick the date: the board chooses one Saturday in June.\n   [Boundary: the club calendar]\n2. Yard setup: list the tables, boards and signs the yard needs.\n   [Boundary: the yard plan]\n3. Hall setup: list what changes when the day moves indoors.\n   [Boundary: the hall plan]\n4. ❓ why: undecided who invites the visitors, and how\n"
+    },
+    {
+      "who": "human",
+      "text": "ok"
+    },
+    {
+      "who": "agent",
+      "bubble": [
+        "create",
+        "open-day",
+        "Open day"
+      ]
+    },
+    {
+      "who": "agent",
+      "bubble": [
+        "goal",
+        "The chess club holds its open day in June, in the yard or in the hall"
+      ]
+    },
+    {
+      "who": "agent",
+      "bubble": [
+        "guard",
+        "The club's weekly training stays as it is"
+      ]
+    },
+    {
+      "who": "agent",
+      "bubble": [
+        "guard",
+        "We spend no more than 200 euros"
+      ]
+    },
+    {
+      "who": "agent",
+      "bubble": [
+        "add",
+        "Pick the date"
+      ]
+    },
+    {
+      "who": "agent",
+      "bubble": [
+        "add",
+        "Yard setup"
+      ]
+    },
+    {
+      "who": "agent",
+      "bubble": [
+        "add",
+        "Hall setup"
+      ]
+    },
+    {
+      "who": "agent",
+      "bubble": [
+        "add",
+        "?",
+        "Undecided who invites the visitors, and how"
+      ]
+    }
+  ]
+}

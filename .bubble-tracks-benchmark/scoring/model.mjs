@@ -17,7 +17,7 @@
  * @typedef {{ id: string, points: number, what: string, by: 'script' | 'judge' | 'human' }} Mark
  *
  * The parts of a scenario file the scoring reads (the runner reads the rest).
- * @typedef {{ name?: string, start?: 'plan' | 'goal', protected?: string[], bubbles?: { min: number, max: number },
+ * @typedef {{ name?: string, start?: 'plan' | 'goal', approval?: number, protected?: string[], bubbles?: { min: number, max: number },
  *             repo?: { setup?: string[][] } }} Scenario
  */
 

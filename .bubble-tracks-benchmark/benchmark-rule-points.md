@@ -28,7 +28,9 @@ and a scenario says which one it is (`start`):
 - **The human starts with a plan** (`start: plan`). The agent enhances it and makes the bubbles. No
   approval is owed first.
 - **The human starts with a goal** (`start: goal`, the default). The agent plans until the human
-  approves, and only then makes the bubbles. A track before that is P8.
+  approves, and only then makes the bubbles. A track before that is P8. A change to the plan, or a
+  question, is not approval: a scenario whose human changes the plan first names the reply that
+  approves (`approval`).
 
 An "ok" after the track is shown means carry on: the agent may start the first bubble on it.
 
@@ -58,6 +60,10 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | P19 | fog whose `why` says what the bubble is, not why it is unclear ("Store the notes in a file" instead of "where and in which format to store is undecided"): the plan hidden in the why. A judge agent reads each why | track |
 | P20 | track without any guard: allowed, but risky | track |
 | P21 | side task (a request that doesn't serve the active bubble) done without the human picking `now`: no ask, or a reply like "do it" taken as the pick. Also a picked `now` task that skipped its limits: it landed in the bubble's commit, or left no `hint` on a later bubble it affects. A judge agent reads the transcript | transcript |
+| P22 | proposal (the plan shown before the track exists) with a part missing or out of order: TL;DR, track, goal, guards, bubbles. One point, whatever is wrong. Only when the human started with a goal | transcript |
+| P23 | proposal in which planned bubbles show no `[Boundary: …]` line of their own. One point, however many lack it. Fog needs none | transcript |
+| P24 | plan sentence that isn't plain: it says two things, is passive without naming who acts, or gives one thing a second name. A judge agent reads the proposal | transcript |
+| P25 | diagram missing where the plan has a flow (steps that depend on each other, a branch, a before and after), a diagram where a plain list of bubbles needed none, or an ASCII diagram whose steps are not each in a box. A judge agent reads the proposal | transcript |
 
 ## Human-judged rules: -1 or +1
 
@@ -68,6 +74,7 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | H3 | **Asking:** could the human answer the questions as asked | No vague question (one that needed a rephrase first). One question at a time; says what is missing or why it asks; pushes back where an answer doesn't hold up; lists options without recommending one; gives a concrete case |
 | H4 | **Guessing:** did the agent guess only where that was safe | Guessing is fine when the human knows the domain. When they don't, research comes first |
 | H5 | **Research:** did it yield | It built up enough context to finish the bubble's task, and stopped there |
+| H7 | **Plan:** could the proposal be read in one pass, with nothing left out | Short sentences in a fixed order, and the hard part still explained: a plan that reads easily because it skipped what is complex gets -1 |
 | H6 | **Flagged bubble:** a bubble that took far more tokens than the others in the run. Whose roundabout was it | -1 if it was a context leak on the agent's side. No point if the human's start left too much open |
 
 ### What a bubble is

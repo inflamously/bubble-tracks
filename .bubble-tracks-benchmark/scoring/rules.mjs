@@ -2,7 +2,7 @@
 // benchmark-rule-points.md; test/benchmark/docs.test.js fails when the ids here and there differ.
 
 /**
- * by: 'track' and 'recording' are checked by the script (track.mjs, recording.mjs), 'judge' by a judge
+ * by: 'track' and 'recording' are checked by the script (track.mjs, recording.mjs, plan.mjs), 'judge' by a judge
  * agent and 'human' by the human; those two come in as judgement lines (judgements.mjs).
  * @type {Record<string, { by: 'track' | 'recording' | 'judge' | 'human', label: string }>}
  */
@@ -32,10 +32,15 @@ export const RULES = {
   P19: { by: 'judge', label: 'why that says what the bubble is, not why it is unclear' },
   P20: { by: 'track', label: 'track without guards' },
   P21: { by: 'judge', label: 'side task done without the human picking now, or a now task that skipped its limits' },
+  P22: { by: 'recording', label: 'proposal with a part missing or out of order (TL;DR, track, goal, guards, bubbles)' },
+  P23: { by: 'recording', label: 'proposed bubbles without a [Boundary: …] line of their own' },
+  P24: { by: 'judge', label: 'plan sentence that is not plain' },
+  P25: { by: 'judge', label: 'diagram missing where the plan has a flow, there without need, or with unboxed steps' },
   H1: { by: 'human', label: 'goal: every bubble served it' },
   H2: { by: 'human', label: 'split: one distinct thing per bubble' },
   H3: { by: 'human', label: 'asking: the questions could be answered as asked' },
   H4: { by: 'human', label: 'guessing: only where it was safe' },
   H5: { by: 'human', label: 'research: it yielded' },
   H6: { by: 'human', label: 'flagged bubble: whose roundabout it was' },
+  H7: { by: 'human', label: 'plan: readable in one pass, nothing complex left out' },
 };

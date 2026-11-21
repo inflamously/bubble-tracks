@@ -1,0 +1,38 @@
+{
+  "name": "plan-shape",
+  "title": "Plan shape",
+  "kind": "A goal with a branch in it, and a human who changes the plan once before saying ok",
+  "modes": [
+    "automatic",
+    "human"
+  ],
+  "covers": [
+    "P3",
+    "P5",
+    "P8",
+    "P22",
+    "P23",
+    "P24",
+    "P25",
+    "H7"
+  ],
+  "repo": {
+    "files": {
+      "README.md": "# Chess club notes\n"
+    },
+    "setup": []
+  },
+  "first": "/bubble I want to plan our chess club's open day in June. If it rains we move from the yard into the hall, and that changes the setup.",
+  "replies": [
+    "add a guard: we spend no more than 200 euros",
+    "ok"
+  ],
+  "approval": 2,
+  "otherwise": "go",
+  "until": "planned",
+  "bubbles": {
+    "min": 3,
+    "max": 6
+  },
+  "expect": "The proposal opens with a TL;DR, then the track, the goal, the guards and the bubbles, each planned bubble with its [Boundary: …] line. One ASCII diagram with every step in a box shows the rain branch. After the guard is added, the agent shows the whole revised proposal and waits: the track exists only after the ok."
+}

@@ -31,6 +31,7 @@ recordings from outside, and nothing a user runs depends on it.
 | `scoring/track.mjs` | the rules read from the track file: F5, P1 to P5, P20 | `model` |
 | `scoring/fills.mjs` | fog answers and fills: what the human answered, what got filled | nothing |
 | `scoring/recording.mjs` | the rules read from the recording: F1 to F4, P8 to P10 | `model`, `fills` |
+| `scoring/plan.mjs` | the rules read from the proposal, the plan the agent shows before the track exists: P22, P23 | `model` |
 | `scoring/sizes.mjs` | tokens and work per bubble, and the two flags. Reported, never scored | `model` |
 | `scoring/judgements.mjs` | the judge's and the human's lines, parsed into marks | `rules` |
 | `scoring/run.mjs` | one run's score: calls the modules above and adds up | all of the above |
@@ -67,7 +68,7 @@ session log, so the agent is told to use them; a file that changed without a rec
   ternaries. An inline comment says why, where the code alone doesn't.
 - **A rule lives in three places, changed together:** its row in `benchmark-rule-fail.md` or
   `benchmark-rule-points.md`, its entry in `scoring/rules.mjs`, and, when a script can check it, its check
-  in `track.mjs` or `recording.mjs` with a test. Rule ids are never reused or renumbered: a dropped rule
+  in `track.mjs`, `recording.mjs` or `plan.mjs` with a test. Rule ids are never reused or renumbered: a dropped rule
   leaves a gap (P17).
 - **Everything counted costs 1 point.** The human gives -1 or +1. Don't add weights. A threshold or
   number you had to invent is a named constant with a comment, and gets a line in `benchmark-feedback.md`.

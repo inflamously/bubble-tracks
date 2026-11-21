@@ -61,7 +61,7 @@ describe('the code structure', () => {
   });
 
   it('only run.mjs pulls the modules together; the others import model, rules or fills at most', () => {
-    const allowed = { 'run.mjs': null, 'track.mjs': ['model'], 'recording.mjs': ['model', 'fills'], 'sizes.mjs': ['model'], 'judgements.mjs': ['rules'] };
+    const allowed = { 'run.mjs': null, 'track.mjs': ['model'], 'recording.mjs': ['model', 'fills'], 'plan.mjs': ['model'], 'sizes.mjs': ['model'], 'judgements.mjs': ['rules'] };
     for (const file of modules) {
       const imports = [...read(path.join('scoring', file)).matchAll(/^import .* from '\.\/([\w-]+)\.mjs';$/gm)].map((m) => m[1]);
       if (allowed[file] === null) continue;

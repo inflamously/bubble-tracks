@@ -9,8 +9,8 @@ const RESEARCH_ASKED = /research|:\s*\?|\byes\b/i;
 const SPLIT_ASKED = /\bfork\b|\bdiverge\b/i;
 const PLANNING_FOLDER = '.bubble-tracks/';
 const ABILITIES_FOLDER = '.bubble-tracks/abilities/';
-/** The first human message is the task; the plan is approved by the second at the earliest. */
-const MESSAGES_BEFORE_APPROVAL = 2;
+/** The reply that approves the plan, unless the scenario names a later one (`approval`): the first. */
+const FIRST_REPLY = 1;
 
 /** The bubble commands a rule looks at. Every other command (show, add, hint, …) breaks none of these rules. */
 const ON_COMMAND = {
@@ -42,6 +42,7 @@ function startWalk(scenario) {
     guardedFiles: new Set((scenario.protected || []).map(normalizePath)),
     knownTracks: tracksFromSetup(scenario),
     planGiven: scenario.start === 'plan', // the human brought the plan: the agent may make the track from it at once
+    approvalMessage: 1 + (scenario.approval || FIRST_REPLY), // the first human message is the task, the replies follow it
     humanMessages: 0,
     lastHumanMessage: '',
     answeredFogs: new Set(), // fog numbers the human gave content for, not filled yet
@@ -93,14 +94,14 @@ function onDone(walk) {
   walk.waitingForHuman = true;
 }
 
-/** P8: create, init, or a switch to a name that doesn't exist yet, before the human approved the agent's plan. */
+/** P8: create, init, or a switch to a name that doesn't exist yet, before the reply that approves the agent's plan. */
 function onOpenTrack(walk, command, args) {
   const words = args.filter((word) => !word.startsWith('--'));
   const name = command === 'init' ? 'track' : (words[0] || '').toLowerCase();
   const isResume = !name || walk.knownTracks.has(name);
   if (isResume) return;
   walk.knownTracks.add(name);
-  if (!walk.planGiven && walk.humanMessages < MESSAGES_BEFORE_APPROVAL) {
+  if (!walk.planGiven && walk.humanMessages < walk.approvalMessage) {
     walk.marks.push(lostPoint('P8', `${command} ${name} before the human approved the plan`));
   }
 }
