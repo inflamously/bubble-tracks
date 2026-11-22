@@ -27,6 +27,10 @@ describe('the recording from a session log', () => {
     // agents often keep the CLI in a shell variable
     assert.deepStrictEqual(bubbleCommands("B='node /skill/cli/bubble.js'\n$B create car \"Start the car\" &&\n$B add \"Find the key\"; ${B} show | tail -n 3"), [['create', 'car', 'Start the car'], ['add', 'Find the key'], ['show']]);
     assert.deepStrictEqual(bubbleCommands('CLI="node x/bubble.js"; "$CLI" done; echo $OTHER done'), [['done']]);
+    // or wrap it in a shell function: the body is not a command, the calls are
+    assert.deepStrictEqual(bubbleCommands('b() { node "x/bubble.js" "$@" || echo "FAILED($?): $*"; }\nb create car "Start the car"\nb type 2 ku >/dev/null; b show'), [['create', 'car', 'Start the car'], ['type', '2', 'ku'], ['show']]);
+    assert.deepStrictEqual(bubbleCommands('function bub {\n  node x/bubble.js "$@"\n}\nbub done && echo bub add'), [['done']]);
+    assert.deepStrictEqual(bubbleCommands('log() { echo "$@"; }; log add; node x/bubble.js show'), [['show']]);
   });
 
   it('keeps messages, bubble commands and edits in order, and counts each message once', () => {

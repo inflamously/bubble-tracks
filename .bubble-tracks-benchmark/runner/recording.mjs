@@ -8,6 +8,8 @@ import path from 'node:path';
 const SHELL_PIECE = /"((?:[^"\\]|\\.)*)"|'([^']*)'|(&&|\|\||[;|\n])|([^\s"';|&]+)/g;
 const BUBBLE_CLI = /bubble\.js$/;
 const REDIRECT = /^\d*>/;
+/** The word that starts a shell function: `b()` or `b(){`. */
+const FUNCTION_START = /^(\w+)\(\)\{?$/;
 const EDIT_TOOLS = ['Edit', 'Write', 'NotebookEdit'];
 
 /** A shell line as commands, each a list of words. Knows quotes and separators, nothing more. */
@@ -35,13 +37,27 @@ function rememberCliVariables(words, cliVariables) {
   });
 }
 
-/** The words after the CLI (`…/bubble.js` or a variable holding it), without `--dir <repo>` and without a redirect like `2>&1`. */
-function bubbleWords(words, cliVariables) {
-  const isCli = (word) => {
-    const variable = word.match(/^\$\{?(\w+)\}?$/);
-    return BUBBLE_CLI.test(word) || Boolean(variable && cliVariables.has(variable[1]));
-  };
-  const cliAt = words.findIndex(isCli);
+/** The CLI itself (`…/bubble.js`) or a variable holding it (`$B`, `${B}`). */
+function isCliWord(word, cliVariables) {
+  const variable = word.match(/^\$\{?(\w+)\}?$/);
+  return BUBBLE_CLI.test(word) || Boolean(variable && cliVariables.has(variable[1]));
+}
+
+/** The name of the shell function a command starts to define: `b() {`, `b () {` or `function b {`. Null when it defines none. */
+function functionStarted(words) {
+  if (words[0] === 'function' && words[1]) return words[1].replace(/\(\)$/, '');
+  if (words[1] === '()') return words[0];
+  const start = (words[0] || '').match(FUNCTION_START);
+  return start ? start[1] : null;
+}
+
+/**
+ * The words after the CLI (`…/bubble.js`, a variable holding it, or a function wrapping it), without
+ * `--dir <repo>` and without a redirect like `2>&1`.
+ */
+function bubbleWords(words, cliVariables, cliFunctions) {
+  // a function is only called where a command starts: `b add x`, not `echo b`
+  const cliAt = cliFunctions.has(words[0]) ? 0 : words.findIndex((word) => isCliWord(word, cliVariables));
   if (cliAt === -1) return [];
   let args = words.slice(cliAt + 1);
   const redirectAt = args.findIndex((word) => REDIRECT.test(word));
@@ -54,10 +70,20 @@ function bubbleWords(words, cliVariables) {
 /** Every bubble command in one shell line: `node …/bubble.js add "Format rows" && node …/bubble.js show`. */
 export function bubbleCommands(shellLine) {
   const cliVariables = new Set();
+  const cliFunctions = new Set();
   const found = [];
+  let functionBeingDefined = null;
   for (const words of shellCommands(shellLine)) {
     rememberCliVariables(words, cliVariables);
-    const args = bubbleWords(words, cliVariables);
+    // agents also wrap the CLI in a function: `b() { node …/bubble.js "$@"; }`, then `b add "Format rows"`.
+    // Its body is not a command the agent ran, so nothing in it is recorded.
+    functionBeingDefined = functionStarted(words) ?? functionBeingDefined;
+    if (functionBeingDefined) {
+      if (words.some((word) => isCliWord(word, cliVariables))) cliFunctions.add(functionBeingDefined);
+      if (words.includes('}')) functionBeingDefined = null;
+      continue;
+    }
+    const args = bubbleWords(words, cliVariables, cliFunctions);
     if (args.length > 0) found.push(args);
   }
   return found;
