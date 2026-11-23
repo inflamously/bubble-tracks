@@ -761,3 +761,25 @@ test('ownership: switch, create and init set who does the work; agent is the def
   const closed = run('switch', 'new-one', '--ownership', 'user');
   assert.match(closed.stderr, /track "new-one" is closed \(read-only\) — its ownership stays hybrid/);
 });
+
+test('ownership lock: after the first done only agent → hybrid ← user passes, with or without --force', () => {
+  for (const [start, other] of [['agent', 'user'], ['user', 'agent']]) {
+    const { run, track } = repo();
+    run('switch', 'track', '--ownership', start);
+    run('switch', 'track', '--ownership', other); // free while nothing is done
+    run('switch', 'track', '--ownership', start);
+    run('done');
+    for (const force of [[], ['--force']]) {
+      const r = run('switch', 'track', '--ownership', other, ...force);
+      assert.strictEqual(r.status, 1);
+      assert.match(r.stderr, new RegExp(`ownership is locked at ${start} since the first done — only hybrid is still open; a different mode is a new track: diverge <name>`));
+    }
+    assert.strictEqual(track().ownership, start === 'agent' ? undefined : start); // a refusal writes nothing
+    assert.match(run('switch', 'track', '--ownership', start).stdout, new RegExp(`ownership stays ${start} — `)); // the same mode is no change
+    assert.match(run('switch', 'track', '--ownership', 'hybrid').stdout, new RegExp(`ownership ${start} → hybrid — `));
+    for (const leave of ['agent', 'user']) {
+      assert.match(run('switch', 'track', '--ownership', leave).stderr, /ownership is locked at hybrid since the first done; a different mode is a new track: diverge <name>/);
+    }
+    assert.strictEqual(track().ownership, 'hybrid');
+  }
+});

@@ -160,6 +160,15 @@ describe('e2e: a development track from sketch to close', () => {
     step(['done'], [/popped "Parse input"/, /S ●──◐──○ F/, /⏸ stop/]);
   });
 
+  describe('ownership lock: a walked track only moves into hybrid', () => {
+    step(['switch', 'dev', '--ownership', 'user'], /ownership is locked at agent since the first done — only hybrid is still open; a different mode is a new track: diverge <name>/, 1);
+    step(['switch', 'dev', '--ownership', 'user', '--force'], /ownership is locked at agent/, 1); // nothing forces it
+    step(['switch', 'dev', '--ownership', 'hybrid'], /ownership agent → hybrid — /);
+    step(['switch', 'dev', '--ownership', 'agent'], /ownership is locked at hybrid since the first done; a different mode is a new track: diverge <name>/, 1);
+    step(['switch', 'dev', '--ownership', 'hybrid'], /ownership stays hybrid — /);
+    it('dev.json is hybrid for good', () => assert.strictEqual(read('dev').ownership, 'hybrid'));
+  });
+
   describe('fork: finishing the child pops its bubble', () => {
     step(['fork', '2', 'dev-check'], [/forked "Check input" into track "dev-check"/, /⑂ fork of #2 "Check input" in dev.json/]);
     step(['show'], /Check input {3}S F {3}empty/); // an empty track isn't all done

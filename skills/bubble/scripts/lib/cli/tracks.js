@@ -25,6 +25,14 @@ function refuseNearMiss(bubblesDir, name) {
     const list = near.map((n) => `"${n}"`).join(', ');
     throw new Error(`no track "${name}" — did you mean ${list}? To resume: switch ${near[0]}. For a new track: create ${name}`);
 }
+/** switch --ownership on an existing track: set the mode and save it. A closed track refuses, before anything is written. */
+function switchOwnership(file, name, track, mode) {
+    if (track.closed)
+        throw new Error(`track "${name}" is closed (read-only) — its ownership stays ${lib.ownershipOf(track)}`);
+    const msg = lib.setOwnership(track, mode);
+    lib.saveTrack(file, track);
+    return msg;
+}
 /** Run a track-level command; returns an exit code, or undefined if `cmd` isn't one. */
 export function runTrackCommand(cmd, args, { dir, opts, renderOpts }) {
     const bubblesDir = lib.findBubblesDir(dir) || path.join(dir, lib.TRACK_DIR);
@@ -32,12 +40,13 @@ export function runTrackCommand(cmd, args, { dir, opts, renderOpts }) {
         lib.checkName(name);
         const file = lib.trackPath(bubblesDir, name);
         const track = { title: title || name, bubbles: [] };
-        if (opts.ownership !== undefined)
-            lib.setOwnership(track, opts.ownership); // a bad mode creates nothing
+        const owned = opts.ownership !== undefined;
+        if (owned)
+            lib.setOwnership(track, opts.ownership); // a bad mode throws here, so it creates nothing
         lib.saveTrack(file, track);
         lib.setCurrent(bubblesDir, name);
         console.log(`created track "${name}" (${file})`);
-        if (opts.ownership !== undefined)
+        if (owned)
             console.log(lib.describeOwnership(track));
         console.log('');
         printTrack(file, track, renderOpts);
@@ -75,12 +84,7 @@ export function runTrackCommand(cmd, args, { dir, opts, renderOpts }) {
                 return create(name, args.join(' '));
             }
             const track = lib.loadTrack(file);
-            // --ownership changes the track, so a closed one refuses it before anything is written
-            if (opts.ownership !== undefined && track.closed)
-                throw new Error(`track "${name}" is closed (read-only) — its ownership stays ${lib.ownershipOf(track)}`);
-            const owned = opts.ownership === undefined ? '' : lib.setOwnership(track, opts.ownership);
-            if (owned)
-                lib.saveTrack(file, track);
+            const owned = opts.ownership === undefined ? undefined : switchOwnership(file, name, track, opts.ownership);
             lib.setCurrent(bubblesDir, name);
             const title = args.join(' ');
             // a title on an existing track isn't applied: say so, and how to rename it

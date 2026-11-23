@@ -27,6 +27,12 @@ const OPTIONS = {
   help: { type: 'boolean', short: 'h' },
 } as const;
 
+/** What an option that came without its value needs, said in the bubble language. */
+const NEEDS: Record<string, string> = {
+  '--to': '--to needs a track name',
+  '--ownership': `--ownership needs a mode: ${OWNERSHIPS.join(', ')}`,
+};
+
 const flags = (args: string[]) => parseFlags({ args, options: OPTIONS, allowPositionals: true, tokens: true });
 
 export const HELP = `bubble-tracks — the bubble language
@@ -100,10 +106,7 @@ export const HELP = `bubble-tracks — the bubble language
 function flagError(err: Error & { code?: string }): Error {
   const name = /'(-[^' ]+)/.exec(err.message)?.[1];
   if (err.code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION') return new Error(`unknown option "${name}" — try: help (text starting with - goes after --)`);
-  if (err.code === 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE') {
-    if (name === '--ownership') return new Error(`--ownership needs a mode: ${OWNERSHIPS.join(', ')}`);
-    return new Error(name === '--to' ? '--to needs a track name' : `${name} needs a value`);
-  }
+  if (err.code === 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE') return new Error(NEEDS[name ?? ''] ?? `${name} needs a value`);
   return err;
 }
 
