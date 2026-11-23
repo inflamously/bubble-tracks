@@ -44,7 +44,9 @@ export const HELP = `bubble-tracks — the bubble language
   switch <name> --ownership <MODE>
                                 set who does the bubbles' work on that track (create and init take it too):
                                 agent (the default), hybrid (the human does the bubbles they pick) or
-                                user (the human does every bubble; the agent hints and checks it)
+                                user (the human does every bubble; the agent hints and checks it).
+                                A hybrid track stays hybrid. After the first done, agent and user only
+                                move into hybrid: agent -> hybrid <- user
   tracks [--closed | --all]     list the tracks, current marked →; closed ones are hidden unless
                                 --closed (only closed) or --all (everything)
   close <name> --force          finish and archive a track: read-only for good, no reopen. Also closes
@@ -72,6 +74,10 @@ export const HELP = `bubble-tracks — the bubble language
   guard show                    list the guards (also printed on switch and after every guard change)
   handoff <note> | handoff -    save (or clear) the note a fresh chat reads to resume
   hint N <text> | hint N -      attach (or clear) a note for that bubble
+  own [N | N:M] | own [N | N:M] -
+                                the human takes bubbles to do themselves (◆ ◈ ◇ on the line), or hands them
+                                back to the agent; not done ones. Any time: own on an agent track and
+                                own - on a user track switch it to hybrid
   fog [N | N:M] [TYPE]          turn bubbles into fog (done ones need --force)
   why [N] <text> | why [N] -    say (or clear) why a fog bubble is unclear: not what it is
   type [N] <TYPE>               classify a fog bubble

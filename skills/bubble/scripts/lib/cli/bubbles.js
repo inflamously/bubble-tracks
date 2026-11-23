@@ -1,4 +1,4 @@
-// Bubble-level commands: act on the current track (show, add, insert, remove, move, fog, fill, done, ...),
+// Bubble-level commands: act on the current track (show, add, insert, remove, move, own, fog, fill, done, ...),
 // or with --to on another one (add, insert, hint write into it; move sends bubbles to it).
 import * as fs from 'node:fs';
 import * as lib from '../index.js';
@@ -8,7 +8,7 @@ import { printGuards, printTrack } from './print.js';
 const STOP = '⏸ stop — show this track to the human and wait. They may move, insert, remove, rename, hint or fog ' +
     'bubbles before the next one starts.';
 /** Every bubble-level command, so an unknown one is named before any track is looked up. */
-const COMMANDS = ['show', 'status', 'add', 'insert', 'remove', 'rm', 'move', 'mv', 'rename', 'handoff', 'goal', 'guard', 'title', 'hint', 'finding', 'fog', 'type', 'why', 'answer', 'fill', 'done'];
+const COMMANDS = ['show', 'status', 'add', 'insert', 'remove', 'rm', 'move', 'mv', 'rename', 'handoff', 'goal', 'guard', 'title', 'hint', 'own', 'finding', 'fog', 'type', 'why', 'answer', 'fill', 'done'];
 /** Commands that take --to <track>: add, insert and hint write into it; move sends bubbles to it. */
 const TO_COMMANDS = ['add', 'insert', 'hint', 'move', 'mv'];
 /** The current track, loaded; throws when there is none or it can't be read. */
@@ -163,6 +163,14 @@ export function runBubbleCommand(cmd, args, { dir, opts, renderOpts }) {
         case 'hint': {
             const addr = needAddr(args, 'hint N <text> | hint N -');
             msg = lib.hint(track, addr, args.join(' '));
+            break;
+        }
+        case 'own': {
+            const spec = isRange(args[0]) ? args.shift() : undefined;
+            const back = args[0] === '-';
+            if (args.length > (back ? 1 : 0))
+                throw new Error('usage: own [N | N:M] | own [N | N:M] -');
+            msg = back ? lib.handBack(track, spec) : lib.own(track, spec);
             break;
         }
         case 'finding': {

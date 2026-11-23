@@ -92,9 +92,8 @@ describe('e2e: a development track from sketch to close', () => {
   });
 
   describe("ownership: who does the bubbles' work", () => {
-    step(['switch', 'dev', '--ownership', 'hybrid'], [/resumed track "dev"\nownership agent → hybrid — the human does the bubbles they pick, the agent does the rest/, /⚑ goal: .*\n◆ ownership: hybrid — /]);
-    step(['show'], /◆ ownership: hybrid — the human does the bubbles they pick, the agent does the rest/);
-    step(['switch', 'dev', '--ownership', 'user'], /ownership hybrid → user — the human does every bubble's work; the agent hints and checks it/);
+    step(['switch', 'dev', '--ownership', 'user'], [/resumed track "dev"\nownership agent → user — the human does every bubble's work; the agent hints and checks it/, /⚑ goal: .*\n◆ ownership: user — /]);
+    step(['show'], /◆ ownership: user — the human does every bubble's work; the agent hints and checks it/);
     step(['switch', 'dev', '--ownership', 'user'], /ownership stays user — /);
     step(['switch', 'dev', '--ownership', 'both'], /unknown ownership "both" \(use: agent, hybrid, user\)/, 1);
     step(['switch', 'dev', '--ownership'], /--ownership needs a mode: agent, hybrid, user/, 1);
@@ -163,10 +162,21 @@ describe('e2e: a development track from sketch to close', () => {
   describe('ownership lock: a walked track only moves into hybrid', () => {
     step(['switch', 'dev', '--ownership', 'user'], /ownership is locked at agent since the first done — only hybrid is still open; a different mode is a new track: diverge <name>/, 1);
     step(['switch', 'dev', '--ownership', 'user', '--force'], /ownership is locked at agent/, 1); // nothing forces it
-    step(['switch', 'dev', '--ownership', 'hybrid'], /ownership agent → hybrid — /);
-    step(['switch', 'dev', '--ownership', 'agent'], /ownership is locked at hybrid since the first done; a different mode is a new track: diverge <name>/, 1);
+    step(['switch', 'dev', '--ownership', 'hybrid'], [/ownership agent → hybrid — the human does the bubbles they pick, the agent does the rest/, /◆ ownership: hybrid — /]);
+    step(['switch', 'dev', '--ownership', 'agent'], /a hybrid track stays hybrid — own N and own N - move single bubbles; a different mode is a new track: diverge <name>/, 1);
     step(['switch', 'dev', '--ownership', 'hybrid'], /ownership stays hybrid — /);
     it('dev.json is hybrid for good', () => assert.strictEqual(read('dev').ownership, 'hybrid'));
+  });
+
+  describe('own: the human takes bubbles, and hands them back', () => {
+    step(['own', '3'], [/"Pick format" is the human's to do/, /S ●──◐──◇ F/, /3 {3}◇ todo {3}Pick format \[known-unknown\]\n {8}owner: human/]);
+    step(['own'], [/"Check input" is the human's to do/, /S ●──◈──◇ F {3}Parse input ‹ ◈ Check input › Pick format/]); // no N: the active bubble
+    step(['own', '2:3', '-'], [/"Check input", "Pick format" are the agent's to do/, /S ●──◐──○ F/]);
+    step(['own', '1'], /"Parse input" is done — a done bubble keeps its owner/, 1);
+    step(['own', '2', 'mine'], /usage: own \[N \| N:M\] \| own \[N \| N:M\] -/, 1);
+    it('dev.json holds no owner once every bubble is handed back', () => {
+      assert.ok(read('dev').bubbles.every((b) => !('owner' in b)));
+    });
   });
 
   describe('fork: finishing the child pops its bubble', () => {
@@ -241,5 +251,13 @@ describe('e2e: a development track from sketch to close', () => {
     step(['create', 'solo', 'Solo', '--ownership', 'user'], [/created track "solo" .*\nownership: user — the human does every bubble's work; the agent hints and checks it/, /◆ ownership: user/]);
     step(['create', 'duo', '--ownership', 'half'], /unknown ownership "half"/, 1);
     it('a bad mode creates no track', () => assert.ok(!exists('duo')));
+    step(['add', 'Mine'], /S ◈ F {3}◈ Mine/); // on a user track every bubble is the human's
+    step(['add', 'Yours'], /S ◈──◇ F/);
+    step(['own', '2'], /every bubble on a user track is the human's already — own N - hands one to the agent/, 1);
+    step(['own', '2', '-'], [/"Yours" is the agent's to do\nownership user → hybrid — /, /S ◈──○ F/, /1 {3}◈ todo {3}Mine\n {8}owner: human/]);
+    step(['switch', 'track'], /resumed track "track"/);
+    step(['own', '1', '-'], /every bubble on an agent track is the agent's already — own N takes one for the human/, 1);
+    step(['own', '1'], [/"One" is the human's to do\nownership agent → hybrid — /, /S ◈ F/]);
+    step(['switch', 'track', '--ownership', 'agent'], /a hybrid track stays hybrid — /, 1); // also with nothing done yet
   });
 });

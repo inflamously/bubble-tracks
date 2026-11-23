@@ -7,17 +7,21 @@ export interface RenderOpts {
   color?: boolean;
 }
 
-export type Symbols = Record<'done' | 'active' | 'todo' | 'fog' | 'sep' | 'prev' | 'next' | 'more' | 'fork' | 'side' | 'lock' | 'goal' | 'guard' | 'owner', string>;
+export type Symbols = Record<'done' | 'active' | 'todo' | 'fog' | 'sep' | 'prev' | 'next' | 'more' | 'fork' | 'side' | 'lock' | 'goal' | 'guard' | 'owner' | 'humanDone' | 'humanActive' | 'humanTodo', string>;
 
 export const SYMBOLS: { unicode: Symbols; ascii: Symbols } = {
-  unicode: { done: '●', active: '◐', todo: '○', fog: '❓', sep: '──', prev: ' ‹ ', next: ' › ', more: '…', fork: '⑂', side: '↗', lock: '🔒', goal: '⚑', guard: '¦', owner: '◆' },
-  ascii: { done: '*', active: '@', todo: 'o', fog: '?', sep: '--', prev: ' < ', next: ' > ', more: '...', fork: 'Y', side: '/', lock: '#', goal: '^', guard: '!', owner: '+' },
+  unicode: { done: '●', active: '◐', todo: '○', fog: '❓', sep: '──', prev: ' ‹ ', next: ' › ', more: '…', fork: '⑂', side: '↗', lock: '🔒', goal: '⚑', guard: '¦', owner: '◆', humanDone: '◆', humanActive: '◈', humanTodo: '◇' },
+  ascii: { done: '*', active: '@', todo: 'o', fog: '?', sep: '--', prev: ' < ', next: ' > ', more: '...', fork: 'Y', side: '/', lock: '#', goal: '^', guard: '!', owner: '+', humanDone: '+', humanActive: 'H', humanTodo: 'h' },
 };
 
-// ANSI colors: title dark green, track blue, prev ‹ active › next dark yellow.
-const COLORS = { title: '\x1b[32m', track: '\x1b[34m', context: '\x1b[33m', reset: '\x1b[0m' };
+// ANSI colors: title dark green, track blue, prev ‹ active › next dark yellow, the human's bubbles red.
+const COLORS = { title: '\x1b[32m', track: '\x1b[34m', context: '\x1b[33m', human: '\x1b[31m', reset: '\x1b[0m' };
 export const paint = (on: boolean, color: 'title' | 'track' | 'context', text: string) =>
   on && text ? `${COLORS[color]}${text}${COLORS.reset}` : text;
+
+/** A human's bubble symbol in red, inside text that `paint` colors as `around`: red, then back to that color. */
+export const paintHuman = (on: boolean, around: 'track' | 'context', symbol: string) =>
+  on ? `${COLORS.human}${symbol}${COLORS[around]}` : symbol;
 
 /** Color is opt-in per call (opts.color); NO_COLOR always wins. */
 export function useColor(opts?: RenderOpts): boolean {
@@ -30,11 +34,12 @@ export function symbolsFor(opts?: RenderOpts): Symbols {
   return ascii ? SYMBOLS.ascii : SYMBOLS.unicode;
 }
 
-export function symbolFor(bubble: Bubble, isActive: boolean, sym: Symbols): string {
+/** A bubble's symbol; `human` (the human does its work) gives it its own shape. Fog looks the same for both. */
+export function symbolFor(bubble: Bubble, isActive: boolean, sym: Symbols, human = false): string {
   if (bubble.state === 'fog') return sym.fog;
-  if (bubble.state === 'done') return sym.done;
-  if (isActive || bubble.state === 'active') return sym.active;
-  return sym.todo;
+  if (bubble.state === 'done') return human ? sym.humanDone : sym.done;
+  if (isActive || bubble.state === 'active') return human ? sym.humanActive : sym.active;
+  return human ? sym.humanTodo : sym.todo;
 }
 
 const LABEL_MAX = 20;

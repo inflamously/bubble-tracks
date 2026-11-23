@@ -47,6 +47,7 @@ Bubble fields:
 - `id`: stable and never reused. Take it from `nextId`, then add 1 to `nextId`.
 - `type`: the fog classification: `known-known`, `known-unknown`, `unknown-known` or `unknown-unknown`.
 - `hint`: the human's note for this bubble.
+- `owner`: `user` when the human does this bubble's work. Only on a `hybrid` track; never on a done bubble you didn't mark before.
 - `why`: set while fog: one line on why it's unclear (not what it is).
 - `answer`: set while fog: the human's own words on it, kept as they said them while it stays fog.
 - Both stay after `fill`, as the trail of how the bubble was planned.
@@ -70,6 +71,7 @@ N is a 1-based position on the track. When N is left out, it means the active bu
 | `type [N] <TYPE>` | Set `type`. Expand `kk`, `ku`, `uk` and `uu`. |
 | `why [N] <text>` · `answer [N] <text>` | Only for a fog bubble: set `why` or `answer`, or delete the field with `-`. |
 | `hint N <text>` · `hint N -` | Set `hint`, or delete the field with `-`. |
+| `own [N \| N:M]` · `own [N \| N:M] -` | Only for bubbles that aren't done: set `owner` to `user`, or delete the field with `-`. On a track with no `ownership`, first set `ownership` to `hybrid`. On a `user` track, `own` changes nothing; `own … -` sets `ownership` to `hybrid` and `owner` to `user` on every other bubble. |
 | `handoff <note>` · `handoff -` | Set `handoff` to `{ "note", "at" }`, or delete it with `-`. |
 | `finding N <text>` · `finding N M -` · `finding N -` | Append to `findings`, drop finding M, or delete `findings` with `-`. Delete the field when it ends up empty. `show` lists them as `found 1:`, `found 2:`… |
 | `research [N] [focus]` | Changes nothing. Follow SKILL.md's **Research** section on bubble N, with its context: the track's `goal` and `guards`, the bubble's `title`, `state`, `type`, `why`, `answer`, `hint` and `findings`, and the bubbles before and after it. Not on a closed track. |

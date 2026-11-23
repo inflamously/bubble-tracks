@@ -16,6 +16,11 @@ export function checkType(type) {
 export function ownershipOf(track) {
     return track.ownership || 'agent';
 }
+/** True when the human does this bubble's work: every bubble on a user track, the picked ones on a hybrid track. */
+export function ownedByHuman(track, b) {
+    const mode = ownershipOf(track);
+    return mode === 'user' || (mode === 'hybrid' && b.owner === 'user');
+}
 /** A bubble's stable id from the track's counter. Positions shift on move/insert/remove; ids don't. */
 export function ensureId(track, b) {
     if (b.id === undefined) {

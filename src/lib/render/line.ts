@@ -1,7 +1,7 @@
 // The one-line track: the status line and `tracks`, plus the status line's guard count.
 
-import { activeIndex, type Track } from '../model.js';
-import { paint, shorten, symbolFor, symbolsFor, useColor, type RenderOpts } from './symbols.js';
+import { activeIndex, ownedByHuman, type Track } from '../model.js';
+import { paint, paintHuman, shorten, symbolFor, symbolsFor, useColor, type RenderOpts } from './symbols.js';
 
 /** One-line render: `Title   S ●──●──◐──❓ F   prev ‹ ◐ active › next`, or `… F   🔒 closed` / `all done` / `empty` (nothing active). */
 export function render(track: Track, opts?: RenderOpts): string {
@@ -9,14 +9,20 @@ export function render(track: Track, opts?: RenderOpts): string {
   const bubbles = track.bubbles || [];
   const index = track.closed ? -1 : activeIndex(track);
   const color = useColor(opts);
-  const line = bubbles.map((b, i) => symbolFor(b, i === index, sym)).join(sym.sep);
+  // The human's bubbles have their own shape (◆ ◈ ◇), and are red when color is on.
+  const symbol = (i: number, around: 'track' | 'context') => {
+    const human = ownedByHuman(track, bubbles[i]);
+    const s = symbolFor(bubbles[i], i === index, sym, human);
+    return human && bubbles[i].state !== 'fog' ? paintHuman(color, around, s) : s;
+  };
+  const line = bubbles.map((_, i) => symbol(i, 'track')).join(sym.sep);
   const head = `${paint(color, 'title', track.title || 'Plan')}   ${paint(color, 'track', `S ${line}${line ? ' ' : ''}F`)}   `;
   if (track.closed) return head + paint(color, 'context', `${sym.lock} closed`);
   const active = bubbles[index];
   if (!active) return head + paint(color, 'context', bubbles.length ? 'all done' : 'empty');
   const prev = bubbles[index - 1];
   const next = bubbles[index + 1];
-  const here = active.state === 'fog' ? `${sym.fog} needs you` : `${sym.active} ${shorten(active.title, sym)}`;
+  const here = active.state === 'fog' ? `${sym.fog} needs you` : `${symbol(index, 'context')} ${shorten(active.title, sym)}`;
   const context = (prev ? shorten(prev.title, sym) + sym.prev : '') + here + (next ? sym.next + shorten(next.title, sym) : '');
   return head + paint(color, 'context', context);
 }

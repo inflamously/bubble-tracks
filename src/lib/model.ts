@@ -19,6 +19,7 @@ export interface Bubble {
   id?: number;
   type?: FogType;
   hint?: string;
+  owner?: 'user'; // the human does this bubble's work; set only on a hybrid track
   why?: string; // why it is fog: what is unclear (not what it is); set while fog, kept after fill
   answer?: string; // the human's own words on it while it stays fog; kept after fill
   findings?: string[]; // what research found for it: guides or tips, each with its source
@@ -60,6 +61,12 @@ export function checkType(type: string | undefined): asserts type is FogType | u
 /** The track's ownership mode; a track that stores none is the agent's. */
 export function ownershipOf(track: Track): Ownership {
   return track.ownership || 'agent';
+}
+
+/** True when the human does this bubble's work: every bubble on a user track, the picked ones on a hybrid track. */
+export function ownedByHuman(track: Track, b: Bubble): boolean {
+  const mode = ownershipOf(track);
+  return mode === 'user' || (mode === 'hybrid' && b.owner === 'user');
 }
 
 /** A bubble's stable id from the track's counter. Positions shift on move/insert/remove; ids don't. */

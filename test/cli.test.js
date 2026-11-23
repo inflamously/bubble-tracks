@@ -16,7 +16,7 @@ function repo() {
   const track = () => JSON.parse(fs.readFileSync(path.join(dir, '.bubble-tracks', 'track.json'), 'utf8'));
   run('init', 'P');
   for (const t of ['A', 'B', 'C']) run('add', t);
-  return { run, track };
+  return { run, track, dir };
 }
 const titles = (t) => t.bubbles.map((b) => b.title).join('');
 
@@ -738,13 +738,10 @@ test('ownership: switch, create and init set who does the work; agent is the def
   const dir = run('show'); // an agent track never mentions ownership
   assert.doesNotMatch(dir.stdout, /ownership/);
   assert.ok(!('ownership' in track()));
-  const hybrid = run('switch', 'track', '--ownership', 'hybrid');
-  assert.match(hybrid.stdout, /resumed track "track"\nownership agent → hybrid — /);
-  assert.strictEqual(track().ownership, 'hybrid');
-  assert.match(run('show', '--ascii').stdout, /^\+ ownership: hybrid — /m);
-  assert.match(run('add', 'D').stdout, /◆ ownership: hybrid/); // every mutation prints it too
-  assert.match(run('--ownership=user', 'switch').stdout, /ownership hybrid → user — /); // bare switch: the current track
+  assert.match(run('--ownership=user', 'switch').stdout, /resumed track "track"\nownership agent → user — /); // bare switch: the current track
   assert.strictEqual(track().ownership, 'user');
+  assert.match(run('show', '--ascii').stdout, /^\+ ownership: user — /m);
+  assert.match(run('add', 'D').stdout, /◆ ownership: user/); // every mutation prints it too
   assert.doesNotMatch(run('switch', 'track').stdout, /ownership (stays|user →)/); // a plain resume changes nothing
   assert.strictEqual(track().ownership, 'user');
   for (const bad of [['switch', 'track', '--ownership', 'me'], ['create', 'x', '--ownership', 'me']]) {
@@ -778,8 +775,70 @@ test('ownership lock: after the first done only agent → hybrid ← user passes
     assert.match(run('switch', 'track', '--ownership', start).stdout, new RegExp(`ownership stays ${start} — `)); // the same mode is no change
     assert.match(run('switch', 'track', '--ownership', 'hybrid').stdout, new RegExp(`ownership ${start} → hybrid — `));
     for (const leave of ['agent', 'user']) {
-      assert.match(run('switch', 'track', '--ownership', leave).stderr, /ownership is locked at hybrid since the first done; a different mode is a new track: diverge <name>/);
+      assert.match(run('switch', 'track', '--ownership', leave).stderr, /a hybrid track stays hybrid — own N and own N - move single bubbles; a different mode is a new track: diverge <name>/);
     }
     assert.strictEqual(track().ownership, 'hybrid');
   }
+});
+
+test('ownership lock: a hybrid track stays hybrid even with nothing done, so its owners are never dropped', () => {
+  const { run, track } = repo();
+  run('own', '2');
+  for (const leave of ['agent', 'user']) {
+    const r = run('switch', 'track', '--ownership', leave, '--force');
+    assert.strictEqual(r.status, 1);
+    assert.match(r.stderr, /a hybrid track stays hybrid — /);
+  }
+  assert.strictEqual(track().ownership, 'hybrid');
+  assert.strictEqual(track().bubbles[1].owner, 'user');
+});
+
+test('own: the owner field, the line shapes and colors, and how it follows the mode', () => {
+  const { run, track, dir } = repo(); // A B C on an agent track
+  const owners = () => track().bubbles.map((b) => b.owner || '-').join('');
+  run('done');
+  const took = run('own', '3'); // mid-walk, on a later bubble: the agent track turns hybrid
+  assert.match(took.stdout, /"C" is the human's to do\nownership agent → hybrid — /);
+  assert.match(took.stdout, /S ●──◐──◇ F/);
+  assert.deepStrictEqual(track().bubbles[2], { title: 'C', state: 'todo', id: 3, owner: 'user' }); // one field, no new state
+  assert.match(run('show', '--ascii').stdout, /S \*--@--h F/);
+  run('own', '2');
+  assert.match(run('show', '--ascii').stdout, /S \*--H--h F {3}A < H B > C/);
+  // color: the human's symbols are red inside the blue track and the yellow context
+  const color = spawnSync(process.execPath, [CLI, '--dir', dir, 'show'], {
+    encoding: 'utf8',
+    env: { ...process.env, BUBBLES_COLOR: '1', NO_COLOR: '', BUBBLES_ASCII: '' },
+  });
+  assert.match(color.stdout, /\x1b\[34mS ●──\x1b\[31m◈\x1b\[34m──\x1b\[31m◇\x1b\[34m F\x1b\[0m {3}\x1b\[33mA ‹ \x1b\[31m◈\x1b\[33m B › C\x1b\[0m/);
+  run('done'); // the human's bubble, popped: a filled diamond, and it keeps its owner
+  assert.match(run('show').stdout, /S ●──◆──◈ F/);
+  assert.match(run('own', '2', '-').stderr, /"B" is done — a done bubble keeps its owner/);
+  run('add', 'D'); // a new bubble on a hybrid track is the agent's
+  assert.strictEqual(owners(), '-useruser-');
+  run('fog', '3'); // fog looks the same for both, and keeps its owner
+  assert.match(run('show').stdout, /S ●──◆──❓──○ F/);
+  assert.strictEqual(owners(), '-useruser-');
+});
+
+test('own: mode changes carry the owners, and move --to keeps them only in a hybrid target', () => {
+  const { run, track, dir } = repo();
+  const owners = () => track().bubbles.map((b) => b.owner || '-').join('');
+  run('switch', 'track', '--ownership', 'user');
+  assert.match(run('show').stdout, /S ◈──◇──◇ F/);
+  assert.match(run('show').stdout, /A\n  2 /); // no owner line on a user track: the mode says it
+  assert.strictEqual(owners(), '---');
+  run('switch', 'track', '--ownership', 'hybrid'); // user → hybrid: nothing silently moves to the agent
+  assert.strictEqual(owners(), 'useruseruser');
+  run('own', '2', '-');
+  assert.strictEqual(owners(), 'user-user');
+  assert.match(run('show').stdout, /S ◈──○──◇ F/);
+  run('own', '1:2');
+  run('create', 'plain');
+  run('create', 'mixed', '--ownership', 'hybrid');
+  run('switch', 'track');
+  run('move', '1', '--to', 'plain');
+  run('move', '1', '--to', 'mixed');
+  const other = (name) => JSON.parse(fs.readFileSync(path.join(dir, '.bubble-tracks', `${name}.json`), 'utf8')).bubbles[0];
+  assert.ok(!('owner' in other('plain')));
+  assert.strictEqual(other('mixed').owner, 'user');
 });
