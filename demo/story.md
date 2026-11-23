@@ -139,3 +139,23 @@ bubble switch todo
 ```
 
 > agent: Cloud sync is its own track now, in fog until you plan it. Todo app is untouched: Delete items is next, and the last bubble is still fog. Say go.
+
+## 10. The human takes a bubble
+
+> human: Go. But I want to write Delete items myself.
+
+```
+bubble own 4
+```
+
+> agent: Delete items is yours now, so I keep my hands off it. A hint: remove the item from the list, then show the list again. Tell me when it is done.
+
+> human: Done, have a look.
+
+> agent: I checked it against the bubble and the guards: deleting works, and the look stays minimal. Popping it.
+
+```
+bubble done
+```
+
+> agent: Delete items is done. The last bubble is fog: what counts as finished for the MVP is unsaid, and only you plan fog.

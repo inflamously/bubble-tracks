@@ -1,6 +1,6 @@
 # 2. Data model
 
-Everything is in `src/lib/model.ts` (89 lines). `src/lib/index.ts` has no logic: it re-exports `store`, `model`, `render` and `ops`, so the hooks, the status line and the tests need only one import.
+Everything is in `src/lib/model.ts` (115 lines). `src/lib/index.ts` has no logic: it re-exports `store`, `model`, `render` and `ops`, so the hooks, the status line and the tests need only one import.
 
 ## A track is one JSON file
 
@@ -9,6 +9,7 @@ Everything is in `src/lib/model.ts` (89 lines). `src/lib/index.ts` has no logic:
 ```ts
 interface Track {
   title?: string;
+  ownership?: 'hybrid' | 'user';         // who does the bubbles' work; missing = agent
   bubbles: Bubble[];                     // the line, S → F, in order
   nextId?: number;                       // counter for stable bubble ids
   handoff?: { note: string; at: string }; // the note a fresh chat reads
@@ -23,6 +24,7 @@ interface Bubble {
   id?: number;        // stable id, survives move/insert/remove
   type?: FogType;     // known-known … unknown-unknown (fog classification)
   hint?: string;      // the human's note: the ↳ line
+  owner?: 'user';     // the human does this bubble's work (hybrid tracks only)
   fork?: string;      // path to the child track this bubble waits for
   sides?: string[];   // paths to side tracks that diverged from it
 }
@@ -60,4 +62,6 @@ A real one, trimmed:
 
   Link paths are relative and always use `/`, so they survive a moved checkout and work on other operating systems.
 - **The fog type is only a label.** `type` records what the human said (`kk`/`ku`/`uk`/`uu` are expanded by `normalizeType`). The CLI never acts on it; it tells the agent how to work the bubble.
+- **Ownership is one field on the track and one on the bubble.** `ownershipOf` reads the mode, and `agent` is never stored, so an older track file is an agent track. `ownedByHuman(track, bubble)` is the one question everything asks: true on a `user` track, and on a `hybrid` track when the bubble has `owner`. The track line, the listing and the gate hook only read it; there is no extra bubble state.
+- **The mode only tightens.** `setOwnership` (`src/lib/ops/ownership.ts`) never leaves `hybrid`, and once a bubble is `done` it lets `agent` and `user` only move into `hybrid`. When a `user` track turns hybrid, every bubble gets `owner`, so none silently moves to the agent.
 - **`resolve` and `resolveRange` do all the address checking.** No address means the active bubble. `N:M` is inclusive. Errors are plain messages like `no bubble at "9"` that the CLI prints as they are.

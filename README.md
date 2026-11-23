@@ -25,6 +25,7 @@ Fix generation   S ●──●──❓──○ F   Read logs ‹ ❓ needs yo
 - **The agent never plans fog.** At a fog bubble it stops and asks. You say what the bubble is, or how the agent should find out.
 - **You steer between bubbles.** The agent pauses after every bubble, so you can move, insert, remove or fog bubbles before it goes on.
 - **A goal and guards frame the track.** The goal is the one result every bubble serves. Guards say what not to do or touch, and the agent reads them before it acts.
+- **You choose who does the work.** The agent does every bubble by default. You can take single bubbles, or all of them, and the agent then hints and checks instead.
 - **One idea per track.** Work that goes deeper becomes a fork, and work that goes elsewhere becomes a side track.
 
 It is a skill plus a small CLI. They run on plain Node.js with no dependencies, and the tracks are JSON files in `.bubble-tracks/`.
@@ -105,7 +106,7 @@ Start or resume a track in chat:
 /bubble switch fix-generation
 ```
 
-**A new track** starts with a short plan in chat. The agent asks for the goal, drafts the guards and the bubbles, and proposes them in one fixed shape: a TL;DR first, then the track, goal, guards and bubbles, each bubble with its `[Boundary: …]` (what it may touch), and a diagram when a flow needs one. Change anything and it shows the revised plan again. Only when you say go does it create the track and asks you about each fog bubble. Then it walks the track one bubble at a time.
+**A new track** starts with a short plan in chat. The agent asks for the goal, drafts the guards and the bubbles, and proposes them in one fixed shape: a TL;DR first, then the track, goal, guards, ownership and bubbles, each bubble with its `[Boundary: …]` (what it may touch), and a diagram when a flow needs one. Change anything and it shows the revised plan again. Only when you say go does it create the track and asks you about each fog bubble. Then it walks the track one bubble at a time.
 
 **An existing track** is picked up where it stopped. Hints on the bubbles and a handoff note carry the context between chats, so a fresh chat needs nothing else.
 
@@ -129,6 +130,31 @@ When the agent reaches a fog bubble, you either say what it is or classify it:
 | `unknown-unknown` | The agent interviews you, one question at a time. |
 
 If you don't know enough to say, answer `N:?` and the agent researches the bubble first.
+
+### Ownership
+
+Every track has an ownership mode. It says who does the work of its bubbles, whether that work is code, a spreadsheet or a text:
+
+| Mode | Who does the work |
+|---|---|
+| `agent` (default) | The agent does every bubble. |
+| `hybrid` | You do the bubbles you pick, and the agent does the rest. |
+| `user` | You do every bubble. |
+
+Set the mode when the track is planned: `/bubble switch fix-generation --ownership hybrid`. On a hybrid track, `own 4` takes bubble 4 and `own 4 -` hands it back, at any time before it is done. Your bubbles are diamonds on the line:
+
+```
+Todo app   S ●──●──●──◈──❓ F   Item list ‹ ◈ Delete items › ???
+```
+
+At one of your bubbles the agent does not do the work. It hints at the steps, waits, checks your work once you say it is done, and then pops the bubble. Planning, fog and guards are the same in every mode.
+
+The mode is meant to be chosen once:
+
+- `agent` and `user` swap freely until the first bubble is done. After that they only move into `hybrid`.
+- A hybrid track stays hybrid for good.
+- `own` on an agent track and `own -` on a user track switch the track to hybrid.
+- A different mode is a new track.
 
 ### Tracks
 
@@ -171,9 +197,10 @@ A leading `bubble` word is optional, and a whole phrase can be passed as one quo
 
 | Command | Effect |
 |---|---|
-| `show` | Render the track and list its bubbles (exit 3 = active bubble is fog) |
+| `show` | Render the track and list its bubbles (exit 3 = active bubble is fog). Ends with a notice when the active bubble is yours to do |
 | `switch [name] [title]` | Resume a track, or create it (no name: the current one). Refuses a new name close to an open track (`flow` for `flow-analysis`); `create` makes it. Names ignore case (`Dev` resumes `dev`) |
 | `create <name> [title]` | Create a new track (refuses if it exists) |
+| `switch <name> --ownership <MODE>` | Set who does the bubbles' work: `agent` · `hybrid` · `user` (`create` and `init` take it too). A hybrid track stays hybrid; after the first `done`, `agent` and `user` only move into `hybrid` |
 | `tracks` · `--closed` · `--all` | List tracks, current marked `→`; closed ones are hidden unless `--closed` (only closed) or `--all` |
 | `close <name> --force` | Finish a track for good: read-only, closes its forks, pops its parent bubble |
 | `delete <name> --force` | Delete a track (not the current one) |
@@ -192,6 +219,7 @@ A leading `bubble` word is optional, and a whole phrase can be passed as one quo
 | `guard drop N` · `guard drop --all` | Drop guard N, or all of them (`--all` needs `--force`) |
 | `handoff <note>` · `handoff -` | Save (or clear) the note a fresh chat resumes from |
 | `hint N <text>` · `hint N -` | Attach (or clear) a note for that bubble |
+| `own [N \| N:M]` · `own [N \| N:M] -` | Take bubbles to do yourself, or hand them back to the agent (not done ones). `own` on an agent track and `own -` on a user track switch it to hybrid |
 | `fog [N \| N:M] [TYPE]` | Turn bubbles into fog (done bubbles need `--force`; not while its fork is open) |
 | `why [N] <text>` · `why [N] -` | Say (or clear) why a fog bubble is unclear |
 | `type [N] <TYPE>` | Set the fog type: `kk` · `ku` · `uk` · `uu` (or the full names) |
@@ -223,24 +251,24 @@ A leading `bubble` word is optional, and a whole phrase can be passed as one quo
 }
 ```
 
-The active bubble is the first one that isn't done. Edit tracks through the CLI, not by hand.
+The active bubble is the first one that isn't done. A track that isn't the agent's also has `"ownership": "hybrid"` or `"user"`, and on a hybrid track your bubbles have `"owner": "user"`. Edit tracks through the CLI, not by hand.
 
 </details>
 
 <details>
 <summary><b>Colors and symbols</b></summary>
 
-In the status line and the terminal, the track title is green, the track is blue, and `prev ‹ active › next` is yellow.
+In the status line and the terminal, the track title is green, the track is blue, and `prev ‹ active › next` is yellow. A bubble you do yourself is a diamond (`◆` done, `◈` active, `◇` todo), in red.
 
 - `NO_COLOR=1` (or `--no-color` on `statusline.js`) turns colors off.
 - `BUBBLES_COLOR=1` forces them on.
-- `BUBBLES_ASCII=1` swaps the symbols for plain ASCII: `S *--@--?--o F`. In Claude Code, set it with `"env": { "BUBBLES_ASCII": "1" }` in settings.
+- `BUBBLES_ASCII=1` swaps the symbols for plain ASCII: `S *--@--?--o F` (your bubbles: `+` done, `H` active, `h` todo). In Claude Code, set it with `"env": { "BUBBLES_ASCII": "1" }` in settings.
 
 </details>
 
 ## Limits
 
-The fog gate blocks file-edit tools only. It is a guardrail, not a security boundary: writes made through shell commands are not blocked, and no hook can stop every way an agent might write a file.
+The fog gate and the ownership gate block file-edit tools only. Work that is not a file edit, like a data pull, is held back by the skill's rules alone. It is a guardrail, not a security boundary: writes made through shell commands are not blocked, and no hook can stop every way an agent might write a file.
 
 ## Development
 
