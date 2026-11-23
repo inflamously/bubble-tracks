@@ -8,6 +8,7 @@ description: bubble-tracks — iterative, fog-of-war planning on a linear track 
 A plan is a linear track from **S**tart to **F**inish. Each bubble is a task:
 `●` done · `◐` active · `○` todo · `❓` fog (unplanned — the human plans it).
 Plan only as far as you can see. The rest stays fog until it's reached.
+`◆` `◈` `◇` are done, active and todo on a bubble the human does themselves (see **Ownership**).
 
 The track line reads `S ●──●──◐──○ F   prev ‹ ◐ active › next`, with each label cut to 20 characters.
 So **titles are short names (2–4 words)**, like `Remove nesting` or `Fog-only fill`. Put details, scope and file lists in a `hint`.
@@ -29,6 +30,7 @@ Run it from the repo root, or pass `--dir <repo>`. The CLI speaks the **bubble l
 | `show` | Render the track and list its bubbles with addresses. Exits **3** if the active bubble is fog. |
 | `switch [name] [title]` | Resume track `<name>`, or create it if it doesn't exist. It becomes current. No name: resume the current track (else the default `track`). A new name that starts an open track's name or is a typo or two from it (`flow` → `flow-analysis`) is refused, naming the match; `create` makes it. Names ignore case: `switch Flow-Analysis` resumes `flow-analysis`, and `create` refuses a case-only twin. |
 | `create <name> [title]` | Create a new track (refuses if it exists) and make it current |
+| `switch <name> --ownership <MODE>` | Set who does the bubbles' work on that track; `create` and `init` take it too. A hybrid track stays hybrid. After the first `done`, `agent` and `user` only move into `hybrid`. See **Ownership**. |
 | `tracks` · `tracks --closed` · `tracks --all` | List the tracks, current marked `→`. Closed tracks are hidden (except the current one) and counted in a footer; `--closed` lists only closed tracks, `--all` lists everything. |
 | `close <name> --force` | Finish a track early, for good, after the human confirms: read-only, no reopen. Also closes all its forks (side tracks stay open) and pops its parent bubble. Without `--force` it refuses and lists every track it would close. |
 | `delete <name> --force` | Delete a track that isn't current, after the human confirms |
@@ -55,6 +57,7 @@ Run it from the repo root, or pass `--dir <repo>`. The CLI speaks the **bubble l
 | `fill [N] <title>` | The human's content for a fog bubble: fog → todo |
 | `done` | Pop the active bubble, then ⏸ stop. The last `done` closes the track, with no ask (see **Closed tracks**). |
 | `research [N] [focus]` | Print the research workflow and bubble N's whole context, to run once. See **Research**. Changes nothing itself. |
+| `own [N \| N:M]` · `own [N \| N:M] -` | The human takes bubbles to do themselves, or hands them back to you. Not for done bubbles. `own` on an `agent` track and `own -` on a `user` track switch the track to `hybrid`. See **Ownership**. |
 | `finding N <text>` · `finding N M -` · `finding N -` | Note what research found for bubble N (a guide or tip, with its source), drop finding M, or drop them all |
 | `abilities` | List the abilities: name, type, project or user, description (or why one is broken) |
 | `bubble:<name> [text]` | Print ability `<name>`'s workflow, the human's extra text, and its context (the active bubble or the whole track), to run once. See **Abilities**. |
@@ -67,6 +70,7 @@ A word that starts with `-` is read as an option, so a title or hint with one, l
 
 N: position on the track; omitted = the active bubble. `N:M` = N through M, inclusive.
 TYPE: `known-known` · `known-unknown` · `unknown-known` · `unknown-unknown` (or `kk` · `ku` · `uk` · `uu`).
+MODE: `agent` · `hybrid` · `user`.
 
 ### The human's commands
 
@@ -98,7 +102,8 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
    - **Track:** its name and title.
    - **Goal:** one sentence.
    - **Guards:** numbered, one rule each.
-   - **Bubbles:** numbered in track order, each with a short title, one line on what it does, and its boundary in square brackets on a line of its own; fog with its reason.
+   - **Ownership:** the mode, in one line (see **Ownership**). Propose `agent` unless the human said they want to do work themselves. Say that the mode is hard to change later, so they check it now.
+   - **Bubbles:** numbered in track order, each with a short title, one line on what it does, and its boundary in square brackets on a line of its own; fog with its reason. On a `hybrid` track, mark the human's bubbles with `(yours)` after the title.
 
      ```
      2. Welcome mail: rewrite the text new members get.
@@ -112,7 +117,7 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
 
    **Refine until go.** The proposal is a draft until the human approves it. If they change something (add a guard, move a bubble, reword the goal) or ask a question, that is not approval: apply the change or answer, show the whole revised proposal again, and wait. Repeat this as often as they want. Create the track only when they say go to the proposal as it stands ("ok", "go", "create it"). If one reply approves and changes it ("ok, but add a guard …"), apply the change, create the track and say what you changed.
 
-   Then create it in one burst: `create <name> <title>`, `goal`, one `guard` per rule, the `add`s and their `hint`s. Then classify the fog (step 2).
+   Then create it in one burst: `create <name> <title>` (with `--ownership <mode>` unless it is `agent`), `goal`, one `guard` per rule, the `add`s and their `hint`s, and `own N` for each bubble the human took. Then classify the fog (step 2).
 
    **Seams: one bubble per use case**, not one per file and not one bubble for the whole goal. Its boundary names the places it may touch, so the work stays scoped and easy to review. A place is whatever the work is made of: files, a domain, a section of a document, a system, a step in a process. Always write it in square brackets, `[Boundary: …]`, with the places separated by commas, so it stands out from the sentences around it. In the proposal it stands on its own line under the bubble, so the human can check all boundaries at a glance. On the track it is the end of the bubble's hint. If a bubble needs work past its boundary, stop and propose an `insert` instead of doing it.
 2. **Sketch.** For later passes on an existing track (or after `init`), make one rough pass from the active bubble to F. Steps that are clear become todo bubbles with short titles; add a `hint` when a step needs more words. Anything unclear becomes `add ? <why>`: fog, plus one line on **why** it's unclear (what's missing or undecided), never what it is. Keep it short and don't over-plan.
@@ -125,6 +130,7 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
      For example: `1:uk  2: tighten the fog gate  3:?`. The levels shape everything after this, because they decide how you work each bubble in step 4.
 3. **Walk.** Run `show`. If the active bubble is known, implement it, then run `done`. Read the bubble's `↳` hint first: it's the human's steer for that bubble, and its `[Boundary: …]` is how far the bubble reaches.
    - **Guards come before acting**, not as a check at `done`. Before you implement a bubble or take any other action, read them (`guard show`, or the list `switch` printed) and keep to them.
+   - **A bubble the human does is not yours to implement.** If `show` ends with `◈ "…" is the human's to do`, hint at the steps, wait, check their work, then run `done` (see **Ownership**).
    - **A guard stands even against a direct ask from the human.** If they ask for something a guard rules out, don't do it on this track: say which guard it hits and route the work where it belongs (`add <title> --to <track>`, or offer `fork` / `diverge`).
 4. **Hit fog → STOP.** When the active bubble is fog (`show` exits 3, or an edit is blocked):
    - **Never plan fog yourself.** Don't invent its content and don't run `fill` on your own.
@@ -173,6 +179,45 @@ A fork stays in sync with its bubble. `title` on the fork renames the bubble, an
 
 A **closed** track is read-only: every bubble command on it refuses, and its line shows 🔒 closed. A track closes itself on its last `done` (an empty track never counts as done), with no ask; `close` ends one early. There's no reopen: a follow-up is a `diverge` or a new track. A closed fork counts as finished, so closing it pops its parent bubble; closing a track closes all its forks too. A closed parent is skipped: its child runs on, but pops and title syncs never reach it.
 
+## Ownership: who does a bubble's work
+
+Every track has an ownership mode. It says who does the work of its bubbles. The work is whatever the bubble is made of: code, a spreadsheet, a text, a data pull.
+
+| Mode | Who does the work | On the line |
+|---|---|---|
+| `agent` (default) | you, on every bubble | `●` `◐` `○` |
+| `hybrid` | the human, on the bubbles they picked; you, on the rest | theirs are `◆` `◈` `◇` |
+| `user` | the human, on every bubble | every bubble is `◆` `◈` `◇` |
+
+Ownership changes only who does the work. In every mode you draft the plan, the human fills the fog, the guards hold, and you run the track commands.
+
+**Only the human sets it.** Never change the mode or an owner on your own.
+
+- The mode: `switch <name> --ownership <mode>`. `show` prints it under the goal, unless it is `agent`.
+- Single bubbles: `own N` or `own N:M` takes them for the human, and `own N -` hands them back to you. The listing marks the human's bubbles with `owner: human`.
+- The human can take later bubbles while you work on another one. "I'll do 4 and 5 myself" means `own 4:5`: run it, show the line, and carry on with your bubble.
+
+**What can still change later.** Say this when the human asks for a change, before you run it:
+
+- `agent` and `user` swap freely until the first `done`. After it they only move into `hybrid`.
+- A `hybrid` track stays `hybrid` for good. On it, the human takes and hands back single bubbles at any time.
+- `own N` on an `agent` track and `own N -` on a `user` track switch the track to `hybrid`. So "do this one for me" on a `user` track is a permanent step: say so and run `own N -` only after the human confirms.
+- Nothing forces another change. A different mode is a new track (`diverge`).
+
+**At a bubble the human does** (`show` ends with `◈ "…" is the human's to do`):
+
+1. **Don't do its work.** Make no edits and run no commands that do the bubble for them. The gate blocks your edits anyway.
+2. **Hint at the steps.** Say in a few lines what the steps could be and where to look. Take them from the bubble's hint, its boundary, its findings, the guards and what you see in the project. Give steps and pointers, not the finished result, unless the human asks to see it.
+3. **Wait, and answer.** The human works at their own pace. Answer their questions while they do.
+4. **Check the work once they say it's done.** Check it against the bubble's title, its hint, its `[Boundary: …]` and the guards. Report what you found in a few lines. If something is wrong, the human fixes it. Don't fix it yourself.
+5. **Then run `done`.** Run it when the check passes, or when the human says the work stands as it is. Then ⏸ stop as after every bubble.
+
+The other rules still hold at such a bubble:
+
+- A fog bubble is planned first, as any fog. Who does the work matters only after `fill`.
+- The guards and the boundary bind the human's work too. If their work breaks one, say so in the check, and they decide.
+- A `now` task waits as well: the gate blocks your edits until the bubble is popped or handed back.
+
 ## Research
 
 Research fills the human's knowledge gaps: a topic they don't know, or the information a bubble needs before it can be built or planned. It works on any bubble, any time, fog included.
@@ -196,3 +241,5 @@ An ability is a short workflow, kept as a file, that the human applies to the ac
 ## Fog gate
 
 Before editing project files, check `show`. If it exits 3, don't edit; go to step 4. Some agents (Claude Code, Codex CLI, Gemini CLI) also enforce this with a hook that blocks edits while the active bubble is fog. Edits under `.bubble-tracks/` are always allowed.
+
+The same hook is the **ownership gate**: it blocks your edits while the active bubble is the human's to do. `show` exits 0 there and ends with the `◈ "…" is the human's to do` line. If you see that line, don't edit; go to **Ownership**.

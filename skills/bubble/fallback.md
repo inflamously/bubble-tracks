@@ -8,6 +8,8 @@ Tell the human once: *"Node isn't available here, so I'm editing the track by ha
 
 Without Node, no hook blocks your edits. Before editing any project file, read the current track. If its active bubble is fog, **don't edit**. Go to SKILL.md step 3 and ask the human. Edits under `.bubble-tracks/` are always allowed.
 
+The ownership gate is on you too. The active bubble is the human's to do when the track's `ownership` is `user`, or when it is `hybrid` and the bubble has `owner`. Then **don't edit** either: follow SKILL.md's **Ownership** section (hint, wait, check, then `done`).
+
 ## Where tracks live
 
 - `.bubble-tracks/` sits at the repo root. Look for it in the working directory, then in each parent.
@@ -34,7 +36,7 @@ Track fields:
 - `title`: the track's name, kept short.
 - `goal`: the one end result every bubble serves.
 - `guards`: rules of what not to do, as an array of strings. Read them before acting, not as a check at `done`.
-- `ownership`: who does the bubbles' work: `hybrid` (the human does the bubbles they pick) or `user` (the human does every bubble, you hint and check it). Missing means the agent does all of it. Set it only when the human asks (`switch <name> --ownership <mode>`); for `agent`, delete the field.
+- `ownership`: who does the bubbles' work: `hybrid` (the human does the bubbles they pick) or `user` (the human does every bubble, you hint and check it). Missing means `agent`: you do all of it. Change it only when the human asks, and only as the `switch` row below allows.
 - `bubbles`: the bubbles in order, S to F. Required, even when empty (`[]`).
 - `nextId`: the id the next new bubble gets. Missing means 1.
 - `handoff`: `{ "note", "at" }`, where `at` is UTC as `YYYY-MM-DD HH:MM UTC`.
@@ -47,7 +49,7 @@ Bubble fields:
 - `id`: stable and never reused. Take it from `nextId`, then add 1 to `nextId`.
 - `type`: the fog classification: `known-known`, `known-unknown`, `unknown-known` or `unknown-unknown`.
 - `hint`: the human's note for this bubble.
-- `owner`: `user` when the human does this bubble's work. Only on a `hybrid` track; never on a done bubble you didn't mark before.
+- `owner`: `user` when the human does this bubble's work. Only on a `hybrid` track. Never change it on a `done` bubble.
 - `why`: set while fog: one line on why it's unclear (not what it is).
 - `answer`: set while fog: the human's own words on it, kept as they said them while it stays fog.
 - Both stay after `fill`, as the trail of how the bubble was planned.
@@ -62,8 +64,9 @@ N is a 1-based position on the track. When N is left out, it means the active bu
 
 | Command | Edit |
 |---|---|
-| `show` | Read the file and draw the line: `<title>   S ●──◐──○ F   prev ‹ ◐ active › next`. `●` is done, `◐` is the active bubble, `○` is todo and `❓` is fog. If the active bubble is fog, its label is `❓ needs you`; with every bubble done it's `all done`, and with no bubbles at all it's `empty` (not done). Then list the bubbles by number with their hints. An active fog bubble is the gate (step 3). |
+| `show` | Read the file and draw the line: `<title>   S ●──◐──○ F   prev ‹ ◐ active › next`. `●` is done, `◐` is the active bubble, `○` is todo and `❓` is fog. A bubble the human does (see the gate above) is `◆`, `◈` or `◇` instead. If the active bubble is fog, its label is `❓ needs you`; with every bubble done it's `all done`, and with no bubbles at all it's `empty` (not done). Then list the bubbles by number with their hints. An active fog bubble is the gate (step 3). |
 | `switch <name>` | If `<name>.json` exists, or one that differs only in case (names ignore case), write the stored name to `current` and resume it. Otherwise, if an open track's name starts with `<name>` or is a typo or two from it (ignoring case; none for names of 3 characters or less, 1 at 4, 2 from 5), don't create it: name that track and ask. Else create it (below). |
+| `switch <name> --ownership <mode>` | Set `ownership` (delete the field for `agent`), but never change `hybrid`. `agent` and `user` swap only while no bubble is `done`; after that they only become `hybrid`. When `user` becomes `hybrid`, set `owner` to `user` on every bubble. A refused change is a new track. |
 | `create <name> [title]` · `init <title>` | Write `{ "title": "<title or name>", "bubbles": [] }` to `<name>.json`, then write `<name>` to `current`. `init` creates `track`. |
 | `add <title>` · `add ? <why>` | Append `{ "title", "state": "todo", "id" }`, or `{ "title": "???", "state": "fog", "id", "why" }` for fog. Take the id from `nextId`. |
 | `insert at N …` | Like `add`, but put the bubble at position N. |
@@ -71,7 +74,7 @@ N is a 1-based position on the track. When N is left out, it means the active bu
 | `type [N] <TYPE>` | Set `type`. Expand `kk`, `ku`, `uk` and `uu`. |
 | `why [N] <text>` · `answer [N] <text>` | Only for a fog bubble: set `why` or `answer`, or delete the field with `-`. |
 | `hint N <text>` · `hint N -` | Set `hint`, or delete the field with `-`. |
-| `own [N \| N:M]` · `own [N \| N:M] -` | Only for bubbles that aren't done: set `owner` to `user`, or delete the field with `-`. On a track with no `ownership`, first set `ownership` to `hybrid`. On a `user` track, `own` changes nothing; `own … -` sets `ownership` to `hybrid` and `owner` to `user` on every other bubble. |
+| `own [N \| N:M]` · `own [N \| N:M] -` | Only when the human asks, and only for bubbles that aren't `done`: set `owner` to `user`, or delete the field with `-`. On a track with no `ownership`, `own` first sets `ownership` to `hybrid`; `own … -` has nothing to hand back there. On a `user` track, `own` changes nothing; `own … -` first makes the track `hybrid` as the `switch` row says, then deletes `owner` on those bubbles. |
 | `handoff <note>` · `handoff -` | Set `handoff` to `{ "note", "at" }`, or delete it with `-`. |
 | `finding N <text>` · `finding N M -` · `finding N -` | Append to `findings`, drop finding M, or delete `findings` with `-`. Delete the field when it ends up empty. `show` lists them as `found 1:`, `found 2:`… |
 | `research [N] [focus]` | Changes nothing. Follow SKILL.md's **Research** section on bubble N, with its context: the track's `goal` and `guards`, the bubble's `title`, `state`, `type`, `why`, `answer`, `hint` and `findings`, and the bubbles before and after it. Not on a closed track. |

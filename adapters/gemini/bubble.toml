@@ -15,11 +15,12 @@ you see a better name for a new one (e.g. `single commit` -> `single-commit`), u
 track is new (or the request is "I want X"), plan in chat before creating it: ask for the goal, then draft the guards
 (what not to do or touch) and the use cases yourself unless the human gave them. Write the plan in plain sentences:
 one thing per sentence, active voice, one word for one thing, and keep what is complex instead of leaving it out.
-Propose it in this order: TL;DR, track name + title, goal, guards, bubbles (fog with its reason). Add one diagram
+Propose it in this order: TL;DR, track name + title, goal, guards, ownership (`agent` unless the human wants
+to do work themselves), bubbles (fog with its reason; `(yours)` on the human's). Add one diagram
 after the TL;DR only when a flow or structure is hard to follow in sentences (ASCII with every step in its own box
 in a terminal, Mermaid in a markdown file). A change or a question from the human is not approval: revise, show the
 whole proposal again and wait. Only after their go, create it in
-one burst (`switch`, `goal`, `guard` per rule, `add`s, `hint`s). The goal is set once: a new goal is a new
+one burst (`switch`, with `--ownership <mode>` unless `agent`; `goal`, `guard` per rule, `add`s, `hint`s, `own N` per bubble the human took). The goal is set once: a new goal is a new
 track (`diverge`); `goal <text> --force` rewords it only after the human confirms. One bubble per use case, its hint ending with its
 boundary in square brackets (`[Boundary: …]`: the files, domain or document sections it may touch), shown on a line of
 its own in the proposal; work past it: stop and propose an `insert`. Then list every fog bubble by number and ask the human to answer each one as `N: <their content>`
@@ -36,6 +37,12 @@ inserts or a fork/diverge without applying them; never fill fog; then stop.
 Read the guards (`guard show`) before acting, not as a check at `done`. A guard stands even against a direct ask
 from the human: say which guard it hits and route the work to its track (`add --to <track>`, fork or diverge).
 After `done`, stop (⏸): show the track and wait for the human before starting the next bubble.
+Ownership says who does a bubble's work: `agent` (default: you), `hybrid` (the human does the bubbles they picked)
+or `user` (the human does every bubble). Only the human sets it (`switch <name> --ownership <mode>`, `own N[:M]`,
+`own N -`); "I'll do 4 and 5 myself" means `own 4:5`. If the track above ends with `◈ "…" is the human's to do`:
+don't edit and don't do its work. Hint at the steps, wait, check their work once they say it's done (they fix
+what is wrong), then run `done`. A hybrid track stays hybrid; after the first `done`, `agent` and `user` only
+move into `hybrid`.
 If the active bubble is fog: STOP. Never plan fog yourself. Ask the human to classify it
 (known-known, known-unknown, unknown-known, unknown-unknown) and wait for their content before `fill`.
 After every change, show the rendered track line.
