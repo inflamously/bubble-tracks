@@ -91,6 +91,22 @@ describe('e2e: a development track from sketch to close', () => {
     });
   });
 
+  describe("ownership: who does the bubbles' work", () => {
+    step(['switch', 'dev', '--ownership', 'hybrid'], [/resumed track "dev"\nownership agent → hybrid — the human does the bubbles they pick, the agent does the rest/, /⚑ goal: .*\n◆ ownership: hybrid — /]);
+    step(['show'], /◆ ownership: hybrid — the human does the bubbles they pick, the agent does the rest/);
+    step(['switch', 'dev', '--ownership', 'user'], /ownership hybrid → user — the human does every bubble's work; the agent hints and checks it/);
+    step(['switch', 'dev', '--ownership', 'user'], /ownership stays user — /);
+    step(['switch', 'dev', '--ownership', 'both'], /unknown ownership "both" \(use: agent, hybrid, user\)/, 1);
+    step(['switch', 'dev', '--ownership'], /--ownership needs a mode: agent, hybrid, user/, 1);
+    step(['add', 'Mine', '--ownership', 'user'], /--ownership works only with switch, create and init/, 1);
+    step(['switch', 'dev', '--ownership', 'agent'], /ownership user → agent — the agent does every bubble's work/);
+    it('dev.json stores no ownership for agent, and show is back to what it was', () => {
+      assert.ok(!('ownership' in read('dev')));
+      const r = spawnSync(process.execPath, [CLI, '--dir', dir, 'show'], { encoding: 'utf8' });
+      assert.doesNotMatch(r.stdout, /ownership/);
+    });
+  });
+
   describe('classify and fill the fog', () => {
     step(['rename', '3', 'Guess'], /"\?\?\?" is fog — plan it with fill/, 1); // fog is the human's to plan
     step(['why', '3', 'no output format chosen'], [/why on "\?\?\?": no output format chosen/, /\n {8}why: no output format chosen/]);
@@ -213,5 +229,8 @@ describe('e2e: a development track from sketch to close', () => {
   describe('init: the default track next to named ones', () => {
     step(['init', 'P'], /created track "track"/);
     step(['add', 'One'], /→ 1 {3}◐ todo {3}One/);
+    step(['create', 'solo', 'Solo', '--ownership', 'user'], [/created track "solo" .*\nownership: user — the human does every bubble's work; the agent hints and checks it/, /◆ ownership: user/]);
+    step(['create', 'duo', '--ownership', 'half'], /unknown ownership "half"/, 1);
+    it('a bad mode creates no track', () => assert.ok(!exists('duo')));
   });
 });

@@ -1,4 +1,5 @@
-// Track-level commands: which track is current (init, create, switch, tracks, close, delete, fork, diverge).
+// Track-level commands: which track is current (init, create, switch, tracks, close, delete, fork, diverge),
+// and who does its bubbles' work (--ownership on switch, create and init).
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -34,9 +35,11 @@ export function runTrackCommand(cmd: string, args: string[], { dir, opts, render
     lib.checkName(name);
     const file = lib.trackPath(bubblesDir, name);
     const track: lib.Track = { title: title || name, bubbles: [] };
+    if (opts.ownership !== undefined) lib.setOwnership(track, opts.ownership); // a bad mode creates nothing
     lib.saveTrack(file, track);
     lib.setCurrent(bubblesDir, name);
     console.log(`created track "${name}" (${file})`);
+    if (opts.ownership !== undefined) console.log(lib.describeOwnership(track));
     console.log('');
     printTrack(file, track, renderOpts);
     return 0;
@@ -71,12 +74,17 @@ export function runTrackCommand(cmd: string, args: string[], { dir, opts, render
         return create(name, args.join(' '));
       }
       const track = lib.loadTrack(file);
+      // --ownership changes the track, so a closed one refuses it before anything is written
+      if (opts.ownership !== undefined && track.closed) throw new Error(`track "${name}" is closed (read-only) — its ownership stays ${lib.ownershipOf(track)}`);
+      const owned = opts.ownership === undefined ? '' : lib.setOwnership(track, opts.ownership);
+      if (owned) lib.saveTrack(file, track);
       lib.setCurrent(bubblesDir, name);
       const title = args.join(' ');
       // a title on an existing track isn't applied: say so, and how to rename it
       const kept = track.title ? `the title stays "${track.title}"` : 'it keeps no title';
       const resumed = `resumed track "${name}"${asked !== name ? ` (names ignore case: "${asked}" is "${name}")` : ''}`;
       console.log(title && title !== track.title ? `${resumed} — ${kept}; to rename it: title ${title}` : resumed);
+      if (owned) console.log(owned);
       console.log('');
       printTrack(file, track, renderOpts, true);
       return 0; // the fog warning still prints; exit 3 is show's alone

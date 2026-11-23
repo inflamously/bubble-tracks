@@ -34,6 +34,7 @@ Track fields:
 - `title`: the track's name, kept short.
 - `goal`: the one end result every bubble serves.
 - `guards`: rules of what not to do, as an array of strings. Read them before acting, not as a check at `done`.
+- `ownership`: who does the bubbles' work: `hybrid` (the human does the bubbles they pick) or `user` (the human does every bubble, you hint and check it). Missing means the agent does all of it. Set it only when the human asks (`switch <name> --ownership <mode>`); for `agent`, delete the field.
 - `bubbles`: the bubbles in order, S to F. Required, even when empty (`[]`).
 - `nextId`: the id the next new bubble gets. Missing means 1.
 - `handoff`: `{ "note", "at" }`, where `at` is UTC as `YYYY-MM-DD HH:MM UTC`.

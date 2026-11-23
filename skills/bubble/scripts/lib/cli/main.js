@@ -7,12 +7,16 @@ import { runTrackCommand } from './tracks.js';
 import { runBubbleCommand } from './bubbles.js';
 import { runAbilityCommand } from './abilities.js';
 import { runResearchCommand } from './research.js';
+/** Commands that take --ownership <mode>: they set who does the bubbles' work on the track. */
+const OWNERSHIP_COMMANDS = ['switch', 'create', 'init'];
 function main() {
     const { cmd, args, opts } = parseArgs(process.argv.slice(2));
     if (!cmd || opts.help || cmd === 'help') {
         console.log(HELP);
         return 0;
     }
+    if (opts.ownership !== undefined && !OWNERSHIP_COMMANDS.includes(cmd))
+        throw new Error('--ownership works only with switch, create and init');
     // Color only for a human at a terminal (or BUBBLES_COLOR=1); agents reading the output get plain text.
     const color = process.env.BUBBLES_COLOR === '1' || (process.env.BUBBLES_COLOR !== '0' && !!process.stdout.isTTY);
     const ctx = { dir: path.resolve(opts.dir || process.cwd()), opts, renderOpts: { ascii: opts.ascii ? true : undefined, color } };

@@ -732,3 +732,32 @@ test('abilities: bubble:<name> prints the workflow; project beats user; broken a
   assert.strictEqual(none.stdout, '');
   assert.match(none.stderr, /track "track" has no active bubble — a bubble ability needs one/);
 });
+
+test('ownership: switch, create and init set who does the work; agent is the default and is not stored', () => {
+  const { run, track } = repo();
+  const dir = run('show'); // an agent track never mentions ownership
+  assert.doesNotMatch(dir.stdout, /ownership/);
+  assert.ok(!('ownership' in track()));
+  const hybrid = run('switch', 'track', '--ownership', 'hybrid');
+  assert.match(hybrid.stdout, /resumed track "track"\nownership agent → hybrid — /);
+  assert.strictEqual(track().ownership, 'hybrid');
+  assert.match(run('show', '--ascii').stdout, /^\+ ownership: hybrid — /m);
+  assert.match(run('add', 'D').stdout, /◆ ownership: hybrid/); // every mutation prints it too
+  assert.match(run('--ownership=user', 'switch').stdout, /ownership hybrid → user — /); // bare switch: the current track
+  assert.strictEqual(track().ownership, 'user');
+  assert.doesNotMatch(run('switch', 'track').stdout, /ownership (stays|user →)/); // a plain resume changes nothing
+  assert.strictEqual(track().ownership, 'user');
+  for (const bad of [['switch', 'track', '--ownership', 'me'], ['create', 'x', '--ownership', 'me']]) {
+    assert.match(run(...bad).stderr, /unknown ownership "me" \(use: agent, hybrid, user\)/);
+  }
+  assert.match(run('tracks').stdout, /^→ track /m); // the refused create made nothing and moved nothing
+  assert.doesNotMatch(run('tracks').stdout, /^  x /m);
+  assert.match(run('done', '--ownership', 'agent').stderr, /--ownership works only with switch, create and init/);
+  assert.match(run('switch', 'track', '--ownership').stderr, /--ownership needs a mode: agent, hybrid, user/);
+  run('switch', 'track', '--ownership', 'agent');
+  assert.ok(!('ownership' in track()));
+  assert.match(run('switch', 'new-one', '--ownership', 'hybrid').stdout, /created track "new-one" .*\nownership: hybrid — /); // switch creates with it
+  run('close', 'new-one', '--force');
+  const closed = run('switch', 'new-one', '--ownership', 'user');
+  assert.match(closed.stderr, /track "new-one" is closed \(read-only\) — its ownership stays hybrid/);
+});

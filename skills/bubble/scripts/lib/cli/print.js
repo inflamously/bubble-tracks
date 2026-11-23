@@ -1,4 +1,4 @@
-// What `show` and every mutation print: the track line, the goal (and guards on switch or guard), the listing, the handoff note or closed line, the fog warning.
+// What `show` and every mutation print: the track line, the goal, the ownership (unless it is the agent's; and guards on switch or guard), the listing, the handoff note or closed line, the fog warning.
 import * as lib from '../index.js';
 import * as links from '../links/index.js';
 /** The track's guards, numbered; nothing when it has none. */
@@ -21,6 +21,8 @@ export function printTrack(file, track, opts, guards = false) {
         console.log(`${side} diverged from ${links.linkLabel(file, track.origin)} in ${track.origin.track}`);
     if (track.goal)
         console.log(`${lib.symbolsFor(opts).goal} goal: ${track.goal}`);
+    if (track.ownership)
+        console.log(`${lib.symbolsFor(opts).owner} ${lib.describeOwnership(track)}`);
     if (guards)
         printGuards(track, opts);
     console.log('');

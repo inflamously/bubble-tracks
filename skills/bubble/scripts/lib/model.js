@@ -1,6 +1,8 @@
-// The bubble model: fog types, which bubble is active, and how addresses resolve to bubbles.
+// The bubble model: fog types, ownership, which bubble is active, and how addresses resolve to bubbles.
 export const TYPES = ['known-known', 'known-unknown', 'unknown-known', 'unknown-unknown'];
 const TYPE_ALIASES = { kk: 'known-known', ku: 'known-unknown', uk: 'unknown-known', uu: 'unknown-unknown' };
+/** Who does the bubbles' work on a track: the agent, the human on the bubbles they pick, or the human on all of them. */
+export const OWNERSHIPS = ['agent', 'hybrid', 'user'];
 /** Expand kk/ku/uk/uu shorthands; undefined stays undefined. */
 export function normalizeType(type) {
     return type === undefined ? undefined : TYPE_ALIASES[type] || type;
@@ -9,6 +11,10 @@ export function checkType(type) {
     if (type !== undefined && !TYPES.includes(type)) {
         throw new Error(`unknown fog type "${type}" (use: ${TYPES.join(', ')} — or kk, ku, uk, uu)`);
     }
+}
+/** The track's ownership mode; a track that stores none is the agent's. */
+export function ownershipOf(track) {
+    return track.ownership || 'agent';
 }
 /** A bubble's stable id from the track's counter. Positions shift on move/insert/remove; ids don't. */
 export function ensureId(track, b) {

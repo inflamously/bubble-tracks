@@ -1,8 +1,12 @@
-// The bubble model: fog types, which bubble is active, and how addresses resolve to bubbles.
+// The bubble model: fog types, ownership, which bubble is active, and how addresses resolve to bubbles.
 
 export const TYPES = ['known-known', 'known-unknown', 'unknown-known', 'unknown-unknown'] as const;
 export type FogType = (typeof TYPES)[number];
 const TYPE_ALIASES: Record<string, FogType> = { kk: 'known-known', ku: 'known-unknown', uk: 'unknown-known', uu: 'unknown-unknown' };
+
+/** Who does the bubbles' work on a track: the agent, the human on the bubbles they pick, or the human on all of them. */
+export const OWNERSHIPS = ['agent', 'hybrid', 'user'] as const;
+export type Ownership = (typeof OWNERSHIPS)[number];
 
 /** A bubble address as the CLI passes it: "3", "2:4", or undefined for the active bubble. */
 export type Addr = string | number | undefined;
@@ -33,6 +37,7 @@ export interface Track {
   title?: string;
   goal?: string; // the one end result every bubble serves
   guards?: string[]; // what not to do on the way: soft rules read before acting
+  ownership?: Exclude<Ownership, 'agent'>; // who does the bubbles' work; agent is the default and isn't stored
   bubbles: Bubble[];
   nextId?: number;
   handoff?: { note: string; at: string };
@@ -50,6 +55,11 @@ export function checkType(type: string | undefined): asserts type is FogType | u
   if (type !== undefined && !(TYPES as readonly string[]).includes(type)) {
     throw new Error(`unknown fog type "${type}" (use: ${TYPES.join(', ')} — or kk, ku, uk, uu)`);
   }
+}
+
+/** The track's ownership mode; a track that stores none is the agent's. */
+export function ownershipOf(track: Track): Ownership {
+  return track.ownership || 'agent';
 }
 
 /** A bubble's stable id from the track's counter. Positions shift on move/insert/remove; ids don't. */

@@ -2,7 +2,7 @@
 // and a whole phrase can be passed as one quoted argument: node bubble.js "move 2 to 5".
 
 import { parseArgs as parseFlags } from 'node:util';
-import { TYPES } from '../model.js';
+import { OWNERSHIPS, TYPES } from '../model.js';
 import type { RenderOpts } from '../render/index.js';
 
 export type CliOpts = ReturnType<typeof flags>['values'];
@@ -23,6 +23,7 @@ const OPTIONS = {
   dir: { type: 'string' },
   at: { type: 'string' },
   to: { type: 'string' },
+  ownership: { type: 'string' },
   help: { type: 'boolean', short: 'h' },
 } as const;
 
@@ -34,6 +35,10 @@ export const HELP = `bubble-tracks — the bubble language
                                 A new name close to an open track (flow for flow-analysis) is refused: create makes it.
                                 Names ignore case: Dev resumes dev, and create refuses a case-only twin
   create <name> [title]         create a new track (refuses if it exists) and make it current
+  switch <name> --ownership <MODE>
+                                set who does the bubbles' work on that track (create and init take it too):
+                                agent (the default), hybrid (the human does the bubbles they pick) or
+                                user (the human does every bubble; the agent hints and checks it)
   tracks [--closed | --all]     list the tracks, current marked →; closed ones are hidden unless
                                 --closed (only closed) or --all (everything)
   close <name> --force          finish and archive a track: read-only for good, no reopen. Also closes
@@ -82,6 +87,7 @@ export const HELP = `bubble-tracks — the bubble language
 
   N: position on the track (omitted = the active bubble). N:M: N through M, inclusive.
   TYPE: ${TYPES.join(' | ')}  (or kk | ku | uk | uu)
+  MODE: ${OWNERSHIPS.join(' | ')}
   Options: --dir <repo> (default: cwd)   --ascii (or BUBBLES_ASCII=1)   --force
            --to <track> (or --to=<track>): add, insert and hint write into that track; the current track stays current
            a word that starts with - is an option; put text like that after --:  hint 2 -- -v means verbose
@@ -94,7 +100,10 @@ export const HELP = `bubble-tracks — the bubble language
 function flagError(err: Error & { code?: string }): Error {
   const name = /'(-[^' ]+)/.exec(err.message)?.[1];
   if (err.code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION') return new Error(`unknown option "${name}" — try: help (text starting with - goes after --)`);
-  if (err.code === 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE') return new Error(name === '--to' ? '--to needs a track name' : `${name} needs a value`);
+  if (err.code === 'ERR_PARSE_ARGS_INVALID_OPTION_VALUE') {
+    if (name === '--ownership') return new Error(`--ownership needs a mode: ${OWNERSHIPS.join(', ')}`);
+    return new Error(name === '--to' ? '--to needs a track name' : `${name} needs a value`);
+  }
   return err;
 }
 
