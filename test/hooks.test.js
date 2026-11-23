@@ -60,6 +60,30 @@ test('gate blocks edits at fog for every payload shape', () => {
   }
 });
 
+test('gate blocks edits while the active bubble is the human\'s to do: user track, or picked on a hybrid one', () => {
+  const edit = (dir, file = 'src/a.js') => run('fog-gate.js', { cwd: dir, tool_name: 'Edit', tool_input: { file_path: file } });
+  const A = { title: 'A', state: 'todo' };
+  const mine = { title: 'A', state: 'todo', owner: 'user' };
+  const B = { title: 'B', state: 'todo', owner: 'user' };
+  for (const track of [{ title: 'P', ownership: 'user', bubbles: [A] }, { title: 'P', ownership: 'hybrid', bubbles: [mine] }]) {
+    const r = edit(repo(track));
+    assert.strictEqual(r.status, 2, track.ownership);
+    assert.match(r.stderr, /Active bubble "A" is the human's to do — don't do its work yourself\. Hint at the steps, and check the work once they say it's done\. Only the human hands it to you: bubble own -/);
+    assert.strictEqual(r.stdout, '');
+  }
+  // the plan itself stays editable, as at fog
+  assert.strictEqual(edit(repo({ title: 'P', ownership: 'user', bubbles: [A] }), '.bubble-tracks/track.json').status, 0);
+  // allowed: the agent's bubble on a hybrid track (a later one is the human's), a stray owner on an agent track, all done, closed
+  assert.strictEqual(edit(repo({ title: 'P', ownership: 'hybrid', bubbles: [A, B] })).status, 0);
+  assert.strictEqual(edit(repo({ title: 'P', bubbles: [mine] })).status, 0);
+  assert.strictEqual(edit(repo({ title: 'P', ownership: 'user', bubbles: [{ title: 'A', state: 'done' }] })).status, 0);
+  assert.strictEqual(edit(repo({ title: 'P', ownership: 'user', closed: { at: '2026-10-16T00:00:00.000Z' }, bubbles: [A] })).status, 0);
+  // fog on the human's bubble: the fog message wins, planning comes first
+  const fog = edit(repo({ title: 'P', ownership: 'user', bubbles: [{ title: '???', state: 'fog' }] }));
+  assert.strictEqual(fog.status, 2);
+  assert.match(fog.stderr, /unplanned/);
+});
+
 test('gate allows: track edits, todo bubble, no track, corrupt track, subdir cwd', () => {
   const fog = repo(fogTrack);
   assert.strictEqual(run('fog-gate.js', { cwd: fog, tool_input: { file_path: '.bubble-tracks/track.json' } }).status, 0);

@@ -1,4 +1,4 @@
-// What `show` and every mutation print: the track line, the goal, the ownership (unless it is the agent's; and guards on switch or guard), the listing, the handoff note or closed line, the fog warning.
+// What `show` and every mutation print: the track line, the goal, the ownership (unless it is the agent's; and guards on switch or guard), the listing, the handoff note or closed line, the fog warning or the human's-bubble notice.
 import * as lib from '../index.js';
 import * as links from '../links/index.js';
 /** The track's guards, numbered; nothing when it has none. */
@@ -10,6 +10,7 @@ export function printGuards(track, opts) {
 }
 /**
  * Print the track saved at `file`; returns 3 when the active bubble is fog (the human has to plan it), else 0.
+ * An active bubble that is the human's to do gets a notice and still returns 0: nothing is missing, the agent just keeps off.
  * Guards print only with `guards` (switch and the guard command); otherwise `guard show` lists them.
  */
 export function printTrack(file, track, opts, guards = false) {
@@ -43,6 +44,10 @@ export function printTrack(file, track, opts, guards = false) {
         if (active.answer)
             console.log('  Their words above are the start: turn them, with the human, into a fill, a hint, a guard, new bubbles or a fork.');
         return 3;
+    }
+    if (active && lib.ownedByHuman(track, active)) {
+        console.log('');
+        console.log(`${lib.symbolsFor(opts).humanActive} "${active.title}" is the human's to do — don't do its work yourself. Hint at the steps; once they say it's done, check it, then run done.`);
     }
     return 0;
 }

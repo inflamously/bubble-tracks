@@ -171,6 +171,7 @@ describe('e2e: a development track from sketch to close', () => {
   describe('own: the human takes bubbles, and hands them back', () => {
     step(['own', '3'], [/"Pick format" is the human's to do/, /S ●──◐──◇ F/, /3 {3}◇ todo {3}Pick format \[known-unknown\]\n {8}owner: human/]);
     step(['own'], [/"Check input" is the human's to do/, /S ●──◈──◇ F {3}Parse input ‹ ◈ Check input › Pick format/]); // no N: the active bubble
+    step(['show'], /\n\n◈ "Check input" is the human's to do — don't do its work yourself\. Hint at the steps; once they say it's done, check it, then run done\.$/); // a notice, exit 0: 3 is fog's alone
     step(['own', '2:3', '-'], [/"Check input", "Pick format" are the agent's to do/, /S ●──◐──○ F/]);
     step(['own', '1'], /"Parse input" is done — a done bubble keeps its owner/, 1);
     step(['own', '2', 'mine'], /usage: own \[N \| N:M\] \| own \[N \| N:M\] -/, 1);
