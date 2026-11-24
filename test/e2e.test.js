@@ -53,11 +53,13 @@ describe('e2e: a development track from sketch to close', () => {
     step(['add', 'Parse input'], [/added bubble "Parse input"/, /→ 1 {3}◐ todo {3}Parse input/]);
     step(['add', '?'], [/added fog "\?\?\?" — no reason yet, say why it's unclear: why 2 <text>/, /S ◐──❓ F/]);
     step(['add', 'Write output'], /S ◐──❓──○ F/);
-    step(['insert', 'at', '2', 'Validate'], [/added bubble "Validate"/, /2 {3}○ todo {3}Validate/]);
+    // a title that isn't 2–4 words only warns: the bubble is still added
+    step(['insert', 'at', '2', 'Validate'], [/added bubble "Validate" \(⚠ 1 word — a title is 2–4 words; details go in a hint\)/, /2 {3}○ todo {3}Validate/]);
     step(['hint', '1', 'read stdin'], [/hint on "Parse input": read stdin/, /↳ read stdin/]);
     step(['hint', '2', '--', '-v prints each rule'], /↳ -v prints each rule/);
     step(['hint', '2', '-'], /cleared hint on "Validate"/);
-    step(['rename', '2', 'Check input'], /renamed "Validate" → "Check input"/);
+    step(['rename', '2', 'Check the input before parsing'], /renamed "Validate" → "Check the input before parsing" \(⚠ 5 words — a title is 2–4 words; details go in a hint\)/);
+    step(['rename', '2', 'Check input'], /renamed "Check the input before parsing" → "Check input"\n/);
   });
 
   describe('plan: goal and guards on the track', () => {
@@ -206,7 +208,7 @@ describe('e2e: a development track from sketch to close', () => {
   describe('--to: record work on another track', () => {
     step(['add', 'Extra', '--to', 'spacing', '--to', 'dev-alt'], /--to given twice — give it once \(text starting with - goes after --\)/, 1);
     step(['add', 'Extra', '--to', 'dev-alt', 'spacing'], /--to splits the text — put options after it \(text starting with - goes after --\)/, 1);
-    step(['add', 'Extra', '--to', 'dev-alt'], /added bubble "Extra" — on track "dev-alt"; the current track stays "dev"/);
+    step(['add', 'Extra', '--to', 'dev-alt'], /added bubble "Extra" \(⚠ 1 word — a title is 2–4 words; details go in a hint\) — on track "dev-alt"; the current track stays "dev"/);
     step(['hint', '2', 'from dev', '--to', 'dev-alt'], /↳ from dev/);
     step(['move', '3', '--to', 'dev-alt'], [/moved "Pick format" to track "dev-alt"\n\nAlt idea {3}S /, /Dev flow {3}S ●──● F {3}all done/]);
     it('the moved bubble keeps its fog type', () => {

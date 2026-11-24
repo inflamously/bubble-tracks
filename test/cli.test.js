@@ -416,7 +416,7 @@ test('--to: add, insert and hint write into that track; the current track stays 
   const main = JSON.stringify(read('main'));
   const r = run('add', 'Later', '--to', 'other');
   assert.strictEqual(r.status, 0);
-  assert.match(r.stdout, /added bubble "Later" — on track "other"; the current track stays "main"/);
+  assert.match(r.stdout, /added bubble "Later" \(⚠ 1 word[^)]*\) — on track "other"; the current track stays "main"/);
   assert.match(r.stdout, /^O   S ◐──○ F/m); // shows the track it wrote into
   run('add', '?', '--to', 'other');
   run('insert', 'at', '1', 'First', '--to', 'other');

@@ -1,5 +1,6 @@
 // The fog lifecycle: turn bubbles into fog, say why, classify them, keep the human's words, fill them with their content.
 import { normalizeType, checkType, resolve, resolveRange } from '../model.js';
+import { titleNote } from './rename.js';
 /** Turn a bubble (or N:M range) into fog. Done bubbles need `force`. */
 export function fog(track, spec, type, { force = false } = {}) {
     type = normalizeType(type);
@@ -58,5 +59,5 @@ export function fill(track, addr, title) {
         throw new Error('fill needs a title');
     b.title = title;
     b.state = 'todo';
-    return `filled "${b.title}"`;
+    return `filled "${b.title}"${titleNote(b.title)}`;
 }

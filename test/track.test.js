@@ -136,6 +136,22 @@ test('fill is fog-only; rename is for planned bubbles', () => {
   assert.throws(() => T.fill(t, '2', ''), /needs a title/);
 });
 
+test('a title that is not 2–4 words warns, and the command still runs', () => {
+  const t = { title: 'T', bubbles: [] };
+  const note = (n) => new RegExp(`\\(⚠ ${n} words? — a title is 2–4 words; details go in a hint\\)$`);
+  assert.strictEqual(T.add(t, 'Parse input'), 'added bubble "Parse input"');
+  assert.strictEqual(T.add(t, 'Parse the input file'), 'added bubble "Parse the input file"');
+  assert.match(T.add(t, 'Parse'), note(1));
+  assert.match(T.add(t, 'Parse the whole input file'), note(5));
+  assert.strictEqual(t.bubbles.length, 4);
+  assert.match(T.rename(t, '1', 'Parser'), note(1));
+  assert.strictEqual(t.bubbles[0].title, 'Parser');
+  assert.strictEqual(T.add(t, undefined, { fog: true, why: 'unsaid' }), 'added fog "???" — why: unsaid'); // fog has no title yet
+  assert.match(T.fill(t, '5', 'Pick one of the two formats'), note(6));
+  assert.strictEqual(t.bubbles[4].state, 'todo');
+  assert.strictEqual(T.fill(T.fog(t, '5') && t, '5', 'Pick format'), 'filled "Pick format"');
+});
+
 test('hint: set, list shows it, clear', () => {
   const t = five();
   T.hint(t, '2', 'keep it soft');

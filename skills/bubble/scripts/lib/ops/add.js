@@ -1,5 +1,6 @@
 // Add a todo or fog bubble, at the end or at a position (insert).
 import { ensureId } from '../model.js';
+import { titleNote } from './rename.js';
 /** `why` (fog only) is the one-line reason the fog exists; without it the message asks for one. */
 export function add(track, title, { fog = false, at, why } = {}) {
     const bubbles = track.bubbles;
@@ -19,7 +20,7 @@ export function add(track, title, { fog = false, at, why } = {}) {
     }
     ensureId(track, bubble);
     if (!fog)
-        return `added bubble "${bubble.title}"`;
+        return `added bubble "${bubble.title}"${titleNote(bubble.title)}`;
     const n = bubbles.indexOf(bubble) + 1;
     return `added fog "${bubble.title}"` + (why ? ` — why: ${why}` : ` — no reason yet, say why it's unclear: why ${n} <text>`);
 }
