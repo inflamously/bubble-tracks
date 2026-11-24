@@ -71,8 +71,9 @@ test('gate blocks edits while the active bubble is the human\'s to do: user trac
     assert.match(r.stderr, /Active bubble "A" is the human's to do — don't do its work yourself\. Hint at the steps, and check the work once they say it's done\. Only the human hands it to you: bubble own -/);
     assert.strictEqual(r.stdout, '');
   }
-  // the plan itself stays editable, as at fog
-  assert.strictEqual(edit(repo({ title: 'P', ownership: 'user', bubbles: [A] }), '.bubble-tracks/track.json').status, 0);
+  // the plan folder stays open, as at fog; the track file itself is the CLI's
+  assert.strictEqual(edit(repo({ title: 'P', ownership: 'user', bubbles: [A] }), '.bubble-tracks/abilities/ready.md').status, 0);
+  assert.match(edit(repo({ title: 'P', ownership: 'user', bubbles: [A] }), '.bubble-tracks/track.json').stderr, /is a track file/);
   // allowed: the agent's bubble on a hybrid track (a later one is the human's), a stray owner on an agent track, all done, closed
   assert.strictEqual(edit(repo({ title: 'P', ownership: 'hybrid', bubbles: [A, B] })).status, 0);
   assert.strictEqual(edit(repo({ title: 'P', bubbles: [mine] })).status, 0);
@@ -84,11 +85,39 @@ test('gate blocks edits while the active bubble is the human\'s to do: user trac
   assert.match(fog.stderr, /unplanned/);
 });
 
-test('gate allows: track edits, todo bubble, no track, corrupt track, subdir cwd', () => {
+test('gate refuses hand edits to track files, at any bubble state: only the CLI writes them', () => {
+  const cli = path.join(SCRIPTS, 'bubble.js');
+  for (const track of [todoTrack, fogTrack, { ...todoTrack, closed: { at: '2026-01-01T00:00:00.000Z' } }]) {
+    const dir = repo(track);
+    const edit = (file) => run('fog-gate.js', { cwd: dir, tool_input: { file_path: file } });
+    const r = edit('.bubble-tracks/track.json');
+    assert.strictEqual(r.status, 2);
+    assert.strictEqual(r.stdout, '');
+    assert.strictEqual(r.stderr, `"track.json" is a track file — don't edit it by hand. Change the track through the CLI: node "${cli}" <command> (try: help)\n`);
+    assert.strictEqual(edit(path.join(dir, '.bubble-tracks', 'current')).status, 2); // the pointer, absolute path
+    assert.strictEqual(edit('.bubble-tracks/new.json').status, 2); // a track that doesn't exist yet: create makes it
+    assert.strictEqual(edit('.bubble-tracks/Track.JSON').status, 2); // names ignore case
+    assert.strictEqual(edit('.bubble-tracks/abilities/ready.md').status, 0); // abilities are files the human and agent write
+    assert.strictEqual(edit('.bubble-tracks/abilities/notes.json').status, 0); // only the top level holds tracks
+  }
+  const dir = repo(todoTrack);
+  const patch = run('fog-gate.js', { cwd: dir, tool_input: { command: '*** Update File: .bubble-tracks/track.json\n*** Update File: .bubble-tracks/current\n*** Update File: src/a.js' } });
+  assert.strictEqual(patch.status, 2);
+  assert.match(patch.stderr, /^"track\.json", "current" are track files — don't edit them by hand\. /);
+  // a second track's file is gated too, also when the current track is missing
+  fs.writeFileSync(path.join(dir, '.bubble-tracks', 'other.json'), JSON.stringify(todoTrack));
+  fs.writeFileSync(path.join(dir, '.bubble-tracks', 'current'), 'gone\n');
+  assert.strictEqual(run('fog-gate.js', { cwd: dir, tool_input: { file_path: '.bubble-tracks/other.json' } }).status, 2);
+  // a track file that no longer parses: the CLI can't load it, so a hand edit is the repair
+  const broken = repo('{nope');
+  assert.strictEqual(run('fog-gate.js', { cwd: broken, tool_input: { file_path: '.bubble-tracks/track.json' } }).status, 0);
+});
+
+test('gate allows: abilities at fog, todo bubble, no track, corrupt track, subdir cwd', () => {
   const fog = repo(fogTrack);
-  assert.strictEqual(run('fog-gate.js', { cwd: fog, tool_input: { file_path: '.bubble-tracks/track.json' } }).status, 0);
+  assert.strictEqual(run('fog-gate.js', { cwd: fog, tool_input: { file_path: '.bubble-tracks/abilities/ready.md' } }).status, 0);
   assert.strictEqual(
-    run('fog-gate.js', { cwd: fog, tool_input: { command: `*** Update File: .bubble-tracks/track.json\n*** Update File: src/a.js` } }).status,
+    run('fog-gate.js', { cwd: fog, tool_input: { command: `*** Update File: .bubble-tracks/abilities/ready.md\n*** Update File: src/a.js` } }).status,
     2,
     'mixed patch still blocked'
   );
@@ -161,5 +190,4 @@ test('fog gate and statusline follow the current track', () => {
   fs.writeFileSync(path.join(dir, '.bubble-tracks', 'current'), 'foggy\n');
   assert.strictEqual(run('fog-gate.js', edit).status, 2);
   assert.match(run('statusline.js', { cwd: dir }).stdout, /needs you/);
-  assert.strictEqual(run('fog-gate.js', { cwd: dir, tool_input: { file_path: path.join(dir, '.bubble-tracks', 'current') } }).status, 0);
 });

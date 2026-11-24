@@ -1,5 +1,6 @@
 // Which files a pre-tool call is about to edit, and whether one is part of the plan itself.
 
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { HookInput } from './input.js';
 
@@ -28,4 +29,22 @@ export function isInsideBubblesDir(file: string, trackFile: string): boolean {
   const bubblesDir = path.dirname(trackFile);
   const rel = path.relative(bubblesDir, file);
   return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
+/** True if `file` is a track file: `<bubblesDir>/<name>.json`, or the `current` pointer. Only the CLI writes
+ *  those. Anything deeper (`abilities/`) is not one. Names ignore case, as the CLI's track names do. */
+export function isTrackFile(file: string, bubblesDir: string): boolean {
+  const rel = path.relative(bubblesDir, file).toLowerCase();
+  if (rel === 'current') return true;
+  return path.dirname(rel) === '.' && rel.endsWith('.json');
+}
+
+/** True if `file` exists and no longer parses as JSON. The CLI can't load such a track, so only a hand edit repairs it. */
+export function isBrokenJson(file: string): boolean {
+  try {
+    JSON.parse(fs.readFileSync(file, 'utf8'));
+    return false;
+  } catch (err) {
+    return (err as NodeJS.ErrnoException).code !== 'ENOENT';
+  }
 }
