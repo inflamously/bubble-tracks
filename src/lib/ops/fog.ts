@@ -3,7 +3,7 @@
 import { normalizeType, checkType, resolve, resolveRange, type Addr, type Track } from '../model.js';
 import { titleNote } from './rename.js';
 
-/** Turn a bubble (or N:M range) into fog. Done bubbles need `force`. */
+/** Turn a bubble (or N:M range) into fog. Done bubbles need `force`. A fog without a reason only warns: it is still made. */
 export function fog(track: Track, spec: Addr, type?: string, { force = false }: { force?: boolean } = {}): string {
   type = normalizeType(type);
   checkType(type);
@@ -20,7 +20,11 @@ export function fog(track: Track, spec: Addr, type?: string, { force = false }: 
     b.state = 'fog';
     if (type) b.type = type;
   }
-  return picked.length === 1 ? `"${picked[0].title}" is now fog` : `bubbles ${from + 1}–${to + 1} are now fog`;
+  const msg = picked.length === 1 ? `"${picked[0].title}" is now fog` : `bubbles ${from + 1}–${to + 1} are now fog`;
+  const unsaid = picked.map((b, i) => (b.why ? 0 : from + i + 1)).filter(Boolean);
+  if (!unsaid.length) return msg;
+  if (picked.length === 1) return `${msg} — no reason yet, say why it's unclear: why ${unsaid[0]} <text>`;
+  return `${msg} — no reason yet on ${unsaid.join(', ')}, say why each is unclear: why N <text>`;
 }
 
 export function setType(track: Track, addr: Addr, type: string | undefined): string {

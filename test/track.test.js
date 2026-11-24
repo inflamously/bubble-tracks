@@ -152,6 +152,18 @@ test('a title that is not 2–4 words warns, and the command still runs', () => 
   assert.strictEqual(T.fill(T.fog(t, '5') && t, '5', 'Pick format'), 'filled "Pick format"');
 });
 
+test('fog without a reason warns, and names the bubbles that still need one', () => {
+  const t = { title: 'T', bubbles: ['A b', 'C d', 'E f'].map((title) => ({ title, state: 'todo' })) };
+  assert.strictEqual(T.fog(t, '1'), `"A b" is now fog — no reason yet, say why it's unclear: why 1 <text>`);
+  T.setWhy(t, '1', 'unsaid');
+  assert.strictEqual(T.fog(t, '1'), '"A b" is now fog');
+  assert.strictEqual(T.fog(t, '1:3'), 'bubbles 1–3 are now fog — no reason yet on 2, 3, say why each is unclear: why N <text>');
+  T.setWhy(t, '2', 'unsaid');
+  T.setWhy(t, '3', 'unsaid');
+  assert.strictEqual(T.fog(t, '1:3'), 'bubbles 1–3 are now fog');
+  assert.ok(t.bubbles.every((b) => b.state === 'fog'));
+});
+
 test('hint: set, list shows it, clear', () => {
   const t = five();
   T.hint(t, '2', 'keep it soft');

@@ -135,7 +135,11 @@ describe('e2e: a development track from sketch to close', () => {
   });
 
   describe('reshape: fog, move, remove, handoff, title', () => {
-    step(['fog', '4'], /"Write output" is now fog/);
+    // a fog without a reason only warns: the bubble is fog all the same
+    step(['fog', '4'], [/"Write output" is now fog — no reason yet, say why it's unclear: why 4 <text>/, /4 {3}❓ fog {4}Write output/]);
+    step(['why', '4', 'no writer picked yet'], /why on "Write output": no writer picked yet/);
+    step(['fog', '4'], /"Write output" is now fog\n/); // it has its reason: nothing to warn about
+    step(['why', '4', '-'], /cleared why on "Write output"/);
     step(['move', '4', 'to', '1'], [/moved "Write output" to 1/, /⚠ "Write output" is fog/]);
     step(['show'], /❓ needs you/, 3); // the fog gate
     step(['switch', 'dev'], /⚠ "Write output" is fog/); // warns, but exit 3 is show's alone
