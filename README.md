@@ -219,7 +219,7 @@ A leading `bubble` word is optional, and a whole phrase can be passed as one quo
 | `guard drop N` · `guard drop --all` | Drop guard N, or all of them (`--all` needs `--force`) |
 | `handoff <note>` · `handoff -` | Save (or clear) the note a fresh chat resumes from |
 | `hint N <text>` · `hint N -` | Attach (or clear) a note for that bubble |
-| `own [N \| N:M]` · `own [N \| N:M] -` | Take bubbles to do yourself, or hand them back to the agent (not done ones). `own` on an agent track and `own -` on a user track switch it to hybrid |
+| `own [N \| N:M]` · `own [N \| N:M] -` | Take bubbles to do yourself, or hand them back to the agent (not done ones). `own` on an agent track and `own -` on a user track switch it to hybrid for good, so they need `--force` |
 | `fog [N \| N:M] [TYPE]` | Turn bubbles into fog (done bubbles need `--force`; not while its fork is open) |
 | `why [N] <text>` · `why [N] -` | Say (or clear) why a fog bubble is unclear |
 | `type [N] <TYPE>` | Set the fog type: `kk` · `ku` · `uk` · `uu` (or the full names) |

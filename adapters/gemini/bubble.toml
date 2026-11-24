@@ -45,7 +45,8 @@ or `user` (the human does every bubble). Only the human sets it (`switch <name> 
 `own N -`); "I'll do 4 and 5 myself" means `own 4:5`. If the track above ends with `◈ "…" is the human's to do`:
 don't edit and don't do its work. Hint at the steps, wait, check their work once they say it's done (they fix
 what is wrong), then run `done`. A hybrid track stays hybrid; after the first `done`, `agent` and `user` only
-move into `hybrid`.
+move into `hybrid`. `own N` on an agent track and `own N -` on a user track turn it hybrid for good: the CLI
+refuses them without `--force`, so confirm it with the human first.
 If the active bubble is fog: STOP. Never plan fog yourself. Ask the human to classify it
 (known-known, known-unknown, unknown-known, unknown-unknown) and wait for their content before `fill`.
 After every change, show the rendered track line.

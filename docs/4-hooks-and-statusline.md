@@ -27,9 +27,13 @@ So the agent is steered back to the conversation exactly when it was about to sk
 ### The rules, in code order
 
 ```ts
+const bubblesDir = lib.findBubblesDir(root);
+if (!bubblesDir) return 0;
+const targets = extractTargetPaths(input, root);
+const byHand = targets.filter((f) => isTrackFile(f, bubblesDir) && !isBrokenJson(f));
+if (byHand.length) return 2;                                   // 0
 const found = lib.findTrack(root);
 if (!found || !found.track || found.track.closed) return 0;   // 1
-const targets = extractTargetPaths(input, root);
 if (targets.length && targets.every((f) => isInsideBubblesDir(f, found.file))) return 0;   // 2
 const active = lib.activeBubble(found.track);
 if (!active || active.state !== 'fog') return 0;              // 3
@@ -37,8 +41,9 @@ process.stderr.write(`Active bubble "${active.title}" is unplanned …`);
 return 2;                                                      // 4
 ```
 
-1. **No track, an unreadable track, or a closed track lets everything through.** A repo that doesn't use bubble-tracks is never affected. A closed track is an archive, so it gates nothing.
-2. **Edits that only touch `.bubble-tracks/` are allowed.** Editing the plan is how fog gets resolved. If a patch touches the plan *and* `src/`, it's still blocked.
+0. **A hand edit to a track file is always blocked.** A track file is `.bubble-tracks/<name>.json` or `.bubble-tracks/current`. Only the CLI writes them, and it runs through the shell, which this hook never sees. The rule holds at every bubble, for every track in the folder, open or closed. The message names the CLI. One exception: a track file that no longer parses is let through, because the CLI can't load it.
+1. **No track, an unreadable track, or a closed track lets everything else through.** A repo that doesn't use bubble-tracks is never affected. A closed track is an archive, so it gates no project file.
+2. **Edits that only touch the rest of `.bubble-tracks/` are allowed.** That is `abilities/`: files the human and the agent write. If a patch touches it *and* `src/`, it's still blocked.
 3. **It only checks the active bubble.** Fog further down the track doesn't block anything until the track reaches it.
 4. **Otherwise the edit is blocked.** All three agents treat exit code 2 as "deny" and pass stderr on to the model.
 

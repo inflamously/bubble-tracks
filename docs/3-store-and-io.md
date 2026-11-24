@@ -34,9 +34,11 @@ Claude Code, Codex CLI and Gemini CLI each send the hook a JSON payload on stdin
 - **`extractTargetPaths`** collects the files an edit would touch:
   - Claude and Gemini put them in `file_path`, `path` or `notebook_path`.
   - Codex sends a raw `apply_patch` text, so the function scans it for `*** Add|Update|Delete File:` and `*** Move to:` lines.
-- **`isInsideBubblesDir`** decides whether an edit only touches the plan. Editing the plan is always allowed, because that's how fog gets filled.
+- **`isTrackFile`** decides whether an edit targets a track file: `<name>.json` at the top of `.bubble-tracks/`, or `current`. Only the CLI writes those, so the gate refuses the edit.
+- **`isBrokenJson`** is the exception to that: a track file that no longer parses is let through, because the CLI can't load it and a hand edit is the only repair.
+- **`isInsideBubblesDir`** decides whether an edit only touches the rest of the plan folder (`abilities/`). That is always allowed, also at fog.
 
-The gate only sees **file-editing tools**. A shell command that writes a file (for example `sed -i`) has no `file_path`, so the fog gate never checks it.
+The gate only sees **file-editing tools**. A shell command that writes a file (for example `sed -i`) has no `file_path`, so the gate never checks it, track files included.
 
 ## links/: tracks pointing at tracks
 

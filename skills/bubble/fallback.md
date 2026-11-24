@@ -8,7 +8,19 @@ Tell the human once: *"Node isn't available here, so I'm editing the track by ha
 
 Without Node, no hook blocks your edits. Before editing any project file, read the current track. If its active bubble is fog, **don't edit**. Go to SKILL.md step 4 and ask the human. Edits under `.bubble-tracks/` are always allowed.
 
+The track files are the one exception to the hook's other rule. With Node, the hook refuses every hand edit to `.bubble-tracks/<name>.json` and `.bubble-tracks/current`, because the CLI writes them. Here nothing writes them but you.
+
 The ownership gate is on you too. The active bubble is the human's to do when the track's `ownership` is `user`, or when it is `hybrid` and the bubble has `owner`. Then **don't edit** either: follow SKILL.md's **Ownership** section (hint, wait, check, then `done`).
+
+## The checks are on you
+
+With Node, the CLI checks these rules on every command. Without it, check each one yourself before you save the file:
+
+- **A title has 2–4 words.** This holds for `add`, `insert`, `fill` and `rename`. The track line cuts each label at 20 characters, so a longer title is cut off. Details, scope and file lists go in the `hint`. The CLI only warns here: if the human wants another length, keep their title.
+- **Every fog has a `why`.** It says in one line why the bubble is unclear: what is missing or undecided, never what the bubble is. When you make a fog with `add ?` or `fog` and have no reason yet, ask the human for it or write it, then set `why`.
+- **A todo bubble's hint ends with its boundary.** The boundary is `[Boundary: …]`, in square brackets, with the places the bubble may touch separated by commas. A fog bubble and a done bubble need none.
+- **Only a fog bubble has a `type`.** Don't set `type` on a todo or done bubble. If the human classifies a planned bubble, it has to become fog first. A filled bubble keeps the `type` it got as fog.
+- **Turning a track `hybrid` is permanent.** `own` on a track with no `ownership`, and `own … -` on a `user` track, both do it. Say that there is no way back, and make the edit only after the human confirms. On a track that is already `hybrid`, `own` needs no confirmation.
 
 ## Where tracks live
 
@@ -22,12 +34,12 @@ The ownership gate is on you too. The active bubble is the human's to do when th
 {
   "title": "Fix generation",
   "bubbles": [
-    { "title": "Repro", "state": "done", "id": 1 },
-    { "title": "???", "state": "fog", "id": 2, "type": "unknown-known" },
-    { "title": "Patch", "state": "todo", "id": 3, "hint": "only touch gen.py" }
+    { "title": "Reproduce the bug", "state": "done", "id": 1 },
+    { "title": "???", "state": "fog", "id": 2, "type": "unknown-known", "why": "unclear which inputs break the generator" },
+    { "title": "Patch the generator", "state": "todo", "id": 3, "hint": "Fix the off-by-one in the loop. [Boundary: gen.py]" }
   ],
   "nextId": 4,
-  "handoff": { "note": "Repro is in test_gen.py. Next: ask the human about bubble 2.", "at": "2026-10-20 18:10 UTC" }
+  "handoff": { "note": "The repro is in test_gen.py. Next: ask the human about bubble 2.", "at": "2026-10-20 18:10 UTC" }
 }
 ```
 
@@ -47,8 +59,8 @@ Bubble fields:
 - `title`: 2–4 words; fog bubbles have `???` until filled.
 - `state`: `todo`, `fog` or `done`. Never store `active`: the **active bubble is the first one that isn't `done`**.
 - `id`: stable and never reused. Take it from `nextId`, then add 1 to `nextId`.
-- `type`: the fog classification: `known-known`, `known-unknown`, `unknown-known` or `unknown-unknown`.
-- `hint`: the human's note for this bubble.
+- `type`: the fog classification: `known-known`, `known-unknown`, `unknown-known` or `unknown-unknown`. Set it only while the bubble is fog.
+- `hint`: the human's note for this bubble. On a todo bubble it ends with `[Boundary: …]`.
 - `owner`: `user` when the human does this bubble's work. Only on a `hybrid` track. Never change it on a `done` bubble.
 - `why`: set while fog: one line on why it's unclear (not what it is).
 - `answer`: set while fog: the human's own words on it, kept as they said them while it stays fog.
@@ -71,10 +83,10 @@ N is a 1-based position on the track. When N is left out, it means the active bu
 | `add <title>` · `add ? <why>` | Append `{ "title", "state": "todo", "id" }`, or `{ "title": "???", "state": "fog", "id", "why" }` for fog. Take the id from `nextId`. |
 | `insert at N …` | Like `add`, but put the bubble at position N. |
 | `fill [N] <title>` | Only for a fog bubble: set `title`, and set `state` to `todo`. |
-| `type [N] <TYPE>` | Set `type`. Expand `kk`, `ku`, `uk` and `uu`. |
+| `type [N] <TYPE>` | Only for a fog bubble: set `type`. Expand `kk`, `ku`, `uk` and `uu`. |
 | `why [N] <text>` · `answer [N] <text>` | Only for a fog bubble: set `why` or `answer`, or delete the field with `-`. |
-| `hint N <text>` · `hint N -` | Set `hint`, or delete the field with `-`. |
-| `own [N \| N:M]` · `own [N \| N:M] -` | Only when the human asks, and only for bubbles that aren't `done`: set `owner` to `user`, or delete the field with `-`. On a track with no `ownership`, `own` first sets `ownership` to `hybrid`; `own … -` has nothing to hand back there. On a `user` track, `own` changes nothing; `own … -` first makes the track `hybrid` as the `switch` row says, then deletes `owner` on those bubbles. |
+| `hint N <text>` · `hint N -` | Set `hint`, or delete the field with `-`. A todo bubble's hint ends with `[Boundary: …]`. |
+| `own [N \| N:M]` · `own [N \| N:M] -` | Only when the human asks, and only for bubbles that aren't `done`: set `owner` to `user`, or delete the field with `-`. On a track with no `ownership`, `own` first sets `ownership` to `hybrid`; `own … -` has nothing to hand back there. On a `user` track, `own` changes nothing; `own … -` first makes the track `hybrid` as the `switch` row says, then deletes `owner` on those bubbles. Both steps into `hybrid` are permanent: make them only after the human confirms (with Node, `--force`). |
 | `handoff <note>` · `handoff -` | Set `handoff` to `{ "note", "at" }`, or delete it with `-`. |
 | `finding N <text>` · `finding N M -` · `finding N -` | Append to `findings`, drop finding M, or delete `findings` with `-`. Delete the field when it ends up empty. `show` lists them as `found 1:`, `found 2:`… |
 | `research [N] [focus]` | Changes nothing. Follow SKILL.md's **Research** section on bubble N, with its context: the track's `goal` and `guards`, the bubble's `title`, `state`, `type`, `why`, `answer`, `hint` and `findings`, and the bubbles before and after it. Not on a closed track. |

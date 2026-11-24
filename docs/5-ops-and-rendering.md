@@ -32,7 +32,7 @@ Addresses come from `model.ts`: `resolve(track, addr)` turns `"3"` into index `2
 |---|---|---|---|
 | `add` | `add`, `insert at N` | new todo (or fog, title `???`) at the end or at position N; gives it an id | no title; bad position |
 | `fog` | `fog [N\|N:M] [TYPE]` | sets state `fog`, optionally the type; **keeps the title** | any picked bubble is done and no `--force` |
-| `setType` | `type [N] TYPE` | records the knowledge level | unknown type. Works on any state, not only fog |
+| `setType` | `type [N] TYPE` | records the knowledge level | unknown type; bubble isn't fog |
 | `fill` | `fill [N] <title>` | fog → todo with the human's title | bubble isn't fog (use `rename`) |
 | `rename` | `rename N <title>` | changes a planned bubble's title | bubble is fog (use `fill`) |
 | `hint` | `hint N <text\|->` | sets or clears the note | — |

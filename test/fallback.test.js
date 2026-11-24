@@ -69,7 +69,7 @@ test('fallback.md example is a valid track', () => {
   assert.strictEqual(new Set(ids).size, ids.length, 'duplicate ids');
   assert.ok(ids.every((id) => id < track.nextId), 'nextId must be above every id');
   for (const b of track.bubbles) assert.ok(['todo', 'fog', 'done'].includes(b.state), `stored state "${b.state}"`);
-  assert.strictEqual(T.render(track, { ascii: false }), 'Fix generation   S ●──❓──○ F   Repro ‹ ❓ needs you › Patch');
+  assert.strictEqual(T.render(track, { ascii: false }), 'Fix generation   S ●──❓──○ F   Reproduce the bug ‹ ❓ needs you › Patch the generator');
 });
 
 test('SKILL.md and the AGENTS.md adapter point to fallback.md', () => {
