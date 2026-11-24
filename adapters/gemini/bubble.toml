@@ -20,7 +20,7 @@ to do work themselves), bubbles (fog with its reason; `(yours)` on the human's).
 after the TL;DR only when a flow or structure is hard to follow in sentences (ASCII with every step in its own box
 in a terminal, Mermaid in a markdown file). A change or a question from the human is not approval: revise, show the
 whole proposal again and wait. Only after their go, create it in
-one burst (`switch`, with `--ownership <mode>` unless `agent`; `goal`, `guard` per rule, `add`s, `hint`s, `own N` per bubble the human took). The goal is set once: a new goal is a new
+one burst (`create`, with `--ownership <mode>` unless `agent`; `goal`, `guard` per rule, `add`s, `hint`s, `own N` per bubble the human took). The goal is set once: a new goal is a new
 track (`diverge`); `goal <text> --force` rewords it only after the human confirms. One bubble per use case, its hint ending with its
 boundary in square brackets (`[Boundary: …]`: the files, domain or document sections it may touch), shown on a line of
 its own in the proposal; work past it: stop and propose an `insert`. Then list every fog bubble by number and ask the human to answer each one as `N: <their content>`
@@ -28,9 +28,12 @@ its own in the proposal; work past it: stop and propose an `insert`. Then list e
 If their words don't settle a fog yet, it stays fog: keep them verbatim with `answer N <their words>`.
 If the request is a bubble command (move, insert, remove, rename, hint, fog, type, fill, done, ...),
 run exactly that through the CLI and show the result. Don't reinterpret it.
-If the human asks for something that doesn't belong to the active bubble, don't `add` it: `fork <name>` if it
-builds on the bubble, `diverge <name>` if it goes a different direction. Ask the human first (suggest one: fork / diverge /
-keep here), run it only after they pick, then sketch the new track fresh.
+If the human asks for something that doesn't belong to the active bubble, it's a side task: don't just do it and
+don't `add` it on your own. Ask the human where it goes and suggest one (fork / diverge / keep here / now):
+`fork <name>` if it builds on the bubble, `diverge <name>` if it goes a different direction, keep here to make it a
+bubble on this track, or now to do it right away with no bubble and no track. Act only after they pick; a reply that
+doesn't pick, like "do it", is not now, so ask once more. A now task still obeys the guards and the fog gate and gets
+its own commit. After a fork or diverge, sketch the new track fresh.
 If the human asks to research a bubble, run `research [N] [focus]` and follow the printed workflow once:
 extend their intent, never overrule it; note each guide or tip with `finding N <tip — source>`; propose
 inserts or a fork/diverge without applying them; never fill fog; then stop.

@@ -1,12 +1,12 @@
 # bubble-tracks without Node
 
-Read this only when the CLI can't run because `node` is missing (exit 127, `command not found`). Everything in SKILL.md still applies: sketch, classify fog, walk, ⏸ stop after every bubble, hand off. The only change is that you edit the track files yourself. This is the one case where hand-editing `.bubble-tracks/` is allowed.
+Read this only when the CLI can't run because `node` is missing. Then the shell says so: exit 127 with `command not found`; in cmd.exe, exit 9009 with `is not recognized as an internal or external command`; in PowerShell, `The term 'node' is not recognized`. Everything in SKILL.md still applies: sketch, classify fog, walk, ⏸ stop after every bubble, hand off. The only change is that you edit the track files yourself. This is the one case where hand-editing `.bubble-tracks/` is allowed.
 
 Tell the human once: *"Node isn't available here, so I'm editing the track by hand. Fork, diverge, close, delete and move --to need Node."*
 
 ## The fog gate is on you
 
-Without Node, no hook blocks your edits. Before editing any project file, read the current track. If its active bubble is fog, **don't edit**. Go to SKILL.md step 3 and ask the human. Edits under `.bubble-tracks/` are always allowed.
+Without Node, no hook blocks your edits. Before editing any project file, read the current track. If its active bubble is fog, **don't edit**. Go to SKILL.md step 4 and ask the human. Edits under `.bubble-tracks/` are always allowed.
 
 The ownership gate is on you too. The active bubble is the human's to do when the track's `ownership` is `user`, or when it is `hybrid` and the bubble has `owner`. Then **don't edit** either: follow SKILL.md's **Ownership** section (hint, wait, check, then `done`).
 
@@ -64,7 +64,7 @@ N is a 1-based position on the track. When N is left out, it means the active bu
 
 | Command | Edit |
 |---|---|
-| `show` | Read the file and draw the line: `<title>   S ●──◐──○ F   prev ‹ ◐ active › next`. `●` is done, `◐` is the active bubble, `○` is todo and `❓` is fog. A bubble the human does (see the gate above) is `◆`, `◈` or `◇` instead. If the active bubble is fog, its label is `❓ needs you`; with every bubble done it's `all done`, and with no bubbles at all it's `empty` (not done). Then list the bubbles by number with their hints. An active fog bubble is the gate (step 3). |
+| `show` | Read the file and draw the line: `<title>   S ●──◐──○ F   prev ‹ ◐ active › next`. `●` is done, `◐` is the active bubble, `○` is todo and `❓` is fog. A bubble the human does (see the gate above) is `◆`, `◈` or `◇` instead. If the active bubble is fog, its label is `❓ needs you`; with every bubble done it's `all done`, and with no bubbles at all it's `empty` (not done). Then list the bubbles by number with their hints. An active fog bubble is the gate (step 4). |
 | `switch <name>` | If `<name>.json` exists, or one that differs only in case (names ignore case), write the stored name to `current` and resume it. Otherwise, if an open track's name starts with `<name>` or is a typo or two from it (ignoring case; none for names of 3 characters or less, 1 at 4, 2 from 5), don't create it: name that track and ask. Else create it (below). |
 | `switch <name> --ownership <mode>` | Set `ownership` (delete the field for `agent`), but never change `hybrid`. `agent` and `user` swap only while no bubble is `done`; after that they only become `hybrid`. When `user` becomes `hybrid`, set `owner` to `user` on every bubble. A refused change is a new track. |
 | `create <name> [title]` · `init <title>` | Write `{ "title": "<title or name>", "bubbles": [] }` to `<name>.json`, then write `<name>` to `current`. `init` creates `track`. |

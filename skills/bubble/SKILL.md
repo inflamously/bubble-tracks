@@ -21,7 +21,7 @@ Every change goes through the CLI. **Don't hand-edit anything in `.bubble-tracks
 node "<dir containing this SKILL.md>/scripts/cli/bubble.js" <command> [args]
 ```
 
-If `node` is missing (exit 127, `command not found`), read `fallback.md` next to this file and work the track by hand.
+If `node` is missing, the shell says so: exit 127 with `command not found`; in cmd.exe, exit 9009 with `is not recognized as an internal or external command`; in PowerShell, `The term 'node' is not recognized`. Then read `fallback.md` next to this file and work the track by hand.
 
 Run it from the repo root, or pass `--dir <repo>`. The CLI speaks the **bubble language**, the same words the human uses:
 

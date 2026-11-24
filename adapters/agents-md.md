@@ -14,7 +14,7 @@ Manage it only through the CLI, never by hand-editing the JSON:
 Full instructions: `{{SKILL}}`.
 
 Rules:
-- If `node` is missing (exit 127, `command not found`), read `fallback.md` next to `{{SKILL}}` and edit the track by hand as it describes, gate included.
+- If `node` is missing, the shell says so: exit 127 with `command not found`; in cmd.exe, exit 9009 with `is not recognized as an internal or external command`; in PowerShell, `The term 'node' is not recognized`. Then read `fallback.md` next to `{{SKILL}}` and edit the track by hand as it describes, gate included.
 - Before editing project files, run `node "{{CLI}}" show`. If it exits 3, the active bubble is fog, so do not edit.
 - At fog, never plan it yourself. Ask the human to classify it (known-known, known-unknown, unknown-known, unknown-unknown) and wait for their content before running `fill`.
 - When the active bubble is a known task, read its hint, implement it, then run `done`.
