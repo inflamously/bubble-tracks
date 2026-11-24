@@ -164,6 +164,19 @@ test('fog without a reason warns, and names the bubbles that still need one', ()
   assert.ok(t.bubbles.every((b) => b.state === 'fog'));
 });
 
+test('a todo bubble\'s hint without a boundary at its end warns, and is still saved', () => {
+  const t = { title: 'T', bubbles: [{ title: 'A b', state: 'done' }, { title: 'C d', state: 'todo' }, { title: '???', state: 'fog' }] };
+  const note = / \(⚠ no \[Boundary: …\] at the end — name the places this bubble may touch\)$/;
+  assert.match(T.hint(t, '2', 'only the parser'), note);
+  assert.strictEqual(t.bubbles[1].hint, 'only the parser');
+  assert.match(T.hint(t, '2', '[Boundary: src/a.ts] only the parser'), note); // the boundary ends the hint
+  assert.match(T.hint(t, '2', 'only the parser [Boundary: ]'), note);
+  assert.strictEqual(T.hint(t, '2', 'only the parser [Boundary: src/a.ts, test/]'), 'hint on "C d": only the parser [Boundary: src/a.ts, test/]');
+  assert.strictEqual(T.hint(t, '1', 'a note'), 'hint on "A b": a note'); // done: its work is over
+  assert.strictEqual(T.hint(t, '3', 'a note'), 'hint on "???": a note'); // fog: not planned yet
+  assert.strictEqual(T.hint(t, '2', '-'), 'cleared hint on "C d"');
+});
+
 test('hint: set, list shows it, clear', () => {
   const t = five();
   T.hint(t, '2', 'keep it soft');

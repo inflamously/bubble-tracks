@@ -55,7 +55,10 @@ describe('e2e: a development track from sketch to close', () => {
     step(['add', 'Write output'], /S ◐──❓──○ F/);
     // a title that isn't 2–4 words only warns: the bubble is still added
     step(['insert', 'at', '2', 'Validate'], [/added bubble "Validate" \(⚠ 1 word — a title is 2–4 words; details go in a hint\)/, /2 {3}○ todo {3}Validate/]);
-    step(['hint', '1', 'read stdin'], [/hint on "Parse input": read stdin/, /↳ read stdin/]);
+    // a todo bubble's hint without a boundary at its end only warns: the hint is still saved
+    step(['hint', '1', 'read stdin'], [/hint on "Parse input": read stdin \(⚠ no \[Boundary: …\] at the end — name the places this bubble may touch\)/, /↳ read stdin/]);
+    step(['hint', '1', 'read stdin [Boundary: src/parse.ts]'], [/hint on "Parse input": read stdin \[Boundary: src\/parse\.ts\]\n/, /↳ read stdin \[Boundary: src\/parse\.ts\]/]);
+    step(['hint', '1', 'read stdin'], /↳ read stdin\n/);
     step(['hint', '2', '--', '-v prints each rule'], /↳ -v prints each rule/);
     step(['hint', '2', '-'], /cleared hint on "Validate"/);
     step(['rename', '2', 'Check the input before parsing'], /renamed "Validate" → "Check the input before parsing" \(⚠ 5 words — a title is 2–4 words; details go in a hint\)/);
