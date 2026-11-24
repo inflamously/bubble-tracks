@@ -115,6 +115,7 @@ describe('e2e: a development track from sketch to close', () => {
     step(['rename', '3', 'Guess'], /"\?\?\?" is fog — plan it with fill/, 1); // fog is the human's to plan
     step(['why', '3', 'no output format chosen'], [/why on "\?\?\?": no output format chosen/, /\n {8}why: no output format chosen/]);
     step(['why', '1', 'x'], /"Parse input" isn't fog — use hint for a note on it/, 1);
+    step(['type', '1', 'ku'], /"Parse input" isn't fog — only fog has a type; fog it first: fog N known-unknown/, 1);
     step(['type', '3', 'ku'], [/classified as known-unknown/, /❓ fog {4}\?\?\? \[known-unknown\]/]);
     step(['answer', '3', 'json or csv, whatever the team reads'], [/answer on "\?\?\?": json or csv/, /\n {8}human: json or csv, whatever the team reads/]);
     step(['fill', '3', 'Pick format'], [/filled "Pick format"/, /S ◐──○──○──○ F/, /why: no output format chosen\n {8}human: json or csv/]);

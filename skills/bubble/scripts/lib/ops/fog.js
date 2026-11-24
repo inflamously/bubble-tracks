@@ -25,12 +25,15 @@ export function fog(track, spec, type, { force = false } = {}) {
         return `${msg} — no reason yet, say why it's unclear: why ${unsaid[0]} <text>`;
     return `${msg} — no reason yet on ${unsaid.join(', ')}, say why each is unclear: why N <text>`;
 }
+/** Record the human's classification of a fog bubble. Only fog has a type: a planned bubble is refused, as `why` and `fill` refuse it. */
 export function setType(track, addr, type) {
     if (!type)
         throw new Error('type needs a value');
     type = normalizeType(type);
     checkType(type);
     const b = track.bubbles[resolve(track, addr)];
+    if (b.state !== 'fog')
+        throw new Error(`"${b.title}" isn't fog — only fog has a type; fog it first: fog N ${type}`);
     b.type = type;
     return `"${b.title}" classified as ${type}`;
 }

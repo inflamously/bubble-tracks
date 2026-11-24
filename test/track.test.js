@@ -129,6 +129,8 @@ test('fog: ranges, type shorthands, done bubbles need force', () => {
 test('fill is fog-only; rename is for planned bubbles', () => {
   const t = five();
   assert.throws(() => T.fill(t, '1', 'x'), /isn't fog/);
+  assert.throws(() => T.setType(t, '1', 'kk'), /"A" isn't fog — only fog has a type/);
+  assert.strictEqual(t.bubbles[0].type, undefined);
   T.rename(t, '1', 'Alpha');
   assert.strictEqual(t.bubbles[0].title, 'Alpha');
   T.fog(t, '2');
