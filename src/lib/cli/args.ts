@@ -77,7 +77,8 @@ export const HELP = `bubble-tracks — the bubble language
   own [N | N:M] | own [N | N:M] -
                                 the human takes bubbles to do themselves (◆ ◈ ◇ on the line), or hands them
                                 back to the agent; not done ones. Any time: own on an agent track and
-                                own - on a user track switch it to hybrid
+                                own - on a user track switch it to hybrid, for good (needs --force,
+                                after the human confirms)
   fog [N | N:M] [TYPE]          turn bubbles into fog (done ones need --force)
   why [N] <text> | why [N] -    say (or clear) why a fog bubble is unclear: not what it is
   type [N] <TYPE>               classify a fog bubble

@@ -159,7 +159,7 @@ export function runBubbleCommand(cmd: string, args: string[], { dir, opts, rende
       const spec = isRange(args[0]) ? args.shift() : undefined;
       const back = args[0] === '-';
       if (args.length > (back ? 1 : 0)) throw new Error('usage: own [N | N:M] | own [N | N:M] -');
-      msg = back ? lib.handBack(track, spec) : lib.own(track, spec);
+      msg = back ? lib.handBack(track, spec, { force: opts.force }) : lib.own(track, spec, { force: opts.force });
       break;
     }
     case 'finding': {

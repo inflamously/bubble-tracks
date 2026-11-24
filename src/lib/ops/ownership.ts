@@ -68,21 +68,29 @@ function ownMessage(picked: Bubble[], who: 'human' | 'agent', switched: string):
   return switched ? `${msg}\n${switched}` : msg;
 }
 
-/** The human takes bubbles. An agent track turns hybrid for it; on a user track they are the human's already. */
-export function own(track: Track, spec: Addr): string {
+/** Turning a track hybrid can't be undone, so `own` does it only with `force`: the human confirms first. */
+function checkTurnsHybrid(mode: Ownership, force: boolean): void {
+  if (force) return;
+  throw new Error(`this turns the ${mode} track hybrid for good (a hybrid track stays hybrid) — confirm with the human, then re-run with --force`);
+}
+
+/** The human takes bubbles. An agent track turns hybrid for it, which needs `force`; on a user track they are the human's already. */
+export function own(track: Track, spec: Addr, { force = false }: { force?: boolean } = {}): string {
   const picked = openBubbles(track, spec);
   const mode = ownershipOf(track);
   if (mode === 'user') throw new Error("every bubble on a user track is the human's already — own N - hands one to the agent");
+  if (mode === 'agent') checkTurnsHybrid(mode, force);
   const switched = mode === 'agent' ? setOwnership(track, 'hybrid') : '';
   for (const b of picked) b.owner = 'user';
   return ownMessage(picked, 'human', switched);
 }
 
-/** The human hands bubbles back to the agent. A user track turns hybrid for it; on an agent track there is nothing to hand back. */
-export function handBack(track: Track, spec: Addr): string {
+/** The human hands bubbles back to the agent. A user track turns hybrid for it, which needs `force`; on an agent track there is nothing to hand back. */
+export function handBack(track: Track, spec: Addr, { force = false }: { force?: boolean } = {}): string {
   const picked = openBubbles(track, spec);
   const mode = ownershipOf(track);
   if (mode === 'agent') throw new Error("every bubble on an agent track is the agent's already — own N takes one for the human");
+  if (mode === 'user') checkTurnsHybrid(mode, force);
   const switched = mode === 'user' ? setOwnership(track, 'hybrid') : '';
   for (const b of picked) delete b.owner;
   return ownMessage(picked, 'agent', switched);

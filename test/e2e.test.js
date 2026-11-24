@@ -265,10 +265,14 @@ describe('e2e: a development track from sketch to close', () => {
     step(['add', 'Mine'], /S ◈ F {3}◈ Mine/); // on a user track every bubble is the human's
     step(['add', 'Yours'], /S ◈──◇ F/);
     step(['own', '2'], /every bubble on a user track is the human's already — own N - hands one to the agent/, 1);
-    step(['own', '2', '-'], [/"Yours" is the agent's to do\nownership user → hybrid — /, /S ◈──○ F/, /1 {3}◈ todo {3}Mine\n {8}owner: human/]);
+    step(['own', '2', '-'], /this turns the user track hybrid for good \(a hybrid track stays hybrid\) — confirm with the human, then re-run with --force/, 1); // a permanent step: the human confirms first
+    it('the refused hand-back changes nothing', () => assert.strictEqual(read('solo').ownership, 'user'));
+    step(['own', '2', '-', '--force'], [/"Yours" is the agent's to do\nownership user → hybrid — /, /S ◈──○ F/, /1 {3}◈ todo {3}Mine\n {8}owner: human/]);
     step(['switch', 'track'], /resumed track "track"/);
     step(['own', '1', '-'], /every bubble on an agent track is the agent's already — own N takes one for the human/, 1);
-    step(['own', '1'], [/"One" is the human's to do\nownership agent → hybrid — /, /S ◈ F/]);
+    step(['own', '1'], /this turns the agent track hybrid for good \(a hybrid track stays hybrid\) — confirm with the human, then re-run with --force/, 1);
+    it('the refused own changes nothing', () => assert.ok(!('ownership' in read('track')) && !('owner' in read('track').bubbles[0])));
+    step(['own', '1', '--force'], [/"One" is the human's to do\nownership agent → hybrid — /, /S ◈ F/]);
     step(['switch', 'track', '--ownership', 'agent'], /a hybrid track stays hybrid — /, 1); // also with nothing done yet
   });
 });

@@ -783,7 +783,7 @@ test('ownership lock: after the first done only agent → hybrid ← user passes
 
 test('ownership lock: a hybrid track stays hybrid even with nothing done, so its owners are never dropped', () => {
   const { run, track } = repo();
-  run('own', '2');
+  run('own', '2', '--force');
   for (const leave of ['agent', 'user']) {
     const r = run('switch', 'track', '--ownership', leave, '--force');
     assert.strictEqual(r.status, 1);
@@ -797,12 +797,17 @@ test('own: the owner field, the line shapes and colors, and how it follows the m
   const { run, track, dir } = repo(); // A B C on an agent track
   const owners = () => track().bubbles.map((b) => b.owner || '-').join('');
   run('done');
-  const took = run('own', '3'); // mid-walk, on a later bubble: the agent track turns hybrid
+  const refused = run('own', '3'); // turning the agent track hybrid is permanent: refused without --force
+  assert.strictEqual(refused.status, 1);
+  assert.match(refused.stderr, /this turns the agent track hybrid for good .* re-run with --force/);
+  assert.deepStrictEqual(track().bubbles[2], { title: 'C', state: 'todo', id: 3 });
+  assert.ok(!('ownership' in track()));
+  const took = run('own', '3', '--force'); // mid-walk, on a later bubble: the agent track turns hybrid
   assert.match(took.stdout, /"C" is the human's to do\nownership agent → hybrid — /);
   assert.match(took.stdout, /S ●──◐──◇ F/);
   assert.deepStrictEqual(track().bubbles[2], { title: 'C', state: 'todo', id: 3, owner: 'user' }); // one field, no new state
   assert.match(run('show', '--ascii').stdout, /S \*--@--h F/);
-  run('own', '2');
+  assert.strictEqual(run('own', '2').status, 0); // already hybrid: nothing permanent, so no --force
   assert.match(run('show', '--ascii').stdout, /S \*--H--h F {3}A < H B > C/);
   // color: the human's symbols are red inside the blue track and the yellow context
   const color = spawnSync(process.execPath, [CLI, '--dir', dir, 'show'], {

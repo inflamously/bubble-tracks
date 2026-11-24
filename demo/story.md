@@ -145,7 +145,7 @@ bubble switch todo
 > human: Go. But I want to write Delete items myself.
 
 ```
-bubble own 4
+bubble own 4 --force
 ```
 
 > agent: Delete items is yours now, so I keep my hands off it. A hint: remove the item from the list, then show the list again. Tell me when it is done.
