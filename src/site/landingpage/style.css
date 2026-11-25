@@ -357,6 +357,13 @@ h3 {
 }
 .column-mark.mark-fog { font-weight: 600; }
 
+/* Ownership: the three modes as columns, and a track line with the human's bubbles on it */
+.ownership-example {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 /* Plan, guards and boundaries: the rules, and an example plan beside them */
 .split {
   display: flex;
