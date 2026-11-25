@@ -59,7 +59,7 @@ Requires Node.js 18 or newer. Nothing to `npm install`: the skill, the hooks and
 | Agent | Command | Fog gate (blocks edits) | Status line |
 |---|---|---|---|
 | Claude Code | `/bubble` | `PreToolUse` hook | yes |
-| Codex CLI | `$bubble` | `PreToolUse` hook on `apply_patch` | no, use `bubble show` |
+| Codex CLI | `$bubble` | `PreToolUse` hook on `apply_patch`, `Edit` and `Write` | no, use `bubble show` |
 | Gemini CLI | `/bubble` | `BeforeTool` hook | no, use `bubble show` |
 | Anything that reads `AGENTS.md` | instructions | soft: the model is told to stop | no, use `bubble show` |
 
@@ -111,7 +111,7 @@ Start or resume a track in chat:
 /bubble switch fix-generation
 ```
 
-**A new track** starts with a short plan in chat. The agent asks for the goal, drafts the guards and the bubbles, and proposes them in one fixed shape: a TL;DR first, then the track, goal, guards, ownership and bubbles, each bubble with its `[Boundary: …]` (what it may touch), and a diagram when a flow needs one. Change anything and it shows the revised plan again. Only when you say go does it create the track and asks you about each fog bubble. Then it walks the track one bubble at a time.
+**A new track** starts with a short plan in chat. The agent asks for the goal, drafts the guards and the bubbles, and proposes them in one fixed shape: a TL;DR first, then the track, goal, guards, ownership and bubbles, each bubble with its `[Boundary: …]` (what it may touch), and a diagram when a flow needs one. Change anything and it shows the revised plan again. Only when you say go does it create the track. It then asks you about each fog bubble and walks the track one bubble at a time.
 
 **An existing track** is picked up where it stopped. Hints on the bubbles and a handoff note carry the context between chats, so a fresh chat needs nothing else.
 
@@ -163,7 +163,7 @@ The mode is meant to be chosen once:
 
 ### Tracks
 
-Each track is one idea, stored as one `.json` file in `.bubble-tracks/`. The file `current` names the active track, and every command, the status line and the fog gate act on it.
+Each track is one idea, stored as one `.json` file in `.bubble-tracks/`. The file `current` names the active track, and every command, the status line and the fog gate act on it. Tracks change only through the CLI: the hook that gates fog also refuses hand edits to a track file.
 
 - **`fork`** builds on a bubble in a child track. The bubble waits until the fork is finished.
 - **`diverge`** goes a different direction from a bubble, in a side track. Nothing waits for it.
@@ -195,10 +195,10 @@ Write `bubble:ready` in chat, plus any extra words to steer it. The agent runs t
 <summary><b>CLI reference</b></summary>
 
 ```
-node skills/bubble/scripts/cli/bubble.js <command> [--dir <repo>] [--ascii]
+node skills/bubble/scripts/cli/bubble.js <command> [--dir <repo>] [--ascii] [--force]
 ```
 
-A leading `bubble` word is optional, and a whole phrase can be passed as one quoted argument.
+A leading `bubble` word is optional, and a whole phrase can be passed as one quoted argument. Exit codes: `0` ok, `1` error, `3` (`show` only) the active bubble is fog.
 
 | Command | Effect |
 |---|---|
@@ -239,6 +239,8 @@ A leading `bubble` word is optional, and a whole phrase can be passed as one quo
 - `N` is the Nth bubble on the track. Omitted, it means the active bubble. `N:M` is N through M, inclusive.
 - `--to <track>` (or `--to=<track>`) on `add`, `insert` and `hint` writes into another existing track, and the current track stays current.
 - A word that starts with `-` is an option. Put text like that after `--`: `hint 2 -- use -v for verbose`.
+- Options go before or after the text, each once. An option in the middle of the text is refused.
+- `--force` confirms the steps that can't be undone: `close`, `delete`, `guard drop --all`, a reworded `goal`, fog on a done bubble, and an `own` that turns a track hybrid.
 
 </details>
 
@@ -248,15 +250,20 @@ A leading `bubble` word is optional, and a whole phrase can be passed as one quo
 ```json
 {
   "title": "Fix generation",
+  "goal": "Generation no longer fails on empty input",
+  "guards": ["No changes to the public API"],
   "bubbles": [
-    { "title": "Repro", "state": "done" },
-    { "title": "???", "state": "fog", "type": "unknown-unknown" },
-    { "title": "Patch", "state": "todo" }
-  ]
+    { "title": "Repro", "state": "done", "id": 1 },
+    { "title": "???", "state": "fog", "type": "unknown-unknown", "why": "the cause is unknown", "id": 2 },
+    { "title": "Patch", "state": "todo", "hint": "Fix the cause. [Boundary: src/generate/]", "id": 3 }
+  ],
+  "nextId": 4
 }
 ```
 
-The active bubble is the first one that isn't done. A track that isn't the agent's also has `"ownership": "hybrid"` or `"user"`, and on a hybrid track your bubbles have `"owner": "user"`. Edit tracks through the CLI, not by hand.
+The active bubble is the first one that isn't done. Each bubble keeps a stable `id`, so links survive a move. A bubble can also carry `answer` (your words on a fog), `findings` (from research), `fork` and `sides` (its child and side tracks). The track can carry a `handoff` note, a `parent` or `origin` link, and `closed`. A track that isn't the agent's has `"ownership": "hybrid"` or `"user"`, and on a hybrid track your bubbles have `"owner": "user"`.
+
+Change tracks through the CLI, not by hand: the hook refuses edits to a track file. A file that no longer parses is the exception, because a hand edit is its only repair.
 
 </details>
 
@@ -265,15 +272,17 @@ The active bubble is the first one that isn't done. A track that isn't the agent
 
 In the status line and the terminal, the track title is green, the track is blue, and `prev ‹ active › next` is yellow. A bubble you do yourself is a diamond (`◆` done, `◈` active, `◇` todo), in red.
 
-- `NO_COLOR=1` (or `--no-color` on `statusline.js`) turns colors off.
-- `BUBBLES_COLOR=1` forces them on.
+Other marks: `⚑` the goal · `¦` the guards (the status line ends with their count, `¦ 2 guards`) · `⑂` a bubble's fork · `↗` a side track · `🔒` a closed track · `…` a label cut to 20 characters.
+
+- The CLI colors its output on a terminal and prints plain text when an agent reads it. `BUBBLES_COLOR=1` forces colors on, and `BUBBLES_COLOR=0` forces them off.
+- `NO_COLOR=1` (or `--no-color` on `statusline.js`) turns colors off everywhere.
 - `BUBBLES_ASCII=1` swaps the symbols for plain ASCII: `S *--@--?--o F` (your bubbles: `+` done, `H` active, `h` todo). In Claude Code, set it with `"env": { "BUBBLES_ASCII": "1" }` in settings.
 
 </details>
 
 ## Limits
 
-The fog gate and the ownership gate block file-edit tools only. Work that is not a file edit, like a data pull, is held back by the skill's rules alone. It is a guardrail, not a security boundary: writes made through shell commands are not blocked, and no hook can stop every way an agent might write a file.
+The hook has three gates: fog, ownership, and hand edits to track files. They block file-edit tools only. Work that is not a file edit, like a data pull, is held back by the skill's rules alone. It is a guardrail, not a security boundary: writes made through shell commands are not blocked, and no hook can stop every way an agent might write a file.
 
 ## Development
 
@@ -283,6 +292,7 @@ The source is TypeScript in `src/`. It builds into `skills/bubble/scripts/` and 
 npm install     # dev only
 npm run build   # src/ -> skills/bubble/scripts/ and skill-install/
 npm test        # fails if the committed JS drifts from src/
+npm run check   # type-check the demo's source in src/site/
 npm run site    # build the demo; preview with: python3 -m http.server -d dist/pages
 ```
 
