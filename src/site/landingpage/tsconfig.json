@@ -2,5 +2,5 @@
   // The landing page's one script: the hero's track card, a React component. Browser only.
   "extends": "../tsconfig.base.json",
   "compilerOptions": { "lib": ["es2023", "dom", "dom.iterable"], "types": [], "jsx": "react-jsx" },
-  "include": ["*.tsx", "*.mts"]
+  "include": ["**/*.tsx", "**/*.mts"]
 }
