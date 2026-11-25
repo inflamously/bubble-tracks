@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "bubble-tracks",
-      "source": "./",
+      "source": "./skills",
       "description": "Gamified fog-of-war planning on a track of task bubbles.",
       "author": { "name": "nflamously" },
       "homepage": "https://github.com/inflamously/bubble-tracks",

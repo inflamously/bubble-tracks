@@ -13,7 +13,8 @@ bubble-tracks section the installer writes into *users'* AGENTS.md.)
 | `skills/bubble/` | the skill: `SKILL.md`, `fallback.md` (no-Node hand edits, drift-tested) + `scripts/` | `scripts/` from `src/` | yes |
 | `skill-install/` | the installer, built | `src/skill-install/` | yes |
 | `dist/pages/` | the demo, bundled for Pages (CI builds it on every deploy) | `src/site/` + the CLI's `src/` + `demo/story.md` | no |
-| `.claude-plugin/` | Claude Code plugin: `plugin.json` (manifest + the fog-gate hook), `marketplace.json` | — | yes |
+| `.claude-plugin/` | Claude Code marketplace: `marketplace.json`, which installs only `skills/` | — | yes |
+| `skills/.claude-plugin/` | Claude Code plugin: `plugin.json` (manifest + the fog-gate hook); `skills/` is the plugin root | — | yes |
 | `adapters/` | templates the installer fills in for other agents | — | yes |
 | `demo/story.md` | the demo story, one source for the page and its test | — | yes |
 | `install.js` | `node install.js …` entry, loads `skill-install/` | — | yes |
