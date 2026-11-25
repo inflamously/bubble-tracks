@@ -24,6 +24,13 @@ export const CLI_BUILDS = [
   { config: 'tsconfig.skill-install.json', out: 'skill-install' },
 ];
 
+/**
+ * Written into each committed folder: the built JS uses `import`, and a copy of the folder leaves this repo's
+ * package.json behind (the plugin installs only skills/, the installer copies skills/bubble/). Without the
+ * marker, a Node that doesn't detect modules itself (18, early 20) refuses to load the scripts.
+ */
+const MODULE_MARKER = JSON.stringify({ type: 'module' }, null, 2) + '\n';
+
 /** The demo site's folders; each tsconfig limits what its folder may use (see src/site/README.md). */
 export const SITE_CONFIGS = ['src/site/bubble-web', 'src/site/terminal', 'src/site/build'];
 
@@ -122,6 +129,7 @@ function tsc(...args) {
 export function buildCli(build, outdir = path.join(ROOT, build.out)) {
   fs.rmSync(outdir, { recursive: true, force: true });
   tsc('-p', build.config, '--outDir', outdir);
+  fs.writeFileSync(path.join(outdir, 'package.json'), MODULE_MARKER);
 }
 
 // The demo site.

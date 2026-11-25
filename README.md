@@ -74,14 +74,19 @@ Requires Node.js 18 or newer. Nothing to `npm install`: the skill, the hooks and
 
    From a local checkout, use `/plugin marketplace add /path/to/bubble-tracks`.
 
-2. Add the status line. Plugins can't set it themselves, so run `node install.js claude --apply-statusline`, or add this to `~/.claude/settings.json`:
+2. Add the status line. Plugins can't set it themselves, so add this to `~/.claude/settings.json`:
 
    ```json
    "statusLine": {
      "type": "command",
-     "command": "node \"/path/to/bubble-tracks/skills/bubble/scripts/cli/statusline.js\""
+     "command": "node ~/.claude/plugins/data/bubble-tracks-bubble-tracks/statusline.js",
+     "padding": 0
    }
    ```
+
+   The plugin writes that file when a session starts, so the status line stays empty until the first session after the install has started. The file runs the status line of the installed plugin version, and the entry stays the same after a plugin update.
+
+   From a local checkout, `node install.js claude --apply-statusline` writes an entry for you; it points at the checkout instead.
 
 ### Codex CLI, Gemini CLI and AGENTS.md
 

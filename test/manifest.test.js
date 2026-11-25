@@ -28,13 +28,16 @@ test('package.json, plugin.json and marketplace.json agree', () => {
   assert.ok(fs.existsSync(path.join(ROOT, 'LICENSE')), 'LICENSE file missing');
 });
 
-test('plugin.json: the fog-gate hook runs a script that exists', () => {
+test('plugin.json: every hook runs a script that exists', () => {
   // Claude Code reads the manifest only at .claude-plugin/plugin.json under the plugin root,
   // and ${CLAUDE_PLUGIN_ROOT} is that root.
   const plugin = read(PLUGIN_JSON);
-  const commands = (plugin.hooks?.PreToolUse || []).flatMap((group) => group.hooks.map((h) => h.command));
-  const gate = commands.find((c) => c.includes('fog-gate.js'));
-  assert.ok(gate, 'plugin.json has no PreToolUse fog-gate hook');
-  const script = /\$\{CLAUDE_PLUGIN_ROOT\}\/([^"]+)/.exec(gate);
-  assert.ok(script && fs.existsSync(path.join(ROOT, PLUGIN_ROOT, script[1])), `the hook runs a missing script: ${gate}`);
+  const commandsOf = (event) => (plugin.hooks?.[event] || []).flatMap((group) => group.hooks.map((h) => h.command));
+  const expected = { PreToolUse: 'fog-gate.js', SessionStart: 'statusline-launcher.js' };
+  for (const [event, name] of Object.entries(expected)) {
+    const command = commandsOf(event).find((c) => c.includes(name));
+    assert.ok(command, `plugin.json has no ${event} hook that runs ${name}`);
+    const script = /\$\{CLAUDE_PLUGIN_ROOT\}\/([^"]+)/.exec(command);
+    assert.ok(script && fs.existsSync(path.join(ROOT, PLUGIN_ROOT, script[1])), `the hook runs a missing script: ${command}`);
+  }
 });

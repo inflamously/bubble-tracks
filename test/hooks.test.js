@@ -191,3 +191,39 @@ test('fog gate and statusline follow the current track', () => {
   assert.strictEqual(run('fog-gate.js', edit).status, 2);
   assert.match(run('statusline.js', { cwd: dir }).stdout, /needs you/);
 });
+
+test('statusline launcher: the session-start hook writes a launcher that runs the status line', () => {
+  const dir = repo(fogTrack);
+  // a data folder that doesn't exist yet, with a space in its path
+  const data = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'bubbles data-')), 'bubble-tracks-bubble-tracks');
+  const hook = run('statusline-launcher.js', { hook_event_name: 'SessionStart' }, { CLAUDE_PLUGIN_DATA: data });
+  assert.strictEqual(hook.status, 0);
+  assert.strictEqual(hook.stdout, '', 'a SessionStart hook must not write stdout: Claude Code adds it to the context');
+  const launcher = path.join(data, 'statusline.js');
+  const launch = (args = []) =>
+    spawnSync(process.execPath, [launcher, ...args], {
+      input: JSON.stringify({ cwd: dir }),
+      encoding: 'utf8',
+      env: { ...process.env, BUBBLES_ASCII: '', NO_COLOR: '1', FORCE_COLOR: undefined },
+    });
+  assert.strictEqual(launch().stdout, run('statusline.js', { cwd: dir }).stdout);
+  assert.strictEqual(launch().stdout, 'P   S ●──❓ F   A ‹ ❓ needs you\n');
+  assert.strictEqual(launch(['--ascii']).stdout, 'P   S *--? F   A < ? needs you\n', 'flags reach the status line');
+
+  // a second session start leaves an up-to-date launcher alone
+  const written = fs.statSync(launcher).mtimeMs;
+  run('statusline-launcher.js', {}, { CLAUDE_PLUGIN_DATA: data });
+  assert.strictEqual(fs.statSync(launcher).mtimeMs, written);
+
+  // a launcher left by another plugin version is replaced
+  fs.writeFileSync(launcher, 'import("file:///gone/statusline.js").catch(() => process.stdout.write("\\n"));\n');
+  assert.strictEqual(launch().stdout, '\n', 'a launcher whose plugin version is gone prints a blank line');
+  run('statusline-launcher.js', {}, { CLAUDE_PLUGIN_DATA: data });
+  assert.match(launch().stdout, /needs you/);
+});
+
+test('statusline launcher: outside a plugin (no data folder) it does nothing', () => {
+  const r = run('statusline-launcher.js', {}, { CLAUDE_PLUGIN_DATA: '' });
+  assert.strictEqual(r.status, 0);
+  assert.strictEqual(r.stdout + r.stderr, '');
+});
