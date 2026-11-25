@@ -53,7 +53,7 @@ On any internal error, `main().catch(() => process.exit(0))` **fails open**. The
 
 | Agent | Hook | Matcher | Where |
 |---|---|---|---|
-| Claude Code | `PreToolUse` | `Edit\|Write\|MultiEdit\|NotebookEdit` | `.claude-plugin/plugin.json` (comes with the plugin) |
+| Claude Code | `PreToolUse` | `Edit\|Write\|MultiEdit\|NotebookEdit` | `skills/.claude-plugin/plugin.json` (comes with the plugin) |
 | Codex CLI | `PreToolUse` | `apply_patch\|Edit\|Write` | `.codex/hooks.json`, written by the installer |
 | Gemini CLI | `BeforeTool` | `write_file\|replace` | `.gemini/settings.json`, written by the installer |
 

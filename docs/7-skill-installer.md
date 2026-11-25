@@ -47,12 +47,12 @@ So re-running the installer is safe and only touches what changed. Dry run repor
 
 | Agent | Copies skill | Writes | Gate |
 |---|---|---|---|
-| `claude` | no | nothing by default. With `--apply-statusline`: `~/.claude/settings.json` | comes with the plugin (`.claude-plugin/plugin.json`) |
+| `claude` | no | nothing by default. With `--apply-statusline`: `~/.claude/settings.json` | comes with the plugin (`skills/.claude-plugin/plugin.json`) |
 | `codex` | yes | `<base>/.codex/hooks.json`: `PreToolUse`, matcher `apply_patch\|Edit\|Write` | hard |
 | `gemini` | yes | `<base>/.gemini/settings.json`: `BeforeTool`, matcher `write_file\|replace`; plus `.gemini/commands/bubble.toml` | hard |
 | `agents-md` | yes | a marked block in `<base>/AGENTS.md` | soft: only rules the agent reads |
 
-**claude** is mostly instructions. Claude Code installs the skill and the gate as a **plugin**: this repo is its own marketplace (`.claude-plugin/marketplace.json`), and `plugin.json` registers the fog gate with `${CLAUDE_PLUGIN_ROOT}`. The installer prints the `/plugin` commands. A plugin can't set the status line, so it prints that snippet too, or writes it with `--apply-statusline` (warning if it replaces a status line that isn't ours).
+**claude** is mostly instructions. Claude Code installs the skill and the gate as a **plugin**: this repo is its own marketplace (`.claude-plugin/marketplace.json`, which installs only `skills/`), and `skills/.claude-plugin/plugin.json` registers the fog gate with `${CLAUDE_PLUGIN_ROOT}`. The installer prints the `/plugin` commands. A plugin can't set the status line, so it prints that snippet too, or writes it with `--apply-statusline` (warning if it replaces a status line that isn't ours).
 
 **codex** and **gemini** share `settings.ts`:
 
