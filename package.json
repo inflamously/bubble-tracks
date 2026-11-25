@@ -1,6 +1,6 @@
 {
   "name": "bubble-tracks",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Gamified fog-of-war planning for agents (Claude Code, Codex CLI, Gemini CLI, AGENTS.md).",
   "license": "MIT",
@@ -18,7 +18,8 @@
     "test": "node --test",
     "site": "node build.mjs site",
     "deploy": "gh workflow run pages.yml --ref master",
-    "check": "node build.mjs check"
+    "check": "node build.mjs check",
+    "bump": "node build.mjs bump"
   },
   "devDependencies": {
     "@pkgjs/parseargs": "0.11.0",

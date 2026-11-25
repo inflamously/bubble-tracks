@@ -298,6 +298,14 @@ npm run site    # build the demo; preview with: python3 -m http.server -d dist/p
 
 Edit `src/`, never the generated JavaScript, and commit both together. [`docs/`](docs/1-big-picture-map.md) walks through the code, and [`AGENTS.md`](AGENTS.md) has the rules for contributors and coding agents.
 
+### Release
+
+Claude Code keeps an installed plugin on its cached copy until the plugin's version changes, so a push alone reaches nobody.
+
+1. Run `npm run bump` (or `npm run bump minor`, `npm run bump major`). It raises the version in `package.json`, `package-lock.json` and `skills/.claude-plugin/plugin.json` together; `npm test` fails when they differ.
+2. Commit and push to `master`.
+3. Wherever the plugin is installed, run `claude plugin update bubble-tracks@bubble-tracks` and restart Claude Code.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).

@@ -4,6 +4,7 @@
 //                         the Impressum is built only with IMPRESSUM_ENABLED=1; its name, address and email come from
 //                         the environment or .impressum.json (see IMPRESSUM)
 //   node build.mjs check  just the src/site/ type check (the CLI builds above type-check as they emit)
+//   node build.mjs bump [patch|minor|major]   raise the version in every file that states it (see VERSION_FILES)
 // Plain JS so it runs on a fresh clone with nothing compiled yet. The tests import it to build into temp dirs.
 import * as esbuild from 'esbuild';
 import fs from 'node:fs';
@@ -30,6 +31,16 @@ export const CLI_BUILDS = [
  * marker, a Node that doesn't detect modules itself (18, early 20) refuses to load the scripts.
  */
 const MODULE_MARKER = JSON.stringify({ type: 'module' }, null, 2) + '\n';
+
+/**
+ * Every file that states the release version, and how often. A release raises all of them together
+ * (`bump`): Claude Code keeps an installed plugin on its cached copy until plugin.json's version changes.
+ */
+export const VERSION_FILES = [
+  { file: 'package.json', count: 1 },
+  { file: 'package-lock.json', count: 2 }, // the lockfile's own version, and its root package's
+  { file: 'skills/.claude-plugin/plugin.json', count: 1 },
+];
 
 /** The demo site's folders; each tsconfig limits what its folder may use (see src/site/README.md). */
 export const SITE_CONFIGS = ['src/site/bubble-web', 'src/site/terminal', 'src/site/build'];
@@ -130,6 +141,33 @@ export function buildCli(build, outdir = path.join(ROOT, build.out)) {
   fs.rmSync(outdir, { recursive: true, force: true });
   tsc('-p', build.config, '--outDir', outdir);
   fs.writeFileSync(path.join(outdir, 'package.json'), MODULE_MARKER);
+}
+
+// The release version.
+
+/**
+ * Raise the version (`level`: patch, minor or major) in every one of VERSION_FILES under `root`, and return
+ * the new version. Only the version strings change, so each file keeps its formatting. Nothing is written
+ * unless every file states the current version as often as expected.
+ */
+export function bump(level = 'patch', root = ROOT) {
+  const at = ['major', 'minor', 'patch'].indexOf(level);
+  if (at < 0) throw new Error(`bump: unknown level "${level}" (use: patch, minor or major)`);
+  const current = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
+  if (!/^\d+\.\d+\.\d+$/.test(current)) throw new Error(`bump: package.json version "${current}" is not x.y.z`);
+  const next = current.split('.').map((part, i) => (i < at ? part : i === at ? Number(part) + 1 : 0)).join('.');
+  const from = `"version": "${current}"`;
+  const texts = VERSION_FILES.map(({ file, count }) => {
+    let text = fs.readFileSync(path.join(root, file), 'utf8');
+    // the first `count` matches: in the lockfile they are the root's, ahead of any dependency's
+    for (let i = 0; i < count; i++) {
+      if (!text.includes(from)) throw new Error(`bump: ${file} states version ${current} ${i} time(s), expected ${count}`);
+      text = text.replace(from, `"version": "${next}"`);
+    }
+    return text;
+  });
+  VERSION_FILES.forEach(({ file }, i) => fs.writeFileSync(path.join(root, file), texts[i]));
+  return next;
 }
 
 // The demo site.
@@ -284,8 +322,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`built dist/pages/${note}`);
   } else if (what === 'check') {
     checkSite();
+  } else if (what === 'bump') {
+    console.log(`version ${bump(process.argv[3])} in ${VERSION_FILES.map((v) => v.file).join(', ')}`);
   } else {
-    console.error('usage: node build.mjs [cli|site|check]');
+    console.error('usage: node build.mjs [cli|site|check|bump [patch|minor|major]]');
     process.exitCode = 2;
   }
 }

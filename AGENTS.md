@@ -73,6 +73,7 @@ npm run build    # src -> skills/bubble/scripts, src/skill-install -> skill-inst
 npm test         # all suites, including the build-drift and demo-parity checks
 npm run site     # type-check src/site, then bundle it -> dist/pages
 npm run check    # just the src/site type check
+npm run bump     # release: raise the version in package.json, package-lock.json and plugin.json together
 python3 -m http.server -d dist/pages   # preview the demo
 npm run deploy   # redeploy GitHub Pages from master without a push (needs gh auth)
 ```
