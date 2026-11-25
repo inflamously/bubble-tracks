@@ -1,0 +1,525 @@
+/* The landing page. Same palette as the demo (src/site/terminal/style.css, see src/site/README.md): mint paper,
+   sky blue for the track and the agent, red for fog and the human's turn. System fonts only.
+   Order: tokens, base, layout, type, parts (buttons, cards, code), then one block per section, top to bottom.
+   Every row is a wrapping flex row, so the page stacks on a phone without media queries. */
+:root {
+  /* The palette, five colours, each with one job: */
+  --red: #ac3539; /* fog, and the human's turn */
+  --pink: #e8a5ad; /* fog on dark */
+  --mint: #e5f7eb; /* sunk surfaces */
+  --ice: #d0ecf7; /* the agent's surfaces */
+  --sky: #71c1d6; /* the track and the agent */
+
+  /* Everything below is one of the five, or a tint or shade of one. */
+  --paper: #f4fbf6;
+  --panel: #ffffff;
+  --ink: #16262c;
+  --ink-soft: #33464d; /* running text under a heading */
+  --muted: #51646b;
+  --line: #d3e6df;
+  --line-strong: #b5d0cb;
+  --accent: #1b6e84; /* sky, dark enough for text and buttons */
+  --accent-ink: #ffffff;
+  --sky-ink: #0f1a1e; /* text on a sky button */
+  --pink-ink: #3a0f12; /* text on a pink button */
+
+  /* The dark cards and the dark band: a terminal. */
+  --term-bg: #12222a;
+  --term-fg: #dcebee;
+  --term-dim: #8fa6ad;
+  --term-line: #27404a;
+  --term-bright: #ffffff;
+
+  --r-card: 1.125rem;
+  --r-code: 0.75rem;
+  --r-pill: 999px;
+
+  --font-display: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+
+/* Base */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1.0625rem/1.55 var(--font-body);
+}
+h1, h2, h3, p, ul, ol, dl, dd, pre { margin: 0; }
+h1, h2, h3 { text-wrap: balance; }
+a { color: var(--ink); }
+a:hover { color: var(--accent); }
+button { font: inherit; cursor: pointer; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.card-dark :focus-visible, .band-dark :focus-visible { outline-color: var(--sky); }
+code, pre { font-family: var(--font-mono); }
+code { font-size: 0.9375rem; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* Layout */
+.wrap {
+  width: 100%;
+  max-width: 70rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding-block: 4.5rem;
+}
+.section-flush { padding-top: 0; }
+.section-tight { gap: 2.25rem; }
+.band {
+  background: var(--mint);
+  border-block: 1px solid var(--line);
+}
+.band-dark {
+  background: var(--term-bg);
+  border: 0;
+  color: var(--term-fg);
+}
+
+/* Type */
+h1, h2 {
+  font-family: var(--font-display), serif;
+  font-weight: 800;
+}
+h1 {
+  font-size: clamp(2.75rem, 6.4vw, 5.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+h2 {
+  font-size: clamp(1.875rem, 3.6vw, 2.875rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-size: 1.3125rem;
+  font-weight: 600;
+}
+.measure { max-width: 16em; }
+.measure-wide { max-width: 18em; }
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.lead {
+  max-width: 34em;
+  font-size: 1.25rem;
+  color: var(--ink-soft);
+}
+.note {
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+.note-wide { max-width: 44em; }
+.band-dark .note { color: var(--term-dim); }
+
+/* The marks of the bubble language, coloured by who they belong to */
+.mark-ink { color: var(--ink); }
+.mark-agent { color: var(--accent); }
+.mark-todo { color: var(--muted); }
+.mark-fog { color: var(--red); }
+
+/* Buttons and links that look like them */
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.875rem;
+  padding: 0.8125rem 1.375rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  text-decoration: none;
+}
+.button-accent { background: var(--accent); color: var(--accent-ink); }
+.button-accent:hover { color: var(--accent-ink); }
+.button-sky { background: var(--sky); color: var(--sky-ink); }
+.button-pink { background: var(--pink); color: var(--pink-ink); }
+.button-ghost {
+  background: transparent;
+  border: 1.5px solid var(--term-dim);
+  color: var(--term-fg);
+}
+.text-link {
+  padding: 0.875rem 0.375rem;
+  font-weight: 600;
+}
+
+/* Cards and code */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1.625rem;
+  border-radius: var(--r-card);
+}
+.card-dark {
+  background: var(--term-bg);
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+}
+.code {
+  overflow-x: auto;
+  padding: 1rem 1.125rem;
+  border-radius: var(--r-code);
+  background: var(--term-bg);
+  color: var(--term-fg);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.code code { font-size: inherit; }
+
+/* Header */
+.site-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.375rem;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.875rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.brand:hover { color: var(--ink); }
+.brand-marks {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4375rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+.brand-name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4375rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.brand-word {
+  display: flex;
+  align-items: baseline;
+}
+/* The brand runs into the distance like a track: each mark and each letter is a step smaller than the one before. */
+.brand-marks > :nth-child(1) { font-size: 1.5rem; }
+.brand-marks > :nth-child(2) { font-size: 1.375rem; }
+.brand-marks > :nth-child(3) { font-size: 1.25rem; }
+.brand-marks > :nth-child(4) { font-size: 1.125rem; }
+.brand-marks > :nth-child(5) { font-size: 1rem; }
+.brand-marks > :nth-child(6) { font-size: 0.875rem; }
+.brand-word:first-child > :nth-child(1) { font-size: 1.625rem; }
+.brand-word:first-child > :nth-child(2) { font-size: 1.5625rem; }
+.brand-word:first-child > :nth-child(3) { font-size: 1.53125rem; }
+.brand-word:first-child > :nth-child(4) { font-size: 1.5rem; }
+.brand-word:first-child > :nth-child(5) { font-size: 1.46875rem; }
+.brand-word:first-child > :nth-child(6) { font-size: 1.4375rem; }
+.brand-word:last-child > :nth-child(1) { font-size: 1.34375rem; }
+.brand-word:last-child > :nth-child(2) { font-size: 1.3125rem; }
+.brand-word:last-child > :nth-child(3) { font-size: 1.28125rem; }
+.brand-word:last-child > :nth-child(4) { font-size: 1.25rem; }
+.brand-word:last-child > :nth-child(5) { font-size: 1.21875rem; }
+.brand-word:last-child > :nth-child(6) { font-size: 1.1875rem; }
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.5rem;
+  font-weight: 500;
+}
+.site-nav a {
+  padding-block: 0.625rem;
+  text-decoration: none;
+}
+.site-nav .nav-pill {
+  padding-inline: 1rem;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-pill);
+}
+
+/* Hero: the pitch, and the track card beside it */
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3rem;
+  padding-block: 3.5rem 4.5rem;
+}
+.hero-text {
+  display: flex;
+  flex: 1 1 26.25rem;
+  flex-direction: column;
+  gap: 1.375rem;
+  min-width: 0;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.875rem;
+}
+.track-card {
+  flex: 1 1 26.25rem;
+  gap: 1.125rem;
+}
+.track-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--term-dim);
+}
+.track-line {
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0;
+  list-style: none;
+}
+.track-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.875rem;
+  font-size: 0.9375rem;
+}
+.track-list .is-done { color: var(--sky); }
+.track-list .is-active { color: var(--term-bright); font-weight: 600; }
+.track-list .is-todo { color: var(--term-dim); }
+.track-list .is-fog { color: var(--pink); font-weight: 600; }
+.track-mark {
+  flex: none;
+  width: 1em;
+  text-align: center;
+}
+.track-label { min-width: 0; }
+.track-state {
+  flex: none;
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--term-dim);
+}
+.track-message {
+  min-height: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--term-line);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+}
+.track-message.is-stopped { color: var(--pink); }
+.track-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-family: var(--font-body);
+}
+
+/* How it works: three columns */
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.column {
+  display: flex;
+  flex: 1 1 16.25rem;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-width: 0;
+  color: var(--ink-soft);
+}
+.column h3 { color: var(--ink); }
+.column-mark {
+  font-family: var(--font-mono);
+  font-size: 1.875rem;
+  line-height: 1.55;
+}
+.column-mark.mark-fog { font-weight: 600; }
+
+/* Plan, guards and boundaries: the rules, and an example plan beside them */
+.split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 3rem;
+}
+.rules {
+  display: flex;
+  flex: 1 1 25rem;
+  flex-direction: column;
+  gap: 1.75rem;
+  min-width: 0;
+}
+.rule {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--ink-soft);
+}
+.rule h3 { color: var(--ink); }
+.rule-term {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.example {
+  flex: 1 1 26.25rem;
+  gap: 0.875rem;
+}
+.example-caption {
+  font-size: 0.8125rem;
+  color: var(--term-dim);
+}
+.plan {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.plan-head { color: var(--term-dim); }
+.plan-item { padding-left: 1.125rem; }
+.plan-note {
+  padding-left: 2.75rem;
+  color: var(--sky);
+}
+.plan-item.is-fog { color: var(--pink); font-weight: 600; }
+.plan-note.is-fog { color: var(--pink); }
+
+/* Four kinds of fog: a short text, and one row per kind */
+.fog-kinds {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 3rem;
+}
+.fog-intro {
+  display: flex;
+  flex: 1 1 20rem;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  color: var(--ink-soft);
+}
+.fog-intro h2 { color: var(--ink); }
+.fog-intro p { max-width: 30em; }
+.fog-intro .note { color: var(--muted); }
+.fog-types {
+  flex: 2 1 30rem;
+  min-width: 0;
+  border-block: 1.5px solid var(--ink);
+}
+.fog-type {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding-block: 1.125rem;
+}
+.fog-type + .fog-type { border-top: 1px solid var(--line); }
+.fog-type dt {
+  flex: 0 0 11.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.fog-type dd {
+  flex: 1 1 16.25rem;
+  min-width: 0;
+  color: var(--ink-soft);
+}
+
+/* More tracks: four commands on the dark band */
+.commands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.75rem 2rem;
+}
+.command {
+  display: flex;
+  flex: 1 1 13.75rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.command-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--pink);
+}
+
+/* Install: the commands, and the limits beside them */
+.install {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 3rem;
+}
+.install-steps {
+  display: flex;
+  flex: 1 1 28.75rem;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+.install-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.install-title {
+  font-size: inherit;
+  font-weight: 600;
+}
+.limits {
+  flex: 1 1 21.25rem;
+  align-self: flex-start;
+  gap: 1rem;
+  padding: 1.75rem;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+}
+.limits ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding-left: 1.25rem;
+  color: var(--ink-soft);
+}
+
+/* Footer */
+.site-foot {
+  border-top: 1px solid var(--line);
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+.site-foot-in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.75rem;
+  padding-block: 1.75rem 2.5rem;
+}
+/* The links sit in one line with " · " between them, as on the demo and the legal pages: the build adds the Impressum's the same way. */
+.site-foot-links a {
+  display: inline-block;
+  padding-block: 0.625rem;
+}
