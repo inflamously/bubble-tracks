@@ -9,10 +9,10 @@ bubble-tracks section the installer writes into *users'* AGENTS.md.)
 |---|---|---|---|
 | `src/cli/`, `src/lib/` | CLI, fog gate, status line | — | yes |
 | `src/skill-install/` | the installer | — | yes |
-| `src/site/` | the GitHub Pages demo (see `src/site/README.md`) | — | yes |
+| `src/site/` | the GitHub Pages site: the landing page and the demo (see `src/site/README.md`) | — | yes |
 | `skills/bubble/` | the skill: `SKILL.md`, `fallback.md` (no-Node hand edits, drift-tested) + `scripts/` | `scripts/` from `src/` | yes |
 | `skill-install/` | the installer, built | `src/skill-install/` | yes |
-| `dist/pages/` | the demo, bundled for Pages (CI builds it on every deploy) | `src/site/` + the CLI's `src/` + `demo/story.md` | no |
+| `dist/pages/` | the site, bundled for Pages (CI builds it on every deploy): the landing page at the root, the demo in `demo/` | `src/site/` + the CLI's `src/` + `demo/story.md` | no |
 | `.claude-plugin/` | Claude Code marketplace: `marketplace.json`, which installs only `skills/` | — | yes |
 | `skills/.claude-plugin/` | Claude Code plugin: `plugin.json` (manifest + the fog-gate hook); `skills/` is the plugin root | — | yes |
 | `adapters/` | templates the installer fills in for other agents | — | yes |
@@ -29,11 +29,11 @@ bubble-tracks section the installer writes into *users'* AGENTS.md.)
 - **Committed build output is what users run without a build step:** `skills/bubble/scripts/` (the
   plugin, the hooks and installed copies run it, and the installer copies the skill folder as is, so
   the skill must carry its own JS) and `skill-install/` (`node install.js` from a fresh clone).
-- **`dist/` is git-ignored** and only holds what gets rebuilt anyway: the demo, which CI builds on
+- **`dist/` is git-ignored** and only holds what gets rebuilt anyway: the site, which CI builds on
   every deploy. Nothing a user runs may live there.
 - **One build script, two tools** (`build.mjs`). tsc emits the committed JS, one file per module with
   comments kept: `tsconfig.json`: `src/` → `skills/bubble/scripts/` (excludes `src/skill-install` and
-  `src/site`); `tsconfig.skill-install.json`: `src/skill-install/` → `skill-install/`. The demo's
+  `src/site`); `tsconfig.skill-install.json`: `src/skill-install/` → `skill-install/`. The site's
   `src/site/*/tsconfig.json` only type-check; esbuild bundles it into `dist/pages/`. Keep new code
   inside the one that ships it.
 - **The demo runs the CLI's own code.** esbuild bundles `src/lib/cli/main.ts` into the page and swaps only
@@ -43,8 +43,9 @@ bubble-tracks section the installer writes into *users'* AGENTS.md.)
 - **A CLI change extends `test/e2e.test.js`.** Every command, and every new output a human sees, gets a
   step in its story, so the e2e transcript (`BUBBLES_TRANSCRIPT=<file>`) covers the whole bubble language.
 - **No runtime dependencies.** Users run the committed JS with plain Node; `typescript`,
-  `@types/node` and `esbuild` are dev-only. So is `@pkgjs/parseargs`, but esbuild bundles it into the demo,
-  so the site ships its licence notices (`THIRD-PARTY-NOTICES.txt`, written by `build.mjs`).
+  `@types/node` and `esbuild` are dev-only. So are `@pkgjs/parseargs` and React, but esbuild bundles them into the
+  site (the demo and the landing page's track card), so the site ships their licence notices
+  (`THIRD-PARTY-NOTICES.txt`, written by `build.mjs`; a new bundled package goes into its `BUNDLED_PACKAGES`).
 - **No personal details in the repo.** The Impressum's name, address and email are passed into the site build
   (repository secrets in CI, a git-ignored `.impressum.json` locally; see `src/site/README.md`). The committed page
   keeps placeholders; never write real details into a file, a test or a track.
@@ -74,7 +75,7 @@ npm test         # all suites, including the build-drift and demo-parity checks
 npm run site     # type-check src/site, then bundle it -> dist/pages
 npm run check    # just the src/site type check
 npm run bump     # release: raise the version in package.json, package-lock.json and plugin.json together
-python3 -m http.server -d dist/pages   # preview the demo
+python3 -m http.server -d dist/pages   # preview the site (the demo is at /demo/)
 npm run deploy   # redeploy GitHub Pages from master without a push (needs gh auth)
 ```
 

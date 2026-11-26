@@ -17,7 +17,7 @@ Fix generation   S ●──●──❓──○ F   Read logs ‹ ❓ needs yo
 
 `●` done · `◐` active · `○` todo · `❓` fog · `prev ‹ active › next` shows where you are
 
-**[Live demo](https://inflamously.github.io/bubble-tracks/)**: the real CLI playing a full session in your browser ([data policy](https://inflamously.github.io/bubble-tracks/data-policy.html)).
+**[Live demo](https://inflamously.github.io/bubble-tracks/demo/)**: the real CLI playing a full session in your browser ([data policy](https://inflamously.github.io/bubble-tracks/data-policy.html)).
 
 ## Overview
 
@@ -50,7 +50,7 @@ You answer "add items and delete them". The fog becomes two bubbles, and the age
 Todo app   S ●──◐──○──○──❓ F   Project setup ‹ ◐ Add items › Delete items
 ```
 
-The [live demo](https://inflamously.github.io/bubble-tracks/) plays this session to the end.
+The [live demo](https://inflamously.github.io/bubble-tracks/demo/) plays this session to the end.
 
 ## Install
 
@@ -292,8 +292,8 @@ The source is TypeScript in `src/`. It builds into `skills/bubble/scripts/` and 
 npm install     # dev only
 npm run build   # src/ -> skills/bubble/scripts/ and skill-install/
 npm test        # fails if the committed JS drifts from src/
-npm run check   # type-check the demo's source in src/site/
-npm run site    # build the demo; preview with: python3 -m http.server -d dist/pages
+npm run check   # type-check the site's source in src/site/
+npm run site    # build the landing page and the demo; preview with: python3 -m http.server -d dist/pages
 ```
 
 Edit `src/`, never the generated JavaScript, and commit both together. [`docs/`](docs/1-big-picture-map.md) walks through the code, and [`AGENTS.md`](AGENTS.md) has the rules for contributors and coding agents.

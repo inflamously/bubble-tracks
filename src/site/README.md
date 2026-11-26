@@ -1,25 +1,26 @@
 # src/site/
 
-The GitHub Pages demo: `demo/story.md` played as the human sees it (the tracks and the conversation), with the real bubble-tracks CLI in an emulated terminal one tab away.
-TypeScript (`.mts`) in three standalone folders, each with its own tsconfig that limits what it may use.
+The GitHub Pages site. It opens on the landing page, and the demo is one click away in `demo/`: `demo/story.md` played as the human sees it (the tracks and the conversation), with the real bubble-tracks CLI in an emulated terminal one tab away.
+TypeScript (`.mts`, `.tsx`) in four standalone folders, each with its own tsconfig that limits what it may use.
 tsc only type-checks them; `build.mjs` bundles them with esbuild.
 
 | Folder | What it is | May use |
 |---|---|---|
 | `bubble-web/` | The CLI (`src/lib/cli/main.ts`, bundled in) on an in-memory machine: fake `node:fs`, POSIX `node:path`, per-run `process` and `console` (`host.mts`) | the language only (no DOM, no Node) |
-| `terminal/` | The page: `index.html`, `style.css` and the modules behind them (the tabs, the human's view, terminal, shell, prompt, disk files, player, header) | the DOM; imports `bubble-web/` |
+| `landingpage/` | The landing page: plain `index.html` and `style.css`. Its one script is the hero's track card (`main.tsx`, `track-card/`), a React component | the DOM and React |
+| `terminal/` | The demo's page: `index.html`, `style.css` and the modules behind them (the tabs, the human's view, terminal, shell, prompt, disk files, player, header) | the DOM; imports `bubble-web/` |
 | `build/` | Node code `build.mjs` runs at build time: parses the story | Node |
 
 ```
 npm run site                          # type-check, then bundle into dist/pages/
-python3 -m http.server -d dist/pages  # preview at http://localhost:8000
+python3 -m http.server -d dist/pages  # preview at http://localhost:8000 (the demo: /demo/)
 npm run deploy                        # redeploy GitHub Pages from master (gh workflow run)
 ```
 
 Every push to `master` deploys too: `.github/workflows/pages.yml` runs the tests, `npm run site`,
 and publishes `dist/pages/`. One-time setup: Settings → Pages → Source: GitHub Actions.
 
-`test/web.test.js` type-checks all three, bundles bubble-web the way the page does, and replays every
+`test/web.test.js` type-checks the folders, bundles bubble-web the way the page does, and replays every
 `bubble …` line of the story on both bubble-web and the real CLI; the output and the files on disk must match.
 
 ## Data policy

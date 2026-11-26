@@ -1,8 +1,9 @@
 // Every build in one place:
 //   node build.mjs        tsc: src/ → skills/bubble/scripts/ and src/skill-install/ → skill-install/ (committed)
-//   node build.mjs site   tsc type-checks src/site/, then esbuild bundles it with the CLI and demo/story.md → dist/pages/;
-//                         the Impressum is built only with IMPRESSUM_ENABLED=1; its name, address and email come from
-//                         the environment or .impressum.json (see IMPRESSUM)
+//   node build.mjs site   tsc type-checks src/site/, then esbuild bundles it → dist/pages/: the landing page at the root,
+//                         the demo (with the CLI and demo/story.md) in demo/; the Impressum is built only with
+//                         IMPRESSUM_ENABLED=1; its name, address and email come from the environment or
+//                         .impressum.json (see IMPRESSUM)
 //   node build.mjs check  just the src/site/ type check (the CLI builds above type-check as they emit)
 //   node build.mjs bump [patch|minor|major]   raise the version in every file that states it (see VERSION_FILES)
 // Plain JS so it runs on a fresh clone with nothing compiled yet. The tests import it to build into temp dirs.
@@ -42,18 +43,30 @@ export const VERSION_FILES = [
   { file: 'skills/.claude-plugin/plugin.json', count: 1 },
 ];
 
-/** The demo site's folders; each tsconfig limits what its folder may use (see src/site/README.md). */
-export const SITE_CONFIGS = ['src/site/bubble-web', 'src/site/terminal', 'src/site/build'];
+/** The site's folders; each tsconfig limits what its folder may use (see src/site/README.md). */
+export const SITE_CONFIGS = ['src/site/bubble-web', 'src/site/terminal', 'src/site/build', 'src/site/landingpage'];
+
+/** The folder of the built site that holds the demo. The landing page is at the root and links it. */
+export const DEMO_DIR = 'demo';
 
 const BUBBLE_WEB = path.join(ROOT, 'src', 'site', 'bubble-web');
 
-/** The licence notices the demo ships with, next to the bundle. The page's footer links to it. */
+/** The licence notices the site ships with, at its root. Both bundles name it, and the demo's footer links to it. */
 export const NOTICES_FILE = 'THIRD-PARTY-NOTICES.txt';
 
-/** Third-party packages whose code ends up in the demo's bundle; each one's licence terms ask for its notice in copies. */
-const BUNDLED_PACKAGES = ['@pkgjs/parseargs'];
+/**
+ * Third-party packages whose code ends up in a bundle; each one's licence terms ask for its notice in copies.
+ * `in` is the bundle (see buildSite). `headers`: the package's source files state licences of their own (code
+ * copied from elsewhere), so the notices carry those too. React's file headers only repeat its LICENSE.
+ */
+const BUNDLED_PACKAGES = [
+  { name: '@pkgjs/parseargs', in: 'demo', headers: true },
+  { name: 'react', in: 'landing' },
+  { name: 'react-dom', in: 'landing' },
+  { name: 'scheduler', in: 'landing' },
+];
 
-/** The data policy page, built next to the demo. It says only what the site really does. */
+/** The data policy page, built at the site's root. It says only what the site really does. */
 export const DATA_POLICY_PAGE = 'data-policy.html';
 
 /** Its German version. Each links the other. */
@@ -62,10 +75,10 @@ export const DATA_POLICY_PAGE_DE = 'data-policy.de.html';
 /** Where a data policy page points to its Impressum, when that page is built. */
 const IMPRESSUM_LINK_SLOT = '<!-- impressum-link -->';
 
-/** Where a footer (index.html, a data policy page) links the Impressum, when that page is built. */
+/** Where a footer (the landing page, the demo, a data policy page) links the Impressum, when that page is built. */
 const IMPRESSUM_FOOTER_SLOT = '<!-- impressum-footer-link -->';
 
-/** The Impressum page, built next to the demo. */
+/** The Impressum page, built at the site's root. */
 export const IMPRESSUM_PAGE = 'impressum.html';
 
 /** Its German version, built with it. Each links the other. */
@@ -89,7 +102,7 @@ export const IMPRESSUM = {
 
 /**
  * The legal pages, one entry per language: the data policy, its Impressum, and the words the build puts into the
- * policy's two slots when the Impressum is built. The demo itself is English and links the first entry.
+ * policy's two slots when the Impressum is built. The landing page and the demo are English and link the first entry.
  */
 const LEGAL_PAGES = [
   {
@@ -170,7 +183,7 @@ export function bump(level = 'patch', root = ROOT) {
   return next;
 }
 
-// The demo site.
+// The site: the landing page and the demo.
 
 export function checkSite() {
   for (const config of SITE_CONFIGS) tsc('-p', config, '--noEmit');
@@ -204,13 +217,14 @@ function leadingComment(file) {
  */
 export function thirdPartyNotices() {
   const rule = '-'.repeat(78);
-  const parts = ['The bubble-tracks demo page bundles code from the packages below. Their licence notices follow.'];
-  for (const name of BUNDLED_PACKAGES) {
+  const parts = ['The bubble-tracks site bundles code from the packages below. Their licence notices follow.'];
+  for (const { name, headers } of BUNDLED_PACKAGES) {
     const dir = path.dirname(require.resolve(`${name}/package.json`));
     const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
     const license = path.join(dir, 'LICENSE');
-    if (!fs.existsSync(license)) throw new Error(`${name}: no LICENSE file to ship with the demo; update build.mjs`);
+    if (!fs.existsSync(license)) throw new Error(`${name}: no LICENSE file to ship with the site; update build.mjs`);
     parts.push(`${rule}\n${name} ${pkg.version} (${pkg.license})\n${pkg.homepage ?? ''}\n${rule}`, fs.readFileSync(license, 'utf8').trim());
+    if (!headers) continue;
     const sources = fs.readdirSync(dir, { recursive: true, encoding: 'utf8' })
       .filter((f) => f.endsWith('.js') && !f.split(path.sep).includes('node_modules'))
       .sort();
@@ -262,43 +276,82 @@ export function fillImpressum(page, details, name = IMPRESSUM_PAGE) {
   return page;
 }
 
+/** The banner a bundle opens with: the third-party packages in it (BUNDLED_PACKAGES) and where their notices are. */
+function noticesBanner(bundleName) {
+  const names = BUNDLED_PACKAGES.filter((p) => p.in === bundleName).map((p) => p.name);
+  return { js: `/*! Bundles ${names.join(', ')}; licence notices in ${NOTICES_FILE} */` };
+}
+
 /**
- * dist/pages/: index.html, the LEGAL_PAGES in each language (a data policy, and its Impressum filled from `impressum`; that one is left out when `impressum` is null, the toggle being off), main-<hash>.js (the page, bubble-web, the CLI and the story in one bundle),
- * style-<hash>.css, and NOTICES_FILE for the third-party code in the bundle. The hashed names keep a browser from mixing a new page with stale cached files.
+ * dist/pages/, the whole site:
+ * - at the root, the landing page (src/site/landingpage/): index.html, main-<hash>.js (the track card, with React)
+ *   and style-<hash>.css; the LEGAL_PAGES in each language (a data policy, and its Impressum filled from
+ *   `impressum`; that one is left out when `impressum` is null, the toggle being off); and NOTICES_FILE for the
+ *   third-party code in both bundles.
+ * - in DEMO_DIR, the demo (src/site/terminal/): index.html, main-<hash>.js (the page, bubble-web, the CLI and the
+ *   story in one bundle) and style-<hash>.css, which the legal pages use too.
+ * The hashed names keep a browser from mixing a new page with stale cached files.
  */
 export async function buildSite(out = path.join(ROOT, 'dist', 'pages'), impressum = impressumEnabled() ? impressumDetails() : null) {
   const { parseStory } = await importTs('src/site/build/story.mts');
   const story = parseStory(fs.readFileSync(path.join(ROOT, 'demo', 'story.md'), 'utf8'));
 
   fs.rmSync(out, { recursive: true, force: true });
-  const { metafile } = await bundle({
+  const hashed = { entryNames: '[name]-[hash]', platform: 'browser', metafile: true };
+  const demo = await bundle({
     ...browserOptions,
+    ...hashed,
     entryPoints: { main: 'src/site/terminal/main.mts', style: 'src/site/terminal/style.css' },
-    entryNames: '[name]-[hash]',
-    outdir: out,
-    platform: 'browser',
+    outdir: path.join(out, DEMO_DIR),
     define: { ...browserOptions.define, STORY: JSON.stringify(story) },
-    banner: { js: `/*! Bundles ${BUNDLED_PACKAGES.join(', ')}; licence notices in ${NOTICES_FILE} */` },
-    metafile: true,
+    banner: noticesBanner('demo'),
+  });
+  const landing = await bundle({
+    ...hashed,
+    bundle: true,
+    format: 'esm',
+    target: 'es2022',
+    minify: true,
+    entryPoints: { main: 'src/site/landingpage/main.tsx', style: 'src/site/landingpage/style.css' },
+    outdir: out,
+    // React picks its production build by this; a browser has no `process`.
+    define: { 'process.env.NODE_ENV': '"production"' },
+    banner: noticesBanner('landing'),
   });
 
-  const built = (entry) => path.basename(Object.keys(metafile.outputs).find((f) => metafile.outputs[f].entryPoint === entry));
-  const source = (name) => fs.readFileSync(path.join(ROOT, 'src', 'site', 'terminal', name), 'utf8');
-  const link = (name, links) => links.reduce((s, [from, to]) => {
-    if (!s.includes(from)) throw new Error(`src/site/terminal/${name}: ${from} moved; update build.mjs`);
+  const built = ({ metafile }, entry) => path.basename(Object.keys(metafile.outputs).find((f) => metafile.outputs[f].entryPoint === entry));
+  /** The source page `folder`/`name` with each of `links` ([from, to]) swapped in. */
+  const link = (folder, name, links) => links.reduce((s, [from, to]) => {
+    if (!s.includes(from)) throw new Error(`src/site/${folder}/${name}: ${from} moved; update build.mjs`);
     return s.replace(from, to);
-  }, source(name));
-  const style = ['href="style.css"', `href="${built('src/site/terminal/style.css')}"`];
-  const footerLink = (legal) => [IMPRESSUM_FOOTER_SLOT, impressum ? ` · <a href="${legal.impressum}">${legal.footer}</a>` : ''];
-  const html = link('index.html', [style, ['src="main.js"', `src="${built('src/site/terminal/main.mts')}"`], footerLink(LEGAL_PAGES[0])]);
-  for (const file of [NOTICES_FILE, DATA_POLICY_PAGE]) {
-    if (!html.includes(`href="${file}"`)) throw new Error(`src/site/terminal/index.html: the link to ${file} is gone; update build.mjs`);
-  }
-  fs.writeFileSync(path.join(out, 'index.html'), html);
+  }, fs.readFileSync(path.join(ROOT, 'src', 'site', folder, name), 'utf8'));
+  /** Fails when the built page `name` lost one of the links `hrefs` that the build relies on. */
+  const linked = (name, html, hrefs) => {
+    for (const href of hrefs) if (!html.includes(`href="${href}"`)) throw new Error(`${name}: the link to ${href} is gone; update build.mjs`);
+    return html;
+  };
+  const demoStyle = built(demo, 'src/site/terminal/style.css');
+  // `up` is the way from the linking page to the root, where the legal pages are.
+  const footerLink = (legal, up = '') => [IMPRESSUM_FOOTER_SLOT, impressum ? ` · <a href="${up}${legal.impressum}">${legal.footer}</a>` : ''];
+
+  fs.writeFileSync(path.join(out, 'index.html'), linked('src/site/landingpage/index.html', link('landingpage', 'index.html', [
+    ['href="style.css"', `href="${built(landing, 'src/site/landingpage/style.css')}"`],
+    ['src="main.js"', `src="${built(landing, 'src/site/landingpage/main.tsx')}"`],
+    footerLink(LEGAL_PAGES[0]),
+  ]), [`${DEMO_DIR}/`, DATA_POLICY_PAGE]));
+
+  fs.writeFileSync(path.join(out, DEMO_DIR, 'index.html'), linked('src/site/terminal/index.html', link('terminal', 'index.html', [
+    ['href="style.css"', `href="${demoStyle}"`],
+    ['src="main.js"', `src="${built(demo, 'src/site/terminal/main.mts')}"`],
+    footerLink(LEGAL_PAGES[0], '../'),
+  ]), ['../', `../${DATA_POLICY_PAGE}`, `../${NOTICES_FILE}`]));
+
+  // The legal pages are at the root and borrow the demo's stylesheet.
+  const style = ['href="style.css"', `href="${DEMO_DIR}/${demoStyle}"`];
   for (const legal of LEGAL_PAGES) {
     const pointer = [IMPRESSUM_LINK_SLOT, impressum ? legal.pointer(legal.impressum) : ''];
-    fs.writeFileSync(path.join(out, legal.policy), link(legal.policy, [style, pointer, footerLink(legal)]));
-    if (impressum) fs.writeFileSync(path.join(out, legal.impressum), fillImpressum(link(legal.impressum, [style]), impressum, legal.impressum));
+    fs.writeFileSync(path.join(out, legal.policy), linked(`src/site/terminal/${legal.policy}`, link('terminal', legal.policy, [style, pointer, footerLink(legal)]), ['./', `${DEMO_DIR}/`]));
+    if (impressum) fs.writeFileSync(path.join(out, legal.impressum), fillImpressum(link('terminal', legal.impressum, [style]), impressum, legal.impressum));
   }
   fs.writeFileSync(path.join(out, NOTICES_FILE), thirdPartyNotices());
   fs.writeFileSync(path.join(out, '.nojekyll'), '');

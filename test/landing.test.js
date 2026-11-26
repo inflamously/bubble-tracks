@@ -22,9 +22,11 @@ export { TrackCard } from './track-card/view.js';
 `;
 
 let track;
+let model;
 let card;
 before(async () => {
-  track = await importTs('src/site/landingpage/track-card/logic.mts');
+  track = await importTs('src/site/landingpage/track-card/state.mts');
+  model = await importTs('src/site/landingpage/track-card/model.mts');
   const { outputFiles } = await esbuild.build({
     stdin: { contents: CARD_ENTRY, resolveDir: LANDING, loader: 'ts' },
     bundle: true,
@@ -37,8 +39,8 @@ before(async () => {
 });
 
 test('the track card walks to the fog, stops there, and goes on to Finish once the human plans it', () => {
-  const { start, step, plan, describe: view } = track;
-  let state = start();
+  const { step, plan, describe: view } = track;
+  let state = model.START;
   assert.equal(view(state).line, 'S ● ◐ ○ ? ○ F', 'it opens with one bubble done and the fog ahead');
   assert.equal(view(state).message, 'The agent is working on: Add the CSV endpoint.');
   assert.equal(view(state).next, 'step');
