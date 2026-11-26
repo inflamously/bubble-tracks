@@ -93,10 +93,12 @@ h1, h2 {
   font-weight: 800;
 }
 h1 {
-  font-size: clamp(2.75rem, 6.4vw, 5.25rem);
+  font-size: clamp(2.5rem, 5.6vw, 4.5rem);
   line-height: 0.98;
   letter-spacing: -0.02em;
 }
+/* Keeps a phrase on one line, so a heading only breaks between phrases */
+.nowrap { white-space: nowrap; }
 h2 {
   font-size: clamp(1.875rem, 3.6vw, 2.875rem);
   line-height: 1.05;
