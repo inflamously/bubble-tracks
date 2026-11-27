@@ -8,6 +8,7 @@ import { runTrackCommand } from './tracks.js';
 import { runBubbleCommand } from './bubbles.js';
 import { runAbilityCommand } from './abilities.js';
 import { runResearchCommand } from './research.js';
+import { runVerifyCommand } from './verify.js';
 
 /** Commands that take --ownership <mode>: they set who does the bubbles' work on the track. */
 const OWNERSHIP_COMMANDS = ['switch', 'create', 'init'];
@@ -23,7 +24,7 @@ function main(): number {
   // Color only for a human at a terminal (or BUBBLES_COLOR=1); agents reading the output get plain text.
   const color = process.env.BUBBLES_COLOR === '1' || (process.env.BUBBLES_COLOR !== '0' && !!process.stdout.isTTY);
   const ctx: Ctx = { dir: path.resolve(opts.dir || process.cwd()), opts, renderOpts: { ascii: opts.ascii ? true : undefined, color } };
-  return runTrackCommand(cmd, args, ctx) ?? runAbilityCommand(cmd, args, ctx) ?? runResearchCommand(cmd, args, ctx) ?? runBubbleCommand(cmd, args, ctx);
+  return runTrackCommand(cmd, args, ctx) ?? runAbilityCommand(cmd, args, ctx) ?? runResearchCommand(cmd, args, ctx) ?? runVerifyCommand(cmd, args, ctx) ?? runBubbleCommand(cmd, args, ctx);
 }
 
 /** One `bubble …` invocation: reads process.argv, prints, and sets process.exitCode. */

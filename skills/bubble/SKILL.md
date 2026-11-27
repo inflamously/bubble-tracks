@@ -61,6 +61,7 @@ Run it from the repo root, or pass `--dir <repo>`. The CLI speaks the **bubble l
 | `research [N] [focus]` | Print the research workflow and bubble N's whole context, to run once. See **Research**. Changes nothing itself. |
 | `own [N \| N:M]` · `own [N \| N:M] -` | The human takes bubbles to do themselves, or hands them back to you. Not for done bubbles. `own` on an `agent` track and `own -` on a `user` track switch the track to `hybrid` for good: the CLI refuses them without `--force`, after the human confirms. See **Ownership**. |
 | `finding N <text>` · `finding N M -` · `finding N -` | Note what research found for bubble N (a guide or tip, with its source), drop finding M, or drop them all |
+| `verify` | Print the verify workflow and the whole current track, for a subagent with no chat context to run once. It reports the plan's gaps. Changes nothing itself. See **Verify once** in step 1. |
 | `abilities` | List the abilities: name, type, project or user, description (or why one is broken) |
 | `bubble:<name> [text]` | Print ability `<name>`'s workflow, the human's extra text, and its context (the active bubble or the whole track), to run once. See **Abilities**. |
 
@@ -138,7 +139,14 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
 
    **Go runs `approve`.** Run it only when the human says go to the draft as it stands ("ok", "go", "create it"). If one reply approves and changes it ("ok, but add a guard …"), apply the change, run `approve` and say what you changed. If the human drops the plan, confirm, then run `delete <name> --force`.
 
-   After `approve`, classify the fog (step 2).
+   **Verify once, right after `approve`.** The plan is a track now. Run `verify` and follow the printed workflow once, before any work starts:
+   - Give the printed output to one subagent, and nothing from the chat. It reads the track as the builder will: with the track only.
+   - It reports gaps: a vague boundary, a missing guard, a bubble that is too big, a hint that needs the chat to make sense.
+   - Show each gap as a proposed change: the bubble, the reason in one line, and the command that closes it. If it found none, say so in one line.
+   - Apply nothing on your own. The human approves each change, and can add changes of their own here. Make each one with one CLI command. A gap never fills a fog.
+   - Don't run `verify` again unless the human asks.
+
+   Then classify the fog (step 2). Start the first bubble only when the human says go again.
 
    **Seams: one bubble per use case**, not one per file and not one bubble for the whole goal. Its boundary names the places it may touch, so the work stays scoped and easy to review. A place is whatever the work is made of: files, a domain, a section of a document, a system, a step in a process. Always write it in square brackets, `[Boundary: …]`, with the places separated by commas, so it stands out from the sentences around it. In the proposal it stands on its own line under the bubble, so the human can check all boundaries at a glance. On the track it is the end of the bubble's hint: `hint` warns when it is missing. If a bubble needs work past its boundary, stop and propose an `insert` instead of doing it.
 2. **Sketch.** For later passes on an existing track (or after `init`), make one rough pass from the active bubble to F. Steps that are clear become todo bubbles with short titles; add a `hint` when a step needs more words. Anything unclear becomes `add ? <why>`: fog, plus one line on **why** it's unclear (what's missing or undecided), never what it is. Keep it short and don't over-plan.

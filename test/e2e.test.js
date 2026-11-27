@@ -246,6 +246,7 @@ describe('e2e: a development track from sketch to close', () => {
     step(['close', 'dev-alt', '--force'], [/closed track "dev-alt"/, /🔒 closed/]);
     step(['add', 'Late'], /track "dev-alt" is closed/, 1);
     step(['research', '1'], /track "dev-alt" is closed \(read-only\) — its bubbles can't take findings/, 1);
+    step(['verify'], /track "dev-alt" is closed \(read-only\) — nothing left to verify/, 1);
     step(['switch', 'dev'], /resumed track "dev"/);
     step(['tracks'], /2 closed hidden/);
     step(['tracks', '--closed'], [/dev-alt .*🔒 closed/, /dev-check .*🔒 closed/]);
@@ -284,6 +285,10 @@ describe('e2e: a development track from sketch to close', () => {
     });
     step(['tracks'], /→ plan {13}Plan {3}S ○──❓ F {3}◌ draft/);
     step(['switch', 'plan'], [/resumed draft "plan"/, /◌ draft — /]);
+    // verify hands the whole draft to a reader without the chat; it changes nothing
+    step(['verify', 'now'], /usage: verify/, 1);
+    step(['verify'], [/verify "plan" — run this once, without the chat's context; it only proposes/, /a vague boundary/, /a missing guard/, /a bubble that is too big/, /a hint that needs the chat/, /Propose, don't apply/, /── context: track "plan" — Plan ──\nPlan {3}S ○──❓ F {3}◌ draft\n⚑ goal: Ship the checked parser\n¦ guards \(before you act\):\n {4}1 {2}no new deps/, /↳ read stdin \[Boundary: src\/parse\.ts\]/, /⏸ stop — show the gaps to the human as proposed changes and wait/]);
+    it('verify left plan.json as it was: still a draft', () => assert.strictEqual(read('plan').draft, true));
     step(['approve', 'now'], /usage: approve/, 1);
     step(['approve'], [/approved — the draft is a track now: keep to its guards, and start at the active bubble/, /S ◐──❓ F {3}◐ Parse input › \?\?\?/, /¦ guards \(before you act\):/, /→ 1 {3}◐ todo {3}Parse input/]);
     step(['approve'], /the current track is no draft — nothing to approve/, 1);

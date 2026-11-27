@@ -98,6 +98,8 @@ export const HELP = `bubble-tracks — the bubble language
   finding N <text> | finding N M - | finding N -
                                 note what research found for bubble N (a guide or tip, with its source),
                                 drop finding M, or drop them all
+  verify                        print the verify workflow and the whole track, to run once without the
+                                chat's context (a subagent); it reports the plan's gaps and changes nothing
 
   abilities                     list the abilities: name, type, project or user, description
   bubble:<ability> [text]       print an ability's workflow to run once on the active bubble or track
