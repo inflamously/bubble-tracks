@@ -20,10 +20,13 @@ script. How a run happens is in `benchmark-runs.md`; the rule ids (F, P, H) are 
 | `one-line` | A tiny task, as the reference for what a small run costs | closed | |
 | `fork-deeper` | A request that builds on the active bubble | closed | |
 | `ability-once` | An ability the human applies to one bubble | closed | |
+| `grill-me` | A goal with open ends, and a human who asks to be grilled before saying ok | planned | yes |
+| `verify-gaps` | A page of text asked for as one bubble, so the verify step has a split and a structure to propose | planned | yes |
 
 The first five are the kinds asked for in the metrics interview. The rest bring what the three saved
 baseline tracks never show: a fog that is typed, stopped at and filled; research; a fork; a guard under
-pressure; an early close; an ability.
+pressure; an early close; an ability. The last two cover the plan's sharpening: the grill before the
+human's go, and the verify step right after it.
 
 **Not covered**, on purpose: what the CLI itself refuses (a near-miss or case-twin track name, a bad
 option, `delete`). That is the CLI's behaviour, not the agent's, and `test/e2e.test.js` already checks it.
@@ -55,9 +58,14 @@ option, `delete`). That is the CLI's behaviour, not the agent's, and `test/e2e.t
   late (`fog-stop` has two `go`s before the fog's answer), but a run can still derail. When it does, note
   it in `benchmark-feedback.md` instead of scoring it.
 - **The proposal is found by position** (P22, P23): the agent's last message before `create`, `init` or
-  `goal`. A proposal split over two messages is read as its second half only, and its parts are found by
+  `goal`, or its first message after them when it said nothing before (a draft stored first, then shown). A proposal split over two messages is read as its second half only, and its parts are found by
   their labels at the start of a line (`TL;DR`, `Track`, `Goal`, `Guards`, `Bubbles`). Without a
   `Bubbles` label, every numbered line in the proposal counts as a bubble for P23, numbered guards included.
+- **A `planned` run ends in the turn that approves the plan.** The agent runs `approve` and `verify` in
+  that turn, so P26 and P27 are checked, but the run stops before the human answers the gaps. Whether
+  the reported gaps are the right ones is read by a person (`verify-gaps`, H2).
+- **The grill's length is not fixed.** `grill-me` answers one question and then ends the grill, so its
+  replies still fit when the agent asks one question more or less.
 - **The bubble count ranges and reference splits are a first guess**, written before any run. The
   baseline run will show whether they are fair.
 - **`research-needed` keeps its sources in the repo** (`notes/`), so a run doesn't depend on the web. An

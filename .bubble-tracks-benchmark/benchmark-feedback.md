@@ -49,6 +49,17 @@ The hints from the baseline run are settled below.
   `all fog: ku`, an answer written into the scenario that fits whatever number the fog has. It is only
   sent when fog is left. Open: P5 cost 2 points for 8 bubbles where the scenario allows 3 to 6.
 
+- **`grill-me`: "ok" answered the wrong question (2026-11-27).** The third reply was "That is enough
+  questions. ok". Opus had just asked "should I make that change on the draft?", read the ok as a yes
+  to that, made the change and kept the draft; the run then needed two spare replies. Fable read the
+  same ok as the go. Neither is wrong. The reply now names the go and rules out a change.
+- **`verify-gaps`: no split was proposed (2026-11-27).** The human asks for one bubble, and both models
+  kept one and reported other gaps: a hint that needs the chat, a missing structure for a section, a
+  guard that was too narrow. Open: whether a reader without the chat should still propose the split,
+  and whether a scripted rule can tell (now only H2 reads it).
+- **A run's tokens leave out the subagent (2026-11-27).** `verify` hands the track to a subagent, whose
+  tokens are in its own log. The reported number is the main agent's output only.
+
 ## Decided
 
 From the interview after the baseline run (2026-11-12, Sonnet, see `README.md`):

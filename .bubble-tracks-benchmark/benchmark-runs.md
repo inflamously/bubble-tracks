@@ -35,13 +35,15 @@ Because the replies are known in advance, breaks that normally need judgement be
 | F2 crosses a guard | the scenario sets a guard on named files; an edit to one of them |
 | F3 no stop after `done` | another bubble command or file edit after `done`, before the next reply |
 | F4 hand-edits the JSON | a file edit under `.bubble-tracks/` that isn't a CLI call |
-| P8 track before approval | `create` or `init` before the reply that approves the plan, in a scenario where the human starts with a goal. The first reply, unless the scenario names a later one |
-| P22 proposal shape | the agent's last message before the track is made: the labels TL;DR, track, goal, guards and bubbles, each at the start of a line, in that order |
+| P8 track before approval | `create` (without `--draft`), `init` or `approve` before the reply that approves the plan, in a scenario where the human starts with a goal. The first reply, unless the scenario names a later one |
+| P22 proposal shape | the agent's last message before the track is made, or its first one after when the draft was stored first: the labels TL;DR, track, goal, guards and bubbles, each at the start of a line, in that order |
 | P23 boundary lines | in that message's bubbles part: fewer `[Boundary: …]` lines than numbered bubbles that are not fog |
 | P9 fork or diverge unasked | `fork` or `diverge` before a reply that picks one |
 | P10 research or ability unasked | `research` or `bubble:<name>` not named in the reply before it |
+| P26 no verify | an `approve` with no `verify` after it before the first `done` |
+| P27 gap applied unasked | a command that changes the plan (`hint`, `insert`, `guard`, …) after `verify`, before the next reply |
 
-Everything else is left out of an automatic score: P6, P7, P11 to P19, P21, P24, P25 and all H rules. An automatic score
+Everything else is left out of an automatic score: P6, P7, P11 to P19, P21, P24, P25, P28 and all H rules. An automatic score
 is therefore a floor, not the full picture. It says "no rule a script can see was broken".
 
 **Two layers, kept apart:**
@@ -56,7 +58,7 @@ is therefore a floor, not the full picture. It says "no rule a script can see wa
 A person walks the scenario with the agent in a real chat and answers as themselves. Afterwards:
 
 1. **The script** scores what it can, exactly as in the automatic mode.
-2. **A judge agent** reads the recording and counts the remaining counted rules (P6, P7, P11 to P19, P21, P24, P25).
+2. **A judge agent** reads the recording and counts the remaining counted rules (P6, P7, P11 to P19, P21, P24, P25, P28).
    For each point it takes, it quotes the line it is based on, so the human can strike a wrong one.
    For P18 it gets each fill next to the answer it was made from, as the script's report lists them.
 3. **The human** fills in a short sheet: for each of H1 to H7, `-1` or `+1` and one line why. For H2 the

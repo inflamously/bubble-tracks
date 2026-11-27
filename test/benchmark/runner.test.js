@@ -92,6 +92,8 @@ describe('until', () => {
     assert.strictEqual(isFinished('planned', on('car', { bubbles: [todo, fog] }), []), false);
     assert.strictEqual(isFinished('planned', on('car', { bubbles: [todo, { ...fog, type: 'unknown-known' }] }), []), true);
     assert.strictEqual(isFinished('planned', on('car', { bubbles: [todo, { ...fog, answer: 'somewhere in the hall' }] }), []), true);
+    // a draft is the proposal: the plan is not a track until the human approved it
+    assert.strictEqual(isFinished('planned', on('car', { draft: true, bubbles: [todo] }), []), false);
     // a track the setup made is not the one the agent was asked to plan
     assert.strictEqual(isFinished('planned', on('old-idea', { bubbles: [todo] }), ['old-idea']), false);
   });

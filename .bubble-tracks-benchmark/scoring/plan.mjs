@@ -1,6 +1,7 @@
 // The rules read from the proposal, the plan the agent shows before the track exists: P22 and P23.
-// The proposal is the agent's last message before the first command that makes the track. A recording
-// that holds no such message can't be checked here, and gets no marks.
+// The proposal is the agent's last message before the first command that makes the track. An agent that
+// stores the plan as a draft first shows it right after: then the proposal is its first message from
+// there on. A recording that holds no such message can't be checked here, and gets no marks.
 /** @import { Event, Mark, Scenario } from './model.mjs' */
 import { lostPoint } from './model.mjs';
 
@@ -27,13 +28,23 @@ const FOG_LINE = /❓|\bfog\b|\bwhy:/i;
 /** `[Boundary: …]` alone on its line; backticks or bold around it are fine. */
 const BOUNDARY_LINE = /^[\s`*_]*\[Boundary:[^\]]+\][\s`*_]*$/gm;
 
-/** The agent's last message before the track is made. Null when no track is made, or nothing was said. @param {Event[]} events */
+/**
+ * The agent's last message before the track is made, or its first one after when it said nothing before
+ * (the plan was stored as a draft, then shown). Null when no track is made, or nothing was said.
+ * @param {Event[]} events
+ */
 function findProposal(events) {
   let lastMessage = null;
+  let trackMade = false;
   for (const event of events) {
     if (event.who !== 'agent') continue;
-    if (event.bubble && MAKES_TRACK.has(event.bubble[0])) return lastMessage;
-    if (event.text) lastMessage = event.text;
+    if (event.bubble && MAKES_TRACK.has(event.bubble[0])) {
+      if (lastMessage !== null) return lastMessage;
+      trackMade = true;
+    } else if (event.text) {
+      if (trackMade) return event.text;
+      lastMessage = event.text;
+    }
   }
   return null;
 }

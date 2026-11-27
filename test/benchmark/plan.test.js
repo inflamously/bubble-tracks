@@ -47,6 +47,12 @@ describe('plan rules', () => {
     assert.deepStrictEqual(scorePlan([human('I want X'), agent('no shape')]), []); // no track made
     assert.deepStrictEqual(scorePlan([human('here is my plan'), agent('no shape'), bubble('create', 'x')], { start: 'plan' }), []);
   });
+
+  it('a draft stored before the plan is shown: the proposal is the first message after it', () => {
+    const draft = [human('I want X'), bubble('create', 'x', '--draft'), bubble('goal', 'X', 'is', 'done')];
+    assert.deepStrictEqual(scorePlan([...draft, agent(SHAPED), human('ok'), agent('Approved.')]), []);
+    assert.deepStrictEqual(ids(scorePlan([...draft, agent('no shape'), human('ok'), agent(SHAPED)])), ['P22']);
+  });
 });
 
 describe('plan-shape: a good plan against a bad one', () => {

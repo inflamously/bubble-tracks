@@ -47,7 +47,7 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | P5 | bubble outside the scenario's allowed bubble count range | track |
 | P6 | piece of work past a bubble's boundary without stopping to propose an `insert` | transcript |
 | P7 | sketch after which fog was not classified with the human | transcript |
-| P8 | track created before the human approved the agent's plan. Only when the human started with a goal: when they brought the plan themselves, the agent may make the track from it at once | transcript |
+| P8 | track created before the human approved the agent's plan: `create`, `init`, or `approve` on a draft. A draft (`create --draft`) is the proposal, not a track yet. Only when the human started with a goal: when they brought the plan themselves, the agent may make the track from it at once | transcript |
 | P9 | `fork` or `diverge` without asking first | transcript |
 | P10 | research or ability run without the human starting it | transcript |
 | P11 | time the human's words on a fog were dropped or reworded | transcript |
@@ -64,6 +64,9 @@ Evidence: **track** = the finished track file, **transcript** = the record of wh
 | P23 | proposal in which planned bubbles show no `[Boundary: …]` line of their own. One point, however many lack it. Fog needs none | transcript |
 | P24 | plan sentence that isn't plain: it says two things, is passive without naming who acts, or gives one thing a second name. A judge agent reads the proposal | transcript |
 | P25 | diagram missing where the plan has a flow (steps that depend on each other, a branch, a before and after), a diagram where a plain list of bubbles needed none, or an ASCII diagram whose steps are not each in a box. A judge agent reads the proposal | transcript |
+| P26 | `approve` without a `verify` before the first `done`: the plan became a track and nobody read it without the chat | transcript |
+| P27 | change to the plan after `verify`, before the human answered: a gap is a proposal, and the human approves each one. One point per `verify` | transcript |
+| P28 | grill that broke its rules: started without the human asking, more than one question in a message, a question the repo already answers, or a plan change made before the human agreed. A judge agent reads the transcript | transcript |
 
 ## Human-judged rules: -1 or +1
 

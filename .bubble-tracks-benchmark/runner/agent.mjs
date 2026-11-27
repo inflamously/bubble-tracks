@@ -8,8 +8,11 @@ import path from 'node:path';
 /** @typedef {{ repoDir: string, model?: string, id: string | null, seenLines: Set<string> }} Session */
 
 const CONFIG_DIR = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
-/** What the agent may always do without a person to ask. What else it may do is the machine's own permission settings. */
-const ALLOWED_TOOLS = ['Skill', 'Read', 'Glob', 'Grep', 'Edit', 'Write', 'Bash(node:*)'];
+/**
+ * What the agent may always do without a person to ask. What else it may do is the machine's own permission settings.
+ * `Agent` is there for `verify`, which hands the track to a subagent.
+ */
+const ALLOWED_TOOLS = ['Skill', 'Read', 'Glob', 'Grep', 'Edit', 'Write', 'Agent', 'Bash(node:*)'];
 /** Only edits made with the edit tools show up in the session log as edits, so the recording needs them made that way. */
 const HOUSE_RULE = 'Change files only with the Edit and Write tools, never through the shell.';
 /** One turn that takes longer than this is stuck. */

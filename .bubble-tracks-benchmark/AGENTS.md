@@ -30,8 +30,9 @@ recordings from outside, and nothing a user runs depends on it.
 | `scoring/rules.mjs` | the table of rule ids and who checks each | nothing |
 | `scoring/track.mjs` | the rules read from the track file: F5, P1 to P5, P20 | `model` |
 | `scoring/fills.mjs` | fog answers and fills: what the human answered, what got filled | nothing |
-| `scoring/recording.mjs` | the rules read from the recording: F1 to F4, P8 to P10 | `model`, `fills` |
+| `scoring/recording.mjs` | the rules read from the recording: F1 to F4, P8 to P10. P8 knows a draft from a track | `model`, `fills` |
 | `scoring/plan.mjs` | the rules read from the proposal, the plan the agent shows before the track exists: P22, P23 | `model` |
+| `scoring/verify.mjs` | the rules read from the recording about the verify step: P26, P27 | `model` |
 | `scoring/sizes.mjs` | tokens and work per bubble, and the two flags. Reported, never scored | `model` |
 | `scoring/judgements.mjs` | the judge's and the human's lines, parsed into marks | `rules` |
 | `scoring/run.mjs` | one run's score: calls the modules above and adds up | all of the above |
@@ -47,7 +48,7 @@ Every check returns **marks** (`{ id, points, what, by }`). A module never print
 | `runner/repo.mjs` | the throwaway repo: builds it from the scenario (files, then `repo.setup` through the CLI) and reads back the track the run is on | nothing |
 | `runner/agent.mjs` | one turn of the agent without a person: sends a message to Claude Code, returns what its session log gained | nothing |
 | `runner/recording.mjs` | the session log as the recording the scoring reads: messages, bubble commands, edits, tokens per step | nothing |
-| `runner/until.mjs` | when a run is over: `planned` or `closed`, checked against the track | nothing |
+| `runner/until.mjs` | when a run is over: `planned` (a draft is not planned yet) or `closed`, checked against the track | nothing |
 
 `run.mjs` pulls them together: build the repo, send the first message, then one scripted reply per stop
 until `until` holds. It keeps the run (`repo/`, `track.json`, `recording.json`) in a temp folder and
@@ -68,7 +69,7 @@ session log, so the agent is told to use them; a file that changed without a rec
   ternaries. An inline comment says why, where the code alone doesn't.
 - **A rule lives in three places, changed together:** its row in `benchmark-rule-fail.md` or
   `benchmark-rule-points.md`, its entry in `scoring/rules.mjs`, and, when a script can check it, its check
-  in `track.mjs`, `recording.mjs` or `plan.mjs` with a test. Rule ids are never reused or renumbered: a dropped rule
+  in `track.mjs`, `recording.mjs`, `plan.mjs` or `verify.mjs` with a test. Rule ids are never reused or renumbered: a dropped rule
   leaves a gap (P17).
 - **Everything counted costs 1 point.** The human gives -1 or +1. Don't add weights. A threshold or
   number you had to invent is a named constant with a comment, and gets a line in `benchmark-feedback.md`.

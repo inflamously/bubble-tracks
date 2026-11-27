@@ -49,6 +49,17 @@ describe('recording rules', () => {
     assert.deepStrictEqual(scoreRecording([human('go'), edit('.bubble-tracks/abilities/risks.md')]), []);
   });
 
+  it('P8: a draft is the proposal, not a track; approve before the approving reply is the track too early', () => {
+    const draft = [human('add dark mode'), bubble('create', 'dark-mode', 'Dark mode', '--draft')];
+    assert.deepStrictEqual(scoreRecording(draft), []);
+    assert.deepStrictEqual(scoreRecording([...draft, human('ok'), bubble('approve')]), []);
+    const early = scoreRecording([...draft, bubble('approve')]);
+    assert.deepStrictEqual(ids(early), ['P8']);
+    assert.match(early[0].what, /approve before the human approved the plan/);
+    // the first reply changes the plan, the second approves it
+    assert.deepStrictEqual(ids(scoreRecording([...draft, human('add a guard'), bubble('approve')], { approval: 2 })), ['P8']);
+  });
+
   it('P8: a new track before the first reply; a resume is not a new track', () => {
     assert.deepStrictEqual(ids(scoreRecording([human('add dark mode'), bubble('create', 'dark-mode', 'Dark mode')])), ['P8']);
     assert.deepStrictEqual(ids(scoreRecording([human('add dark mode'), bubble('switch', 'dark-mode')])), ['P8']);

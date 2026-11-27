@@ -5,11 +5,11 @@ function isClassified(bubble) {
   return bubble.state !== 'fog' || Boolean(bubble.type) || Boolean(bubble.answer);
 }
 
-/** `planned`: a track the agent made exists, has bubbles, and no fog is left unclassified. */
+/** `planned`: a track the agent made exists, is no draft any more, has bubbles, and no fog is left unclassified. */
 function isPlanned(current, tracksBefore) {
   const isNewTrack = !tracksBefore.includes(current.name);
   const bubbles = current.track.bubbles || [];
-  return isNewTrack && bubbles.length > 0 && bubbles.every(isClassified);
+  return isNewTrack && !current.track.draft && bubbles.length > 0 && bubbles.every(isClassified);
 }
 
 /**

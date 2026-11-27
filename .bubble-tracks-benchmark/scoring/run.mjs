@@ -5,6 +5,7 @@ import { RULES } from './rules.mjs';
 import { scoreTrack } from './track.mjs';
 import { scoreRecording } from './recording.mjs';
 import { scorePlan } from './plan.mjs';
+import { scoreVerify } from './verify.mjs';
 import { fills } from './fills.mjs';
 import { bubbleSizes, tokenReport } from './sizes.mjs';
 
@@ -32,7 +33,7 @@ function sum(numbers) {
 export function scoreRun({ scenario = {}, track, recording, judgements = [] }) {
   const events = recording ? recording.events : null;
   const fromTrack = scoreTrack(track, scenario);
-  const fromRecording = events ? [...scoreRecording(events, scenario), ...scorePlan(events, scenario)] : [];
+  const fromRecording = events ? [...scoreRecording(events, scenario), ...scorePlan(events, scenario), ...scoreVerify(events)] : [];
   const marks = [...fromTrack, ...fromRecording, ...judgements];
 
   const points = sum(marks.map((mark) => mark.points));

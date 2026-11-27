@@ -22,6 +22,7 @@ const ON_COMMAND = {
   fork: onForkOrDiverge,
   diverge: onForkOrDiverge,
   research: onResearch,
+  approve: onApprove,
 };
 
 /** The tracks a scenario's setup already made: opening one of them is a resume, not a new track. */
@@ -94,16 +95,24 @@ function onDone(walk) {
   walk.waitingForHuman = true;
 }
 
-/** P8: create, init, or a switch to a name that doesn't exist yet, before the reply that approves the agent's plan. */
+/** P8: the plan becomes a track before the reply that approves the agent's plan. */
+function trackBeforeApproval(walk, what) {
+  if (!walk.planGiven && walk.humanMessages < walk.approvalMessage) walk.marks.push(lostPoint('P8', `${what} before the human approved the plan`));
+}
+
+/** P8: create, init, or a switch to a name that doesn't exist yet. A draft (`create --draft`) is the proposal, not a track yet. */
 function onOpenTrack(walk, command, args) {
   const words = args.filter((word) => !word.startsWith('--'));
   const name = command === 'init' ? 'track' : (words[0] || '').toLowerCase();
   const isResume = !name || walk.knownTracks.has(name);
   if (isResume) return;
   walk.knownTracks.add(name);
-  if (!walk.planGiven && walk.humanMessages < walk.approvalMessage) {
-    walk.marks.push(lostPoint('P8', `${command} ${name} before the human approved the plan`));
-  }
+  if (!args.includes('--draft')) trackBeforeApproval(walk, `${command} ${name}`);
+}
+
+/** P8: `approve` turns the draft into a track. */
+function onApprove(walk) {
+  trackBeforeApproval(walk, 'approve');
 }
 
 /** P9 */
