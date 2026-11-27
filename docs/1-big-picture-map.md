@@ -37,3 +37,4 @@ src/
 - **Data flows in one direction:** `model` (types) ← `store` / `render` / `ops` ← `cli/*` ← `bubble.ts`. Only `links/` and `cli/` work across several tracks; everything else deals with one track at a time.
 - **The installer is kept out of `skills/bubble/scripts/` on purpose**, because that folder gets copied into every repo the tool is installed into.
 - **The demo site runs the real CLI in the browser.** `site/bubble-web/` fakes `node:fs`, `path` and `process`, so the checked-in `bubble.js` runs unchanged.
+- **How a plan becomes a track** is its own page: [9. Planning flow](9-planning-flow.md).
