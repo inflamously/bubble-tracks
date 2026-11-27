@@ -1,5 +1,5 @@
 // Fog gate — pre-tool hook shared by Claude Code (PreToolUse), Codex CLI (PreToolUse/apply_patch)
-// and Gemini CLI (BeforeTool). Blocks file edits while the active bubble is fog, or is the human's to do,
+// and Gemini CLI (BeforeTool). Blocks file edits while the track is a draft, the active bubble is fog, or it is the human's to do,
 // and hand edits to the track files at any time: only the CLI writes those.
 // Exit 2 + stderr = block (all three agents). Fails open on any internal error. Never writes stdout.
 
@@ -36,6 +36,15 @@ async function main(): Promise<number> {
 
   // The rest of the plan folder (abilities/) is always open, also at fog.
   if (targets.length && targets.every((f) => isInsideBubblesDir(f, found.file))) return 0;
+
+  // Draft gate: the plan isn't approved yet, so no work starts, whatever its first bubble is.
+  if (found.track.draft) {
+    process.stderr.write(
+      `Track "${found.name}" is a draft — the human hasn't approved the plan yet. ` +
+        `Show it (bubble show), change it with them, and run bubble approve only on their go.\n`
+    );
+    return 2;
+  }
 
   const active = lib.activeBubble(found.track);
   if (!active) return 0;

@@ -39,6 +39,7 @@ export interface Track {
   goal?: string; // the one end result every bubble serves
   guards?: string[]; // what not to do on the way: soft rules read before acting
   ownership?: Exclude<Ownership, 'agent'>; // who does the bubbles' work; agent is the default and isn't stored
+  draft?: true; // a proposal the human hasn't approved yet: nothing on it is active, and no work starts
   bubbles: Bubble[];
   nextId?: number;
   handoff?: { note: string; at: string };

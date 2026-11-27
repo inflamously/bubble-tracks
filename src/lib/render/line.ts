@@ -3,11 +3,11 @@
 import { activeIndex, ownedByHuman, type Track } from '../model.js';
 import { paint, paintHuman, shorten, symbolFor, symbolsFor, useColor, type RenderOpts } from './symbols.js';
 
-/** One-line render: `Title   S ●──●──◐──❓ F   prev ‹ ◐ active › next`, or `… F   🔒 closed` / `all done` / `empty` (nothing active). */
+/** One-line render: `Title   S ●──●──◐──❓ F   prev ‹ ◐ active › next`, or `… F   🔒 closed` / `◌ draft` / `all done` / `empty` (nothing active). */
 export function render(track: Track, opts?: RenderOpts): string {
   const sym = symbolsFor(opts);
   const bubbles = track.bubbles || [];
-  const index = track.closed ? -1 : activeIndex(track);
+  const index = track.closed || track.draft ? -1 : activeIndex(track);
   const color = useColor(opts);
   // The human's bubbles have their own shape (◆ ◈ ◇), and are red when color is on.
   const symbol = (i: number, around: 'track' | 'context') => {
@@ -18,6 +18,7 @@ export function render(track: Track, opts?: RenderOpts): string {
   const line = bubbles.map((_, i) => symbol(i, 'track')).join(sym.sep);
   const head = `${paint(color, 'title', track.title || 'Plan')}   ${paint(color, 'track', `S ${line}${line ? ' ' : ''}F`)}   `;
   if (track.closed) return head + paint(color, 'context', `${sym.lock} closed`);
+  if (track.draft) return head + paint(color, 'context', `${sym.draft} draft`);
   const active = bubbles[index];
   if (!active) return head + paint(color, 'context', bubbles.length ? 'all done' : 'empty');
   const prev = bubbles[index - 1];

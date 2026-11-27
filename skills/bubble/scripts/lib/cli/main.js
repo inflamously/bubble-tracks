@@ -17,6 +17,8 @@ function main() {
     }
     if (opts.ownership !== undefined && !OWNERSHIP_COMMANDS.includes(cmd))
         throw new Error('--ownership works only with switch, create and init');
+    if (opts.draft && cmd !== 'create')
+        throw new Error('--draft works only with create — approve turns a draft into a track');
     // Color only for a human at a terminal (or BUBBLES_COLOR=1); agents reading the output get plain text.
     const color = process.env.BUBBLES_COLOR === '1' || (process.env.BUBBLES_COLOR !== '0' && !!process.stdout.isTTY);
     const ctx = { dir: path.resolve(opts.dir || process.cwd()), opts, renderOpts: { ascii: opts.ascii ? true : undefined, color } };

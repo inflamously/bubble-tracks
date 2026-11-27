@@ -1,4 +1,4 @@
-// Bubble-level commands: act on the current track (show, add, insert, remove, move, own, fog, fill, done, ...),
+// Bubble-level commands: act on the current track (show, add, insert, remove, move, own, fog, fill, done, approve, ...),
 // or with --to on another one (add, insert, hint write into it; move sends bubbles to it).
 
 import * as fs from 'node:fs';
@@ -12,7 +12,7 @@ const STOP =
   'bubbles before the next one starts.';
 
 /** Every bubble-level command, so an unknown one is named before any track is looked up. */
-const COMMANDS = ['show', 'status', 'add', 'insert', 'remove', 'rm', 'move', 'mv', 'rename', 'handoff', 'goal', 'guard', 'title', 'hint', 'own', 'finding', 'fog', 'type', 'why', 'answer', 'fill', 'done'];
+const COMMANDS = ['show', 'status', 'add', 'insert', 'remove', 'rm', 'move', 'mv', 'rename', 'handoff', 'goal', 'guard', 'title', 'hint', 'own', 'finding', 'fog', 'type', 'why', 'answer', 'fill', 'done', 'approve'];
 
 /** Commands that take --to <track>: add, insert and hint write into it; move sends bubbles to it. */
 const TO_COMMANDS = ['add', 'insert', 'hint', 'move', 'mv'];
@@ -135,7 +135,8 @@ export function runBubbleCommand(cmd: string, args: string[], { dir, opts, rende
       if (track.handoff) msg += ` — in a fresh chat run: /bubble switch ${found.name}`;
       break;
     case 'goal':
-      msg = lib.setGoal(track, args.join(' '), { force: opts.force });
+      // a draft is still being refined, so its goal can be reworded; once approved it is set
+      msg = lib.setGoal(track, args.join(' '), { force: opts.force || track.draft });
       break;
     case 'guard':
       if (args[0] === 'show') {
@@ -190,6 +191,7 @@ export function runBubbleCommand(cmd: string, args: string[], { dir, opts, rende
       break;
     }
     case 'done': {
+      if (track.draft) throw new Error(`track "${found.name}" is a draft — no work starts before the human approves it: approve`);
       const active = lib.activeBubble(track);
       if (active) links.checkForkFinished(file, active, { force: opts.force });
       msg = lib.done(track);
@@ -198,6 +200,11 @@ export function runBubbleCommand(cmd: string, args: string[], { dir, opts, rende
       stop = true;
       break;
     }
+    case 'approve':
+      if (args.length) throw new Error('usage: approve (it approves the current draft and takes nothing else)');
+      if (track.closed) throw closedError(found.name);
+      msg = lib.approve(track);
+      break;
     default:
       throw new Error(`unknown command "${cmd}" — try: help`);
   }
@@ -209,7 +216,7 @@ export function runBubbleCommand(cmd: string, args: string[], { dir, opts, rende
   const linked = after ? after() : '';
   console.log(linked ? `${msg}\n${linked}` : msg);
   console.log('');
-  printTrack(file, track, renderOpts, cmd === 'guard');
+  printTrack(file, track, renderOpts, cmd === 'guard' || cmd === 'approve');
   if (stop && lib.activeBubble(track)) {
     console.log('');
     console.log(STOP);

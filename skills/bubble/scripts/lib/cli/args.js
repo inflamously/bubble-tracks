@@ -8,6 +8,7 @@ const OPTIONS = {
     force: { type: 'boolean' },
     closed: { type: 'boolean' },
     all: { type: 'boolean' },
+    draft: { type: 'boolean' },
     dir: { type: 'string' },
     at: { type: 'string' },
     to: { type: 'string' },
@@ -26,6 +27,10 @@ export const HELP = `bubble-tracks — the bubble language
                                 A new name close to an open track (flow for flow-analysis) is refused: create makes it.
                                 Names ignore case: Dev resumes dev, and create refuses a case-only twin
   create <name> [title]         create a new track (refuses if it exists) and make it current
+  create <name> [title] --draft create it as a draft: the proposal, stored. Every plan command works on it and
+                                show prints it with its guards, but nothing is active: project edits are
+                                blocked and done refuses. The goal can still be reworded
+  approve                       the human's go: turn the current draft into a normal track
   switch <name> --ownership <MODE>
                                 set who does the bubbles' work on that track (create and init take it too):
                                 agent (the default), hybrid (the human does the bubbles they pick) or
@@ -36,7 +41,7 @@ export const HELP = `bubble-tracks — the bubble language
                                 --closed (only closed) or --all (everything)
   close <name> --force          finish and archive a track: read-only for good, no reopen. Also closes
                                 all its forks (side tracks stay open) and pops its parent bubble
-  delete <name> --force         delete a track (not the current one)
+  delete <name> --force         delete a track (not the current one, unless it is a draft)
   fork [N] <name>               build on bubble N in a child track <name>; the bubble waits for it. Makes it current
   diverge [N] <name> [title]    go a different direction from bubble N in a side track <name> (titled after
                                 the bubble unless given); nothing waits. Makes it current

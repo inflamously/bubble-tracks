@@ -62,6 +62,15 @@ export function setCurrent(bubblesDir, name) {
     fs.mkdirSync(bubblesDir, { recursive: true });
     fs.writeFileSync(path.join(bubblesDir, CURRENT_FILE), checkName(name) + '\n', 'utf8');
 }
+/** Drop the pointer, so no named track is current (the default track is, if it exists). */
+export function clearCurrent(bubblesDir) {
+    try {
+        fs.unlinkSync(path.join(bubblesDir, CURRENT_FILE));
+    }
+    catch {
+        /* no pointer: nothing to drop */
+    }
+}
 // Reading and writing one track file.
 export function loadTrack(file) {
     const track = JSON.parse(fs.readFileSync(file, 'utf8'));

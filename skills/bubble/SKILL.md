@@ -30,10 +30,12 @@ Run it from the repo root, or pass `--dir <repo>`. The CLI speaks the **bubble l
 | `show` | Render the track and list its bubbles with addresses. Exits **3** if the active bubble is fog. |
 | `switch [name] [title]` | Resume track `<name>`, or create it if it doesn't exist. It becomes current. No name: resume the current track (else the default `track`). A new name that starts an open track's name or is a typo or two from it (`flow` → `flow-analysis`) is refused, naming the match; `create` makes it. Names ignore case: `switch Flow-Analysis` resumes `flow-analysis`, and `create` refuses a case-only twin. |
 | `create <name> [title]` | Create a new track (refuses if it exists) and make it current |
+| `create <name> [title] --draft` | Create it as a **draft**: the proposal, stored. Every plan command works on it. Nothing on it is active: the gate blocks project edits, and `done`, `fork`, `diverge` and `close` refuse. `show` prints it with its guards. Its goal can be reworded without `--force`. |
+| `approve` | The human's go: turn the current draft into a normal track. Refuses a draft with no bubbles. |
 | `switch <name> --ownership <MODE>` | Set who does the bubbles' work on that track; `create` and `init` take it too. A hybrid track stays hybrid. After the first `done`, `agent` and `user` only move into `hybrid`. See **Ownership**. |
 | `tracks` · `tracks --closed` · `tracks --all` | List the tracks, current marked `→`. Closed tracks are hidden (except the current one) and counted in a footer; `--closed` lists only closed tracks, `--all` lists everything. |
 | `close <name> --force` | Finish a track early, for good, after the human confirms: read-only, no reopen. Also closes all its forks (side tracks stay open) and pops its parent bubble. Without `--force` it refuses and lists every track it would close. |
-| `delete <name> --force` | Delete a track that isn't current, after the human confirms |
+| `delete <name> --force` | Delete a track that isn't current, after the human confirms. An abandoned draft goes even while it is current; no track is current after that. |
 | `init <title>` | Create the default track (`.bubble-tracks/track.json`) |
 | `fork [N] <name>` | **Build on** bubble N in a new child track `<name>`, titled after the bubble, and make it current. The bubble keeps its state and gets `fork` (relative path to the child); the child gets `parent` (relative path, the bubble's stable `id`, and its title for display). The bubble waits for its fork. |
 | `diverge [N] <name> [title]` | Go **a different direction** from bubble N in a new side track `<name>` (titled after the bubble unless you give a title), and make it current. The bubble (any state) adds the path to its `sides`; the side track gets `origin`. Nothing waits for it. |
@@ -79,11 +81,12 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
 ## How to work
 
 0. **Resume or start.** `/bubble switch <name>` is often the first line of a fresh chat. Run `tracks` first, on its own, and read it before you run `switch`: a `switch` on a name that doesn't exist creates that track, unless it's close to an open one, which it refuses and names.
+   - **It's a draft** (`switch` prints `resumed draft`): the human hasn't approved the plan yet. Go on at **Refine until go** in step 1.
    - **It exists:** run `switch <name>` right away, without asking why. You have no memory of this track, so the track is your context. Read every bubble, its `↳` hint, the `✎ handoff` note, the goal and the guards it prints, then say in one line where you are (prev ‹ active › next) and continue at the active bubble with the usual rules. It's a ⏸ stop if the human hasn't said go.
    - **It's new** (or the human says "I want X" with no track): go to step 1. Don't create the track yet.
 
    If the name is short for an existing track or close to one (`flow` → `flow-analysis`), resume that track and say so in one line. If you see a better name for a new one, use it and say so instead of asking. For example, `switch single commit` becomes `switch single-commit "Single commit"`.
-1. **Plan, in chat, before the track exists.** Keep it short, not a plan-mode wall of text. The plan needs three things:
+1. **Plan, in chat, then on a draft.** Keep it short, not a plan-mode wall of text. The plan needs three things:
    - **Goal:** the one end result every bubble serves.
    - **Guards:** what not to do or touch (files, domains, approaches).
    - **Use cases:** the separate jobs the goal breaks into.
@@ -115,9 +118,17 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
 
    If an existing track already covers it, propose that instead: "this fits track X, add it there?".
 
-   **Refine until go.** The proposal is a draft until the human approves it. If they change something (add a guard, move a bubble, reword the goal) or ask a question, that is not approval: apply the change or answer, show the whole revised proposal again, and wait. Repeat this as often as they want. Create the track only when they say go to the proposal as it stands ("ok", "go", "create it"). If one reply approves and changes it ("ok, but add a guard …"), apply the change, create the track and say what you changed.
+   **Store the proposal as a draft.** Right after you show the first proposal, create it in one burst: `create <name> <title> --draft` (with `--ownership <mode>` unless it is `agent`), `goal`, one `guard` per rule, the `add`s and their `hint`s, and `own N` for each bubble the human took. A draft is not a track yet: the gate blocks project edits on it, and `done` refuses.
 
-   Then create it in one burst: `create <name> <title>` (with `--ownership <mode>` unless it is `agent`), `goal`, one `guard` per rule, the `add`s and their `hint`s, and `own N` for each bubble the human took. Then classify the fog (step 2).
+   **Refine until go.** If the human changes something (add a guard, move a bubble, reword the goal) or asks a question, that is not approval:
+   - Make each change with one CLI command on the draft.
+   - Then show only the lines that changed, plus the track line. Don't print the whole proposal again.
+   - When the human asks for the whole plan, run `show` and paste its output.
+   - Wait. Repeat this as often as they want.
+
+   **Go runs `approve`.** Run it only when the human says go to the draft as it stands ("ok", "go", "create it"). If one reply approves and changes it ("ok, but add a guard …"), apply the change, run `approve` and say what you changed. If the human drops the plan, confirm, then run `delete <name> --force`.
+
+   After `approve`, classify the fog (step 2).
 
    **Seams: one bubble per use case**, not one per file and not one bubble for the whole goal. Its boundary names the places it may touch, so the work stays scoped and easy to review. A place is whatever the work is made of: files, a domain, a section of a document, a system, a step in a process. Always write it in square brackets, `[Boundary: …]`, with the places separated by commas, so it stands out from the sentences around it. In the proposal it stands on its own line under the bubble, so the human can check all boundaries at a glance. On the track it is the end of the bubble's hint: `hint` warns when it is missing. If a bubble needs work past its boundary, stop and propose an `insert` instead of doing it.
 2. **Sketch.** For later passes on an existing track (or after `init`), make one rough pass from the active bubble to F. Steps that are clear become todo bubbles with short titles; add a `hint` when a step needs more words. Anything unclear becomes `add ? <why>`: fog, plus one line on **why** it's unclear (what's missing or undecided), never what it is. Keep it short and don't over-plan.
@@ -242,4 +253,6 @@ An ability is a short workflow, kept as a file, that the human applies to the ac
 
 Before editing project files, check `show`. If it exits 3, don't edit; go to step 4. Some agents (Claude Code, Codex CLI, Gemini CLI) also enforce this with a hook that blocks edits while the active bubble is fog. The hook also refuses hand edits to the track files (`.bubble-tracks/<name>.json` and `.bubble-tracks/current`) at any bubble: change a track through the CLI. `.bubble-tracks/abilities/` stays open.
 
-The same hook is the **ownership gate**: it blocks your edits while the active bubble is the human's to do. `show` exits 0 there and ends with the `◈ "…" is the human's to do` line. If you see that line, don't edit; go to **Ownership**.
+The same hook is the **draft gate**: it blocks your edits while the current track is a draft. `show` exits 0 there and ends with the `◌ draft` line. If you see that line, don't edit; go to **Refine until go** in step 1.
+
+The same hook is also the **ownership gate**: it blocks your edits while the active bubble is the human's to do. `show` exits 0 there and ends with the `◈ "…" is the human's to do` line. If you see that line, don't edit; go to **Ownership**.

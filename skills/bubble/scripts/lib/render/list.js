@@ -4,7 +4,7 @@ import { symbolFor, symbolsFor } from './symbols.js';
 /** Multi-line listing of the track, with addressable indexes. */
 export function list(track, opts) {
     const sym = symbolsFor(opts);
-    const index = track.closed ? -1 : activeIndex(track);
+    const index = track.closed || track.draft ? -1 : activeIndex(track); // a draft is a proposal: nothing is active yet
     const hybrid = ownershipOf(track) === 'hybrid'; // on a user track every bubble is the human's, so no line says it
     return (track.bubbles || [])
         .map((b, i) => {

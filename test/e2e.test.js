@@ -256,6 +256,50 @@ describe('e2e: a development track from sketch to close', () => {
     step(['tracks', '--all'], [/dev {14}Dev flow .*🔒 closed/, /dev-check .*🔒 closed/]);
   });
 
+  describe('draft: the proposal, stored until the human approves it', () => {
+    const gate = (file) =>
+      spawnSync(process.execPath, [path.join(path.dirname(CLI), 'fog-gate.js')], {
+        encoding: 'utf8',
+        input: JSON.stringify({ cwd: dir, tool_input: { file_path: path.join(dir, file) } }),
+      });
+    step(['add', 'Late', '--draft'], /--draft works only with create — approve turns a draft into a track/, 1);
+    step(['create', 'plan', 'Plan', '--draft'], [/created draft "plan"/, /Plan {3}S F {3}◌ draft/, /◌ draft — a proposal, not a track yet: project edits are blocked and done refuses\. Change it with the human; on their go, run: approve/]);
+    step(['approve'], /the draft has no bubbles — add one before the human approves it/, 1);
+    step(['goal', 'Ship the parser'], /⚑ goal: Ship the parser/);
+    step(['goal', 'Ship the checked parser'], /goal "Ship the parser" → "Ship the checked parser"/); // a draft's goal is still open
+    step(['guard', 'no new deps'], /guard 1: no new deps/);
+    step(['add', 'Parse input'], /S ○ F {3}◌ draft/); // nothing is active on a draft
+    step(['hint', '1', 'read stdin [Boundary: src/parse.ts]'], /↳ read stdin \[Boundary: src\/parse\.ts\]/);
+    step(['add', '?', 'no output format chosen'], /S ○──❓ F {3}◌ draft/);
+    // show is the proposal: goal, guards, every hint and boundary, no active mark; fog doesn't exit 3 yet
+    step(['show'], [/⚑ goal: Ship the checked parser\n¦ guards \(before you act\):\n {4}1 {2}no new deps\n\n {2}1 {3}○ todo {3}Parse input\n {8}↳ read stdin \[Boundary: src\/parse\.ts\]\n {2}2 {3}❓ fog {4}\?\?\?\n {8}why: no output format chosen\n\n◌ draft — /]);
+    step(['done'], /track "plan" is a draft — no work starts before the human approves it: approve/, 1);
+    step(['fork', '1', 'plan-deep'], /track "plan" is a draft — fork from it once the human approved it: approve/, 1);
+    step(['close', 'plan', '--force'], /track "plan" is a draft — approve makes it a track, delete plan --force removes it/, 1);
+    it('the gate blocks project edits on a draft, but not the plan folder', () => {
+      const r = gate('src/parse.ts');
+      assert.strictEqual(r.status, 2);
+      assert.match(r.stderr, /Track "plan" is a draft — the human hasn't approved the plan yet\./);
+      assert.strictEqual(gate('.bubble-tracks/abilities/check.md').status, 0);
+    });
+    step(['tracks'], /→ plan {13}Plan {3}S ○──❓ F {3}◌ draft/);
+    step(['switch', 'plan'], [/resumed draft "plan"/, /◌ draft — /]);
+    step(['approve', 'now'], /usage: approve/, 1);
+    step(['approve'], [/approved — the draft is a track now: keep to its guards, and start at the active bubble/, /S ◐──❓ F {3}◐ Parse input › \?\?\?/, /¦ guards \(before you act\):/, /→ 1 {3}◐ todo {3}Parse input/]);
+    step(['approve'], /the current track is no draft — nothing to approve/, 1);
+    it('plan.json is a normal track now, and the gate lets edits through', () => {
+      assert.ok(!('draft' in read('plan')));
+      assert.strictEqual(gate('src/parse.ts').status, 0);
+    });
+    step(['goal', 'Ship it'], /already has a goal/, 1); // approved: the goal is set
+    // an abandoned draft goes with delete, even while it is current
+    step(['create', 'scrap', '--draft'], /created draft "scrap"/);
+    step(['delete', 'scrap'], /confirm with the human/, 1);
+    step(['delete', 'scrap', '--force'], /deleted draft "scrap" — no track is current now: switch <name>/);
+    it('scrap.json is gone', () => assert.ok(!exists('scrap')));
+    step(['switch', 'dev'], /resumed track "dev"/);
+  });
+
   describe('init: the default track next to named ones', () => {
     step(['init', 'P'], /created track "track"/);
     step(['add', 'One'], /→ 1 {3}◐ todo {3}One/);

@@ -49,6 +49,7 @@ Track fields:
 - `goal`: the one end result every bubble serves.
 - `guards`: rules of what not to do, as an array of strings. Read them before acting, not as a check at `done`.
 - `ownership`: who does the bubbles' work: `hybrid` (the human does the bubbles they pick) or `user` (the human does every bubble, you hint and check it). Missing means `agent`: you do all of it. Change it only when the human asks, and only as the `switch` row below allows.
+- `draft`: `true` while the track is a draft: the proposal the human hasn't approved yet. Missing means a normal track. Only `create --draft` sets it and only `approve` deletes it.
 - `bubbles`: the bubbles in order, S to F. Required, even when empty (`[]`).
 - `nextId`: the id the next new bubble gets. Missing means 1.
 - `handoff`: `{ "note", "at" }`, where `at` is UTC as `YYYY-MM-DD HH:MM UTC`.
@@ -80,6 +81,8 @@ N is a 1-based position on the track. When N is left out, it means the active bu
 | `switch <name>` | If `<name>.json` exists, or one that differs only in case (names ignore case), write the stored name to `current` and resume it. Otherwise, if an open track's name starts with `<name>` or is a typo or two from it (ignoring case; none for names of 3 characters or less, 1 at 4, 2 from 5), don't create it: name that track and ask. Else create it (below). |
 | `switch <name> --ownership <mode>` | Set `ownership` (delete the field for `agent`), but never change `hybrid`. `agent` and `user` swap only while no bubble is `done`; after that they only become `hybrid`. When `user` becomes `hybrid`, set `owner` to `user` on every bubble. A refused change is a new track. |
 | `create <name> [title]` · `init <title>` | Write `{ "title": "<title or name>", "bubbles": [] }` to `<name>.json`, then write `<name>` to `current`. `init` creates `track`. |
+| `create <name> [title] --draft` | Like `create`, but also set `draft` to `true`. Every plan edit below works on a draft. Nothing on it is active: make no project edits and don't run `done`. Its line ends in `◌ draft`, and `show` lists it with its `goal` and `guards`. The `goal` of a draft can still be reworded. To drop an abandoned draft, the human deletes its file. |
+| `approve` | Only on the human's go, and only when the draft has a bubble: delete `draft`. The track is a normal track from then on. |
 | `add <title>` · `add ? <why>` | Append `{ "title", "state": "todo", "id" }`, or `{ "title": "???", "state": "fog", "id", "why" }` for fog. Take the id from `nextId`. |
 | `insert at N …` | Like `add`, but put the bubble at position N. |
 | `fill [N] <title>` | Only for a fog bubble: set `title`, and set `state` to `todo`. |

@@ -1,5 +1,5 @@
 // Track-level commands: which track is current (init, create, switch, tracks, close, delete, fork, diverge),
-// and who does its bubbles' work (--ownership on switch, create and init).
+// who does its bubbles' work (--ownership on switch, create and init), and whether it starts as a draft (create --draft).
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as lib from '../index.js';
@@ -43,9 +43,11 @@ export function runTrackCommand(cmd, args, { dir, opts, renderOpts }) {
         const owned = opts.ownership !== undefined;
         if (owned)
             lib.setOwnership(track, opts.ownership); // a bad mode throws here, so it creates nothing
+        if (opts.draft)
+            track.draft = true;
         lib.saveTrack(file, track);
         lib.setCurrent(bubblesDir, name);
-        console.log(`created track "${name}" (${file})`);
+        console.log(`created ${track.draft ? 'draft' : 'track'} "${name}" (${file})`);
         if (owned)
             console.log(lib.describeOwnership(track));
         console.log('');
@@ -89,7 +91,7 @@ export function runTrackCommand(cmd, args, { dir, opts, renderOpts }) {
             const title = args.join(' ');
             // a title on an existing track isn't applied: say so, and how to rename it
             const kept = track.title ? `the title stays "${track.title}"` : 'it keeps no title';
-            const resumed = `resumed track "${name}"${asked !== name ? ` (names ignore case: "${asked}" is "${name}")` : ''}`;
+            const resumed = `resumed ${track.draft ? 'draft' : 'track'} "${name}"${asked !== name ? ` (names ignore case: "${asked}" is "${name}")` : ''}`;
             console.log(title && title !== track.title ? `${resumed} — ${kept}; to rename it: title ${title}` : resumed);
             if (owned)
                 console.log(owned);
@@ -142,6 +144,8 @@ export function runTrackCommand(cmd, args, { dir, opts, renderOpts }) {
                 throw new Error(`no current track to ${cmd} from — start one with: switch <name>`);
             if (!found.track)
                 throw new Error(`invalid ${found.file}: ${found.error}`);
+            if (found.track.draft)
+                throw new Error(`track "${found.name}" is a draft — ${cmd} from it once the human approved it: approve`);
             const addr = isAddr(args[0]) ? args.shift() : undefined;
             const name = lib.checkName(args.shift());
             // A side track can have its own title; a fork's title follows its bubble.
@@ -174,6 +178,8 @@ export function runTrackCommand(cmd, args, { dir, opts, renderOpts }) {
             if (!fs.existsSync(file))
                 throw new Error(`no track "${name}"`);
             const track = lib.loadTrack(file);
+            if (track.draft)
+                throw new Error(`track "${name}" is a draft — approve makes it a track, delete ${name} --force removes it`);
             const forks = links.forkTree(file, track);
             const open = forks.filter((f) => f.track && !f.track.closed);
             if (track.closed && !open.length)
@@ -209,12 +215,23 @@ export function runTrackCommand(cmd, args, { dir, opts, renderOpts }) {
             const file = lib.trackPath(bubblesDir, name);
             if (!fs.existsSync(file))
                 throw new Error(`no track "${name}"`);
-            if (name === lib.currentName(bubblesDir))
+            // An abandoned draft goes even while it is current: nothing was started on it, and no track is current after it.
+            let draft = false;
+            try {
+                draft = !!lib.loadTrack(file).draft;
+            }
+            catch {
+                /* unreadable: no draft, so the rules for a track hold */
+            }
+            const current = name === lib.currentName(bubblesDir);
+            if (current && !draft)
                 throw new Error(`"${name}" is the current track — switch to another one first`);
             if (!opts.force)
                 throw new Error(`deleting "${name}" can't be undone — confirm with the human, then re-run with --force`);
             fs.unlinkSync(file);
-            console.log(`deleted track "${name}"`);
+            if (current)
+                lib.clearCurrent(bubblesDir);
+            console.log(`deleted ${draft ? 'draft' : 'track'} "${name}"${current ? ' — no track is current now: switch <name>' : ''}`);
             return 0;
         }
         default:

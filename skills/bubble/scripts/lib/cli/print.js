@@ -1,4 +1,4 @@
-// What `show` and every mutation print: the track line, the goal, the ownership (unless it is the agent's; and guards on switch or guard), the listing, the handoff note or closed line, the fog warning or the human's-bubble notice.
+// What `show` and every mutation print: the track line, the goal, the ownership (unless it is the agent's; and guards on switch, guard or a draft), the listing, the handoff note or closed line, the draft notice, the fog warning or the human's-bubble notice.
 import * as lib from '../index.js';
 import * as links from '../links/index.js';
 /** The track's guards, numbered; nothing when it has none. */
@@ -12,6 +12,7 @@ export function printGuards(track, opts) {
  * Print the track saved at `file`; returns 3 when the active bubble is fog (the human has to plan it), else 0.
  * An active bubble that is the human's to do gets a notice and still returns 0: nothing is missing, the agent just keeps off.
  * Guards print only with `guards` (switch and the guard command); otherwise `guard show` lists them.
+ * A draft prints as the proposal: always with its guards, nothing active, a draft notice, and 0.
  */
 export function printTrack(file, track, opts, guards = false) {
     console.log(lib.render(track, opts));
@@ -24,8 +25,8 @@ export function printTrack(file, track, opts, guards = false) {
         console.log(`${lib.symbolsFor(opts).goal} goal: ${track.goal}`);
     if (track.ownership)
         console.log(`${lib.symbolsFor(opts).owner} ${lib.describeOwnership(track)}`);
-    if (guards)
-        printGuards(track, opts);
+    if (guards || track.draft)
+        printGuards(track, opts); // a draft is the proposal: its guards are part of it
     console.log('');
     console.log(lib.list(track, opts));
     if (track.closed) {
@@ -36,6 +37,11 @@ export function printTrack(file, track, opts, guards = false) {
     if (track.handoff && track.handoff.note) {
         console.log('');
         console.log(`✎ handoff (${track.handoff.at}): ${track.handoff.note}`);
+    }
+    if (track.draft) {
+        console.log('');
+        console.log(`${lib.symbolsFor(opts).draft} draft — a proposal, not a track yet: project edits are blocked and done refuses. Change it with the human; on their go, run: approve`);
+        return 0; // nothing is active on a draft, so its fog doesn't stop anything yet
     }
     const active = lib.activeBubble(track);
     if (active && active.state === 'fog') {

@@ -1,7 +1,7 @@
 // What rendering is made of: the symbol sets (unicode / ascii), colors, and title shortening.
 export const SYMBOLS = {
-    unicode: { done: '●', active: '◐', todo: '○', fog: '❓', sep: '──', prev: ' ‹ ', next: ' › ', more: '…', fork: '⑂', side: '↗', lock: '🔒', goal: '⚑', guard: '¦', owner: '◆', humanDone: '◆', humanActive: '◈', humanTodo: '◇' },
-    ascii: { done: '*', active: '@', todo: 'o', fog: '?', sep: '--', prev: ' < ', next: ' > ', more: '...', fork: 'Y', side: '/', lock: '#', goal: '^', guard: '!', owner: '+', humanDone: '+', humanActive: 'H', humanTodo: 'h' },
+    unicode: { done: '●', active: '◐', todo: '○', fog: '❓', sep: '──', prev: ' ‹ ', next: ' › ', more: '…', fork: '⑂', side: '↗', lock: '🔒', draft: '◌', goal: '⚑', guard: '¦', owner: '◆', humanDone: '◆', humanActive: '◈', humanTodo: '◇' },
+    ascii: { done: '*', active: '@', todo: 'o', fog: '?', sep: '--', prev: ' < ', next: ' > ', more: '...', fork: 'Y', side: '/', lock: '#', draft: '~', goal: '^', guard: '!', owner: '+', humanDone: '+', humanActive: 'H', humanTodo: 'h' },
 };
 // ANSI colors: title dark green, track blue, prev ‹ active › next dark yellow, the human's bubbles red.
 const COLORS = { title: '\x1b[32m', track: '\x1b[34m', context: '\x1b[33m', human: '\x1b[31m', reset: '\x1b[0m' };

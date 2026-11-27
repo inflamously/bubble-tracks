@@ -7,11 +7,11 @@ export interface RenderOpts {
   color?: boolean;
 }
 
-export type Symbols = Record<'done' | 'active' | 'todo' | 'fog' | 'sep' | 'prev' | 'next' | 'more' | 'fork' | 'side' | 'lock' | 'goal' | 'guard' | 'owner' | 'humanDone' | 'humanActive' | 'humanTodo', string>;
+export type Symbols = Record<'done' | 'active' | 'todo' | 'fog' | 'sep' | 'prev' | 'next' | 'more' | 'fork' | 'side' | 'lock' | 'draft' | 'goal' | 'guard' | 'owner' | 'humanDone' | 'humanActive' | 'humanTodo', string>;
 
 export const SYMBOLS: { unicode: Symbols; ascii: Symbols } = {
-  unicode: { done: '●', active: '◐', todo: '○', fog: '❓', sep: '──', prev: ' ‹ ', next: ' › ', more: '…', fork: '⑂', side: '↗', lock: '🔒', goal: '⚑', guard: '¦', owner: '◆', humanDone: '◆', humanActive: '◈', humanTodo: '◇' },
-  ascii: { done: '*', active: '@', todo: 'o', fog: '?', sep: '--', prev: ' < ', next: ' > ', more: '...', fork: 'Y', side: '/', lock: '#', goal: '^', guard: '!', owner: '+', humanDone: '+', humanActive: 'H', humanTodo: 'h' },
+  unicode: { done: '●', active: '◐', todo: '○', fog: '❓', sep: '──', prev: ' ‹ ', next: ' › ', more: '…', fork: '⑂', side: '↗', lock: '🔒', draft: '◌', goal: '⚑', guard: '¦', owner: '◆', humanDone: '◆', humanActive: '◈', humanTodo: '◇' },
+  ascii: { done: '*', active: '@', todo: 'o', fog: '?', sep: '--', prev: ' < ', next: ' > ', more: '...', fork: 'Y', side: '/', lock: '#', draft: '~', goal: '^', guard: '!', owner: '+', humanDone: '+', humanActive: 'H', humanTodo: 'h' },
 };
 
 // ANSI colors: title dark green, track blue, prev ‹ active › next dark yellow, the human's bubbles red.
