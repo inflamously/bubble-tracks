@@ -126,6 +126,16 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
    - When the human asks for the whole plan, run `show` and paste its output.
    - Wait. Repeat this as often as they want.
 
+   **Grill me, only when the human asks.** At any point before go, the human can say "grill me". Then you question the plan:
+   - Ask one question at a time, and wait for the answer.
+   - Ask only what could still change the goal, a guard or a bubble. Don't ask what the codebase already answers: read it first.
+   - With each question, say which part of the plan the answer decides.
+   - When an answer changes the plan, propose the change in one line. Make it on the draft only when the human agrees, as in **Refine until go**.
+   - An answer never fills a fog. The human does that.
+   - Stop when no answer could change the plan any more, or when the human says stop. Say so in one line. The end of the grill is not a go: wait for it.
+
+   You may offer the grill once per plan, in one line under the first proposal: *"Say 'grill me' if you want me to question this plan."* Never start it on your own, and don't offer it again.
+
    **Go runs `approve`.** Run it only when the human says go to the draft as it stands ("ok", "go", "create it"). If one reply approves and changes it ("ok, but add a guard …"), apply the change, run `approve` and say what you changed. If the human drops the plan, confirm, then run `delete <name> --force`.
 
    After `approve`, classify the fog (step 2).
