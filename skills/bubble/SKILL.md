@@ -141,7 +141,10 @@ When the human writes a line in the bubble language, like `bubble move 2 to 3`, 
 
    **Verify once, right after `approve`.** The plan is a track now. Run `verify` and follow the printed workflow once, before any work starts:
    - Give the printed output to one subagent, and nothing from the chat. It reads the track as the builder will: with the track only.
-   - It reports gaps: a vague boundary, a missing guard, a bubble that is too big, a hint that needs the chat to make sense.
+   - It reports gaps: a vague boundary, a missing guard, a bubble to split, no structure named, a hint that needs the chat to make sense.
+   - A bubble to split shows one of three signs: several jobs in one hint, a wide boundary (more than about five places, or one place that holds many), or mixed kinds of work.
+   - No structure named means the hint doesn't say which format and ruleset the result follows. Both hold for any kind of work, not only code: a page of text needs a structure as much as a source file does.
+   - A split is proposed as commands: `hint N` for the first part with a narrower boundary, then `insert at N+1` and its `hint`. The track stays linear.
    - Show each gap as a proposed change: the bubble, the reason in one line, and the command that closes it. If it found none, say so in one line.
    - Apply nothing on your own. The human approves each change, and can add changes of their own here. Make each one with one CLI command. A gap never fills a fog.
    - Don't run `verify` again unless the human asks.
